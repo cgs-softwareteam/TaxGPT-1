@@ -1,7 +1,9 @@
 import { useState } from "react";
 import ChatInterface from "@/components/ChatInterface";
 import ChatInput from "@/components/ChatInput";
-import { Calculator } from "lucide-react";
+import { Calculator, Play } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Link } from "wouter";
 
 interface Message {
   role: 'user' | 'assistant';
@@ -74,14 +76,22 @@ export default function Home() {
       {/* Header */}
       <header className="bg-white border-b border-gray-200 shadow-sm" data-testid="header">
         <div className="max-w-4xl mx-auto px-4 py-4">
-          <div className="flex items-center space-x-3">
-            <div className="bg-primary text-white p-2 rounded-lg" data-testid="logo">
-              <Calculator className="text-xl w-6 h-6" />
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-3">
+              <div className="bg-primary text-white p-2 rounded-lg" data-testid="logo">
+                <Calculator className="text-xl w-6 h-6" />
+              </div>
+              <div>
+                <h1 className="text-xl font-semibold text-gray-900" data-testid="title">TaxGPT</h1>
+                <p className="text-sm text-gray-600" data-testid="subtitle">AI-Powered Tax Planning Assistant</p>
+              </div>
             </div>
-            <div>
-              <h1 className="text-xl font-semibold text-gray-900" data-testid="title">TaxGPT</h1>
-              <p className="text-sm text-gray-600" data-testid="subtitle">AI-Powered Tax Planning Assistant</p>
-            </div>
+            <Link href="/demo">
+              <Button variant="outline" className="flex items-center space-x-2" data-testid="demo-link">
+                <Play className="w-4 h-4" />
+                <span>View Demo</span>
+              </Button>
+            </Link>
           </div>
         </div>
       </header>

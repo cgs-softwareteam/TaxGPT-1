@@ -47,16 +47,25 @@ The application follows a modern full-stack architecture with clear separation b
    - Maintains conversation history array
    - Handles API communication with backend
    - Manages loading states
+   - Includes navigation to demo page
+
+4. **Demo Page**: Interactive showcase with simulated tax planning conversation
+   - Pre-populated conversation showing complete tax consultation flow
+   - Realistic structured tax report with financial calculations
+   - Reset functionality to restore original demo conversation
+   - Navigation back to main application
 
 ### Backend Components
 1. **OpenAI Integration**: Direct integration with OpenAI GPT-4o model
    - Processes full conversation history for context retention
    - Uses sophisticated system prompt for two-phase interaction
+   - Graceful error handling when API key not provided
 
 2. **API Routes**: Single `/api/generate` endpoint for chat functionality
    - Accepts conversation arrays
    - Returns AI-generated responses
    - Handles error states gracefully
+   - Provides helpful error messages for missing API configuration
 
 3. **Storage Layer**: In-memory storage with interface for future database integration
    - User management capabilities
