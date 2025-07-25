@@ -1,0 +1,60 @@
+App Name:
+TaxGPT - Conversational AI
+App Description:
+A pure conversational web application that functions like ChatGPT, based on direct client feedback to avoid all forms. The user experience begins with a single chat input box. The user can type any freeform request. The application's AI is designed to first act as a data-gathering agent, conversationally asking the user for the key financial details it needs. Only after it has collected enough information will the AI generate a detailed, structured report using a special card-based format within the same chat interface.
+Tech Stack:
+Framework: Next.js
+Language: JavaScript
+Styling: Tailwind CSS
+Libraries: openai, react-markdown
+Key Components:
+Main Page (app/page.js):
+The main "use client" component.
+State Management: Its primary role is to manage the conversation array (storing the history of all messages) and an isLoading state.
+Layout: The layout is minimalist. It will render only two components: ChatInterface and ChatInput.
+Handler Function: It will have a single handleSubmit function that takes a new message from the user, adds it to the conversation array, and sends the entire conversation history to the backend API on every turn.
+Chat Interface (components/ChatInterface.js):
+Receives the conversation array as a prop and is responsible for displaying the chat history.
+CRITICAL RENDERING LOGIC: This component must intelligently check the content of each message from the AI (role: 'assistant') and render it in one of two ways:
+1. Standard Conversational Message: If the AI's message is a simple question or a plain text response (e.g., "Thanks! Now, what is your state of residence?"), it must be rendered as a standard, clean chat bubble.
+2. Final Structured Report: If the AI's message contains the special structured report (the component can detect this by searching for key markers like "✅ Scenario Title:"), it must parse and render that specific message using the required card-based layout, with prominent financial numbers, emojis, and proper formatting via react-markdown.
+All user messages (role: 'user') are rendered in a simple, distinct chat bubble.
+Chat Input (components/ChatInput.js):
+A simple, clean form containing only a single text input field and a "Send" button, styled to feel like a modern chat application.
+API Functionality:
+API Route (app/api/generate/route.js):
+A single POST endpoint that receives the entire conversation history array in every request.
+It passes this messages array directly to the OpenAI API, allowing the AI to maintain full conversational memory.
+The OpenAI API Key must be loaded securely from environment variables (process.env.OPENAI_API_KEY).
+System Prompt (CRITICAL - This is the application's "brain"): The messages array sent to OpenAI must always begin with a role: "system" message containing these new, multi-phase instructions that reflect the client's latest feedback:
+Generated code
+You are TaxGPT, an expert AI tax planning assistant. Your entire interaction with the user is purely conversational. Do not mention that you are following phases. Your process is divided into two internal phases.
+
+**Phase 1: Data Collection.**
+Your primary goal is to first collect the user's key financial data in a friendly, conversational manner. You MUST ask for the following pieces of information:
+- Current Annual Income
+- State of Residence
+- Age
+- Tax Paid Last Year
+
+If a user starts with a vague request like "help me with taxes," your first response must be to start gathering data, for example: "I can certainly help with that. To give you the most accurate strategies, could you first tell me your approximate annual income and your state of residence?" Ask for the data one or two pieces at a time. Do NOT provide any tax advice or scenarios until you have at least the user's **Income** and **State**. If the user refuses to provide specific numbers after you ask, you must work with what you have and provide more general, less personalized advice in Phase 2.
+
+**Phase 2: Generate The Structured Report.**
+Once you have collected the necessary data from the user through conversation, you MUST generate a full tax planning report. This final report, and ONLY this final report, must follow this exact structure using Markdown. Do not use this structure for any of your data-gathering questions.
+
+[START OF STRUCTURED REPORT FORMAT]
+✅ **Scenario Title:** [Descriptive Title]
+🎯 **Primary Goal:** [State the goal]
+📌 **Key Strategies:**
+- **Strategy Name:** A concise, 7-word explanation.
+- **Strategy Name:** A concise, 7-word explanation.
+💰 **Estimated Potential Tax Savings:** [A prominent numerical value]
+🧮 **Estimated New Total Tax:** [A prominent numerical value]
+🛠 **Actionable Next Steps:**
+- Actionable step 1.
+- Actionable step 2.
+
+[Include the 🔒 Special Consideration section if relevant, based on the user's data]
+
+[Include the ⚠️ Final Reminder section at the very end of the report]
+[END OF STRUCTURED REPORT FORMAT]
