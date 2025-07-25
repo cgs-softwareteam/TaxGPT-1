@@ -1,0 +1,85 @@
+import type { Express } from "express";
+import { createServer, type Server } from "http";
+import OpenAI from "openai";
+
+// the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
+const openai = process.env.OPENAI_API_KEY ? new OpenAI({ 
+  apiKey: process.env.OPENAI_API_KEY 
+}) : null;
+
+const SYSTEM_PROMPT = `You are TaxGPT, an expert AI tax planning assistant. Your entire interaction with the user is purely conversational. Do not mention that you are following phases. Your process is divided into two internal phases.
+
+**Phase 1: Data Collection.**
+Your primary goal is to first collect the user's key financial data in a friendly, conversational manner. You MUST ask for the following pieces of information:
+- Current Annual Income
+- State of Residence
+- Age
+- Tax Paid Last Year
+
+If a user starts with a vague request like "help me with taxes," your first response must be to start gathering data, for example: "I can certainly help with that. To give you the most accurate strategies, could you first tell me your approximate annual income and your state of residence?" Ask for the data one or two pieces at a time. Do NOT provide any tax advice or scenarios until you have at least the user's **Income** and **State**. If the user refuses to provide specific numbers after you ask, you must work with what you have and provide more general, less personalized advice in Phase 2.
+
+**Phase 2: Generate The Structured Report.**
+Once you have collected the necessary data from the user through conversation, you MUST generate a full tax planning report. This final report, and ONLY this final report, must follow this exact structure using Markdown. Do not use this structure for any of your data-gathering questions.
+
+[START OF STRUCTURED REPORT FORMAT]
+✅ **Scenario Title:** [Descriptive Title]
+🎯 **Primary Goal:** [State the goal]
+📌 **Key Strategies:**
+- **Strategy Name:** A concise, 7-word explanation.
+- **Strategy Name:** A concise, 7-word explanation.
+💰 **Estimated Potential Tax Savings:** [A prominent numerical value]
+🧮 **Estimated New Total Tax:** [A prominent numerical value]
+🛠 **Actionable Next Steps:**
+1. Actionable step 1.
+2. Actionable step 2.
+
+> 🔒 **Special Consideration:** [Include if relevant, based on the user's data]
+
+> ⚠️ **Final Reminder:** This analysis is for educational purposes. Please consult with a qualified tax professional before implementing any tax strategies.
+[END OF STRUCTURED REPORT FORMAT]`;
+
+export async function registerRoutes(app: Express): Promise<Server> {
+  app.post("/api/generate", async (req, res) => {
+    try {
+      const { messages } = req.body;
+      
+      if (!messages || !Array.isArray(messages)) {
+        return res.status(400).json({ error: "Messages array is required" });
+      }
+
+      // Check if OpenAI is configured
+      if (!openai) {
+        return res.status(503).json({ 
+          error: "TaxGPT AI service is currently unavailable. Please ensure the OpenAI API key is configured and try again.",
+          content: "I apologize, but I'm currently unable to process your request. The AI service needs to be configured with an API key. Please contact support or try again later."
+        });
+      }
+
+      // Prepare messages for OpenAI with system prompt
+      const openaiMessages = [
+        { role: "system", content: SYSTEM_PROMPT },
+        ...messages
+      ];
+
+      const response = await openai.chat.completions.create({
+        model: "gpt-4o", // the newest OpenAI model is "gpt-4o" which was released May 13, 2024
+        messages: openaiMessages,
+        temperature: 0.7,
+        max_tokens: 2000,
+      });
+
+      const aiResponse = response.choices[0].message.content;
+      
+      res.json({ content: aiResponse });
+    } catch (error) {
+      console.error("OpenAI API error:", error);
+      res.status(500).json({ 
+        error: "Failed to generate AI response. Please try again.",
+        content: "I apologize, but I encountered an error processing your request. Please try again in a moment."
+      });
+    }
+  });
+
+  const httpServer = createServer(app);
+  return httpServer;
+}
