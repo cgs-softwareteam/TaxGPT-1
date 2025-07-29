@@ -60,6 +60,47 @@ export default function ChatInput({ onSubmit, isLoading }: ChatInputProps) {
         </Button>
       </form>
       
+      {/* Quick Start Suggestions */}
+      {message.trim() === '' && (
+        <div className="mt-3 mb-2" data-testid="quick-start-suggestions">
+          <div className="text-xs text-gray-500 mb-2">Quick start options:</div>
+          <div className="flex flex-wrap gap-2">
+            <button
+              type="button"
+              onClick={() => setMessage("I need help with tax planning. I make $75,000 per year and live in California.")}
+              className="text-xs bg-gray-100 hover:bg-gray-200 text-gray-700 px-3 py-2 rounded-lg transition-colors duration-200"
+              data-testid="quick-start-california"
+            >
+              💼 California resident, $75k income
+            </button>
+            <button
+              type="button"
+              onClick={() => setMessage("I'm self-employed and need tax strategies for my small business.")}
+              className="text-xs bg-gray-100 hover:bg-gray-200 text-gray-700 px-3 py-2 rounded-lg transition-colors duration-200"
+              data-testid="quick-start-selfemployed"
+            >
+              🏢 Self-employed tax help
+            </button>
+            <button
+              type="button"
+              onClick={() => setMessage("I want to maximize my retirement savings and reduce taxes.")}
+              className="text-xs bg-gray-100 hover:bg-gray-200 text-gray-700 px-3 py-2 rounded-lg transition-colors duration-200"
+              data-testid="quick-start-retirement"
+            >
+              💰 Retirement tax strategies
+            </button>
+            <button
+              type="button"
+              onClick={() => setMessage("I recently got married and need to understand how this affects my taxes.")}
+              className="text-xs bg-gray-100 hover:bg-gray-200 text-gray-700 px-3 py-2 rounded-lg transition-colors duration-200"
+              data-testid="quick-start-married"
+            >
+              💒 Marriage tax planning
+            </button>
+          </div>
+        </div>
+      )}
+
       <div className="flex items-center justify-between mt-3">
         <div className="flex items-center space-x-4 text-xs text-gray-500">
           <span className="flex items-center space-x-1" data-testid="security-indicator">
