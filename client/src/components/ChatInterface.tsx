@@ -12,9 +12,10 @@ interface Message {
 interface ChatInterfaceProps {
   conversation: Message[];
   isLoading: boolean;
+  onRequestExpertAnalysis?: (strategyName: string) => void;
 }
 
-export default function ChatInterface({ conversation, isLoading }: ChatInterfaceProps) {
+export default function ChatInterface({ conversation, isLoading, onRequestExpertAnalysis }: ChatInterfaceProps) {
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const scrollToBottom = () => {
@@ -57,6 +58,7 @@ export default function ChatInterface({ conversation, isLoading }: ChatInterface
             <StructuredReportRenderer 
               content={message.content} 
               timestamp={message.timestamp}
+              onRequestExpertAnalysis={onRequestExpertAnalysis}
             />
           </div>
         );

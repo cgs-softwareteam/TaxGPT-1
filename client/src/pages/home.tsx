@@ -71,6 +71,12 @@ export default function Home() {
     }
   };
 
+  const handleExpertAnalysisRequest = async (strategyName: string) => {
+    const expertAnalysisMessage = `Please provide a comprehensive, expert-level explanation of the "${strategyName}" tax strategy. Include specific examples, advanced techniques, potential pitfalls, and detailed implementation guidance. Make this a thorough analysis that a tax professional would provide.`;
+    
+    await handleSubmit(expertAnalysisMessage);
+  };
+
   return (
     <div className="min-h-screen flex flex-col" data-testid="main-page">
       {/* Header */}
@@ -101,6 +107,7 @@ export default function Home() {
         <ChatInterface 
           conversation={conversation} 
           isLoading={isLoading}
+          onRequestExpertAnalysis={handleExpertAnalysisRequest}
         />
       </main>
 
