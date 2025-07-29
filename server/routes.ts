@@ -55,9 +55,28 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
 
-      // Prepare messages for OpenAI with system prompt
+      // Check if this is a detailed explanation request
+      const lastMessage = messages[messages.length - 1];
+      const isDetailedExplanationRequest = lastMessage.content.includes('comprehensive, expert-level explanation') && 
+        lastMessage.content.includes('tax strategy');
+
+      const detailedExplanationPrompt = `You are a senior tax professional providing comprehensive, expert-level analysis. The user is asking for detailed explanation of a specific tax strategy. You must provide a thorough analysis without asking for additional information.
+
+Provide:
+
+1. **Detailed Overview**: Comprehensive explanation of how the strategy works
+2. **Specific Examples**: Real-world scenarios with actual numbers and calculations  
+3. **Advanced Techniques**: Professional-level implementation methods and optimization tips
+4. **Potential Pitfalls**: Common mistakes, limitations, and compliance issues
+5. **Implementation Guidance**: Step-by-step professional recommendations
+6. **Current Law Context**: Recent changes and upcoming considerations
+
+Be thorough, technical, and provide the depth of analysis a CPA would deliver to a client. Use specific examples with realistic numbers and detailed calculations where applicable. Do not ask for additional information - provide a complete analysis.`;
+
+      // Prepare messages for OpenAI with appropriate system prompt
+      const systemPrompt = isDetailedExplanationRequest ? detailedExplanationPrompt : SYSTEM_PROMPT;
       const openaiMessages = [
-        { role: "system", content: SYSTEM_PROMPT },
+        { role: "system", content: systemPrompt },
         ...messages
       ];
 

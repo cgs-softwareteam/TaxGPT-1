@@ -1,6 +1,6 @@
 import ReactMarkdown from "react-markdown";
 import { useState } from "react";
-import { DollarSign, Target, Lightbulb, CheckCircle, Shield, AlertTriangle, PiggyBank, Building2, Receipt, TrendingUp, Clock, Zap, Calendar, ChevronDown, ChevronRight, Info } from "lucide-react";
+import { DollarSign, Target, Lightbulb, CheckCircle, Shield, AlertTriangle, PiggyBank, Building2, Receipt, TrendingUp, Clock, Zap, Calendar, ChevronDown, ChevronRight, Info, Sparkles } from "lucide-react";
 
 interface StructuredReportRendererProps {
   content: string;
@@ -9,6 +9,8 @@ interface StructuredReportRendererProps {
 
 export default function StructuredReportRenderer({ content, timestamp }: StructuredReportRendererProps) {
   const [expandedStrategy, setExpandedStrategy] = useState<number | null>(null);
+  const [loadingDetailedExplanation, setLoadingDetailedExplanation] = useState<number | null>(null);
+  const [detailedExplanations, setDetailedExplanations] = useState<{[key: number]: string}>({});
 
   const formatTime = (date: Date) => {
     return date.toLocaleTimeString('en-US', {
@@ -155,6 +157,43 @@ export default function StructuredReportRenderer({ content, timestamp }: Structu
           "Rebalancing may trigger taxes"
         ]
       };
+    }
+  };
+
+  // Generate detailed AI explanation for a strategy
+  const generateDetailedExplanation = async (strategyName: string, strategyIndex: number) => {
+    setLoadingDetailedExplanation(strategyIndex);
+    
+    try {
+      const response = await fetch('/api/generate', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          messages: [
+            {
+              role: 'user',
+              content: `Please provide a comprehensive, expert-level explanation of the "${strategyName}" tax strategy. Include specific examples, advanced techniques, potential pitfalls, and detailed implementation guidance. Make this a thorough analysis that a tax professional would provide.`
+            }
+          ]
+        })
+      });
+
+      const data = await response.json();
+      
+      setDetailedExplanations(prev => ({
+        ...prev,
+        [strategyIndex]: data.content
+      }));
+    } catch (error) {
+      console.error('Error generating detailed explanation:', error);
+      setDetailedExplanations(prev => ({
+        ...prev,
+        [strategyIndex]: 'Unable to generate detailed explanation at this time. Please try again later.'
+      }));
+    } finally {
+      setLoadingDetailedExplanation(null);
     }
   };
 
@@ -321,13 +360,53 @@ export default function StructuredReportRenderer({ content, timestamp }: Structu
                       <div className="pt-4 space-y-4">
                         {/* Overview */}
                         <div className="bg-blue-50 rounded-lg p-4">
-                          <div className="flex items-start space-x-2">
-                            <Info className="w-4 h-4 text-blue-600 mt-0.5 flex-shrink-0" />
-                            <div>
-                              <h5 className="font-medium text-blue-900 text-sm mb-1">Overview</h5>
-                              <p className="text-xs text-blue-800">{detailedContent.overview}</p>
+                          <div className="flex items-start justify-between">
+                            <div className="flex items-start space-x-2 flex-1">
+                              <Info className="w-4 h-4 text-blue-600 mt-0.5 flex-shrink-0" />
+                              <div className="flex-1">
+                                <h5 className="font-medium text-blue-900 text-sm mb-1">Overview</h5>
+                                <p className="text-xs text-blue-800">{detailedContent.overview}</p>
+                              </div>
                             </div>
+                            <button
+                              onClick={() => generateDetailedExplanation(strategy.name, index)}
+                              disabled={loadingDetailedExplanation === index}
+                              className="ml-3 flex items-center space-x-1 bg-blue-600 hover:bg-blue-700 text-white text-xs px-3 py-1.5 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                              data-testid={`detailed-explanation-${index}`}
+                            >
+                              {loadingDetailedExplanation === index ? (
+                                <div className="animate-spin w-3 h-3 border border-white border-t-transparent rounded-full"></div>
+                              ) : (
+                                <Sparkles className="w-3 h-3" />
+                              )}
+                              <span>{loadingDetailedExplanation === index ? 'Generating...' : 'Get Expert Analysis'}</span>
+                            </button>
                           </div>
+                          
+                          {/* Detailed AI Explanation */}
+                          {detailedExplanations[index] && (
+                            <div className="mt-4 pt-4 border-t border-blue-200">
+                              <h6 className="font-medium text-blue-900 text-sm mb-2 flex items-center">
+                                <Sparkles className="w-3 h-3 mr-1" />
+                                Expert Analysis
+                              </h6>
+                              <div className="bg-white rounded-lg p-3 border border-blue-200">
+                                <div className="prose prose-xs max-w-none">
+                                  <ReactMarkdown
+                                    components={{
+                                      p: ({ children }) => <p className="text-xs text-gray-700 leading-relaxed mb-2 last:mb-0">{children}</p>,
+                                      strong: ({ children }) => <strong className="font-semibold text-gray-900">{children}</strong>,
+                                      ul: ({ children }) => <ul className="list-disc list-inside space-y-1 my-2">{children}</ul>,
+                                      ol: ({ children }) => <ol className="list-decimal list-inside space-y-1 my-2">{children}</ol>,
+                                      li: ({ children }) => <li className="text-xs text-gray-600">{children}</li>
+                                    }}
+                                  >
+                                    {detailedExplanations[index]}
+                                  </ReactMarkdown>
+                                </div>
+                              </div>
+                            </div>
+                          )}
                         </div>
 
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
