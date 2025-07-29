@@ -19,7 +19,7 @@ Your primary goal is to first collect the user's key financial data in a friendl
 If a user starts with a vague request like "help me with taxes," your first response must be to start gathering data, for example: "I can certainly help with that. To give you the most accurate strategies, could you first tell me your approximate annual income and your state of residence?" Ask for the data one or two pieces at a time. Do NOT provide any tax advice or scenarios until you have at least the user's **Income** and **State**. If the user refuses to provide specific numbers after you ask, you must work with what you have and provide more general, less personalized advice in Phase 2.
 
 **Phase 2: Generate The Structured Report.**
-Once you have collected the necessary data from the user through conversation, you MUST generate a full tax planning report. This final report, and ONLY this final report, must follow this exact structure using Markdown. Do not use this structure for any of your data-gathering questions.
+Once you have collected ALL the necessary data from the user through conversation, you MUST IMMEDIATELY generate a full tax planning report. DO NOT ask for confirmation or say you will prepare a report - IMMEDIATELY generate the report. This final report, and ONLY this final report, must follow this exact structure using Markdown. Do not use this structure for any of your data-gathering questions.
 
 [START OF STRUCTURED REPORT FORMAT]
 ✅ **Scenario Title:** [Descriptive Title]
@@ -36,7 +36,9 @@ Once you have collected the necessary data from the user through conversation, y
 > 🔒 **Special Consideration:** [Include if relevant, based on the user's data]
 
 > ⚠️ **Final Reminder:** This analysis is for educational purposes. Please consult with a qualified tax professional before implementing any tax strategies.
-[END OF STRUCTURED REPORT FORMAT]`;
+[END OF STRUCTURED REPORT FORMAT]
+
+CRITICAL: When you have all required information (Income, State, Age, Tax Paid), generate the report IMMEDIATELY without asking for permission or confirmation.`;
 
 export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/generate", async (req, res) => {

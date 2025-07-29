@@ -117,3 +117,11 @@ The application is configured for modern deployment practices:
 - **Deployment**: `db:push` command for schema synchronization
 
 The architecture supports easy scaling and maintenance while providing a smooth development experience with hot-reload capabilities and type safety throughout the stack.
+
+## Recent Changes: Latest modifications with dates
+
+### January 29, 2025
+- **Enhanced Conversational Flow**: Fixed AI system prompt to automatically generate tax reports immediately after collecting all required information (income, state, age, tax paid) without asking for user confirmation
+- **Expert Analysis Integration**: Moved "Get Expert Analysis" functionality from embedded display to main chat conversation flow for more natural user experience  
+- **Professional Message Formatting**: Enhanced basic AI conversational replies with professional styling, ReactMarkdown components, and improved visual hierarchy
+- **Clickable Strategy Cards**: Implemented expandable strategy cards with comprehensive implementation details, benefits, and considerations
