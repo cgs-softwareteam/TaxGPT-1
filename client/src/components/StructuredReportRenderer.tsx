@@ -1,5 +1,5 @@
 import ReactMarkdown from "react-markdown";
-import { DollarSign, Target, Lightbulb, CheckCircle, Shield, AlertTriangle } from "lucide-react";
+import { DollarSign, Target, Lightbulb, CheckCircle, Shield, AlertTriangle, PiggyBank, Building2, Receipt, TrendingUp, Clock, Zap, Calendar } from "lucide-react";
 
 interface StructuredReportRendererProps {
   content: string;
@@ -13,6 +13,52 @@ export default function StructuredReportRenderer({ content, timestamp }: Structu
       minute: '2-digit',
       hour12: true
     });
+  };
+
+  // Get strategy metadata based on strategy name and index
+  const getStrategyMetadata = (strategyName: string, index: number) => {
+    const strategies = [
+      {
+        keywords: ['retirement', 'ira', '401k', 'pension'],
+        icon: <PiggyBank className="w-4 h-4 text-blue-600" />,
+        impactLevel: 'High',
+        timeline: 'Immediate',
+        impactColor: 'bg-green-100 text-green-700',
+        timelineIcon: <Zap className="w-3 h-3" />
+      },
+      {
+        keywords: ['charitable', 'donation', 'deduction'],
+        icon: <Receipt className="w-4 h-4 text-purple-600" />,
+        impactLevel: 'Medium',
+        timeline: 'Short-term',
+        impactColor: 'bg-yellow-100 text-yellow-700',
+        timelineIcon: <Clock className="w-3 h-3" />
+      },
+      {
+        keywords: ['real estate', 'property', 'depreciation'],
+        icon: <Building2 className="w-4 h-4 text-orange-600" />,
+        impactLevel: 'High',
+        timeline: 'Long-term',
+        impactColor: 'bg-green-100 text-green-700',
+        timelineIcon: <Calendar className="w-3 h-3" />
+      },
+      {
+        keywords: ['investment', 'tax-efficient', 'capital'],
+        icon: <TrendingUp className="w-4 h-4 text-green-600" />,
+        impactLevel: 'Medium',
+        timeline: 'Medium-term',
+        impactColor: 'bg-yellow-100 text-yellow-700',
+        timelineIcon: <Clock className="w-3 h-3" />
+      }
+    ];
+
+    // Match strategy by keywords or use index-based fallback
+    const lowerStrategyName = strategyName.toLowerCase();
+    const matchedStrategy = strategies.find(s => 
+      s.keywords.some(keyword => lowerStrategyName.includes(keyword))
+    ) || strategies[index % strategies.length];
+
+    return matchedStrategy;
   };
 
   // Parse the structured content
@@ -123,19 +169,46 @@ export default function StructuredReportRenderer({ content, timestamp }: Structu
           </div>
         </div>
 
-        {/* Key Strategies as Individual Cards */}
+        {/* Key Strategies as Enhanced Cards */}
         <div>
           <h3 className="text-md font-semibold text-gray-900 mb-3 flex items-center">
             <Lightbulb className="w-5 h-5 text-yellow-600 mr-2" />
             Key Strategies
           </h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-            {report.strategies.map((strategy: any, index: number) => (
-              <div key={index} className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm hover:shadow-md transition-shadow">
-                <h4 className="font-medium text-gray-900 mb-2">{strategy.name}</h4>
-                <p className="text-sm text-gray-600">{strategy.description}</p>
-              </div>
-            ))}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+            {report.strategies.map((strategy: any, index: number) => {
+              const { icon, impactLevel, timeline, impactColor, timelineIcon } = getStrategyMetadata(strategy.name, index);
+              
+              return (
+                <div key={index} className="bg-white border border-gray-200 rounded-xl p-5 shadow-sm hover:shadow-lg transition-all duration-200 hover:border-gray-300">
+                  {/* Strategy Header */}
+                  <div className="flex items-start justify-between mb-3">
+                    <div className="flex items-center space-x-3">
+                      <div className="bg-blue-50 p-2 rounded-lg">
+                        {icon}
+                      </div>
+                      <div>
+                        <h4 className="font-semibold text-gray-900 text-sm">{strategy.name}</h4>
+                        <p className="text-xs text-gray-500 mt-1">{strategy.description}</p>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  {/* Strategy Metadata */}
+                  <div className="flex items-center justify-between pt-3 border-t border-gray-100">
+                    <div className="flex items-center space-x-2">
+                      <span className={`px-2 py-1 rounded-full text-xs font-medium ${impactColor}`}>
+                        {impactLevel} Impact
+                      </span>
+                    </div>
+                    <div className="flex items-center space-x-1 text-xs text-gray-500">
+                      {timelineIcon}
+                      <span>{timeline}</span>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
           </div>
         </div>
 
