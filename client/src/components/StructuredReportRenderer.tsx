@@ -1,5 +1,6 @@
 import ReactMarkdown from "react-markdown";
-import { DollarSign, Target, Lightbulb, CheckCircle, Shield, AlertTriangle, PiggyBank, Building2, Receipt, TrendingUp, Clock, Zap, Calendar } from "lucide-react";
+import { useState } from "react";
+import { DollarSign, Target, Lightbulb, CheckCircle, Shield, AlertTriangle, PiggyBank, Building2, Receipt, TrendingUp, Clock, Zap, Calendar, ChevronDown, ChevronRight, Info } from "lucide-react";
 
 interface StructuredReportRendererProps {
   content: string;
@@ -7,6 +8,8 @@ interface StructuredReportRendererProps {
 }
 
 export default function StructuredReportRenderer({ content, timestamp }: StructuredReportRendererProps) {
+  const [expandedStrategy, setExpandedStrategy] = useState<number | null>(null);
+
   const formatTime = (date: Date) => {
     return date.toLocaleTimeString('en-US', {
       hour: 'numeric',
@@ -59,6 +62,100 @@ export default function StructuredReportRenderer({ content, timestamp }: Structu
     ) || strategies[index % strategies.length];
 
     return matchedStrategy;
+  };
+
+  // Get detailed strategy content when clicked
+  const getDetailedStrategyContent = (strategyName: string) => {
+    const lowerStrategyName = strategyName.toLowerCase();
+    
+    if (lowerStrategyName.includes('retirement') || lowerStrategyName.includes('ira') || lowerStrategyName.includes('401k')) {
+      return {
+        overview: "Maximize your retirement contributions to reduce current taxable income while building long-term wealth.",
+        steps: [
+          "Contribute maximum to employer 401(k) - up to $23,000 (2024 limit)",
+          "Add catch-up contributions if 50+ - additional $7,500",
+          "Open Traditional IRA for additional $7,000 deduction",
+          "Consider Roth conversions during lower-income years"
+        ],
+        benefits: [
+          "Immediate tax deduction on contributions",
+          "Tax-deferred growth on investments",
+          "Potential employer matching (free money)",
+          "Builds retirement security"
+        ],
+        considerations: [
+          "Funds locked until age 59½ (with exceptions)",
+          "Required minimum distributions at 73",
+          "Income limits may apply to IRA deductibility"
+        ]
+      };
+    } else if (lowerStrategyName.includes('charitable') || lowerStrategyName.includes('donation')) {
+      return {
+        overview: "Strategic charitable giving can provide significant tax deductions while supporting causes you care about.",
+        steps: [
+          "Bunch donations in alternate years to exceed standard deduction",
+          "Donate appreciated assets instead of cash",
+          "Consider donor-advised funds for flexible timing",
+          "Set up qualified charitable distribution from IRA if 70½+"
+        ],
+        benefits: [
+          "Deduction up to 60% of AGI for cash donations",
+          "Avoid capital gains on donated appreciated assets",
+          "Support meaningful causes",
+          "Potential estate tax benefits"
+        ],
+        considerations: [
+          "Must itemize deductions to benefit",
+          "Keep detailed records and receipts",
+          "AGI limits may apply",
+          "Ensure charity is qualified 501(c)(3)"
+        ]
+      };
+    } else if (lowerStrategyName.includes('real estate') || lowerStrategyName.includes('property') || lowerStrategyName.includes('depreciation')) {
+      return {
+        overview: "Real estate investments offer unique tax advantages through depreciation, deductions, and potential 1031 exchanges.",
+        steps: [
+          "Document all rental property expenses",
+          "Claim depreciation on investment properties",
+          "Track improvement costs for basis adjustments",
+          "Consider 1031 exchanges to defer capital gains"
+        ],
+        benefits: [
+          "Depreciation reduces taxable rental income",
+          "Deduct mortgage interest, repairs, management fees",
+          "1031 exchanges defer capital gains taxes",
+          "Potential for appreciation and cash flow"
+        ],
+        considerations: [
+          "Depreciation recapture when selling",
+          "Passive activity loss limitations",
+          "Property management time and costs",
+          "Market and liquidity risks"
+        ]
+      };
+    } else {
+      return {
+        overview: "Tax-efficient investment strategies can minimize your tax burden while growing your wealth.",
+        steps: [
+          "Prioritize tax-advantaged accounts (401k, IRA, HSA)",
+          "Use tax-loss harvesting in taxable accounts",
+          "Hold investments over 1 year for long-term capital gains",
+          "Consider municipal bonds if in high tax bracket"
+        ],
+        benefits: [
+          "Lower long-term capital gains rates",
+          "Tax-loss harvesting reduces current taxes",
+          "Municipal bond interest often tax-free",
+          "Compound growth in tax-deferred accounts"
+        ],
+        considerations: [
+          "Wash sale rules apply to tax-loss harvesting",
+          "State taxes may apply to municipal bonds",
+          "Investment risks remain",
+          "Rebalancing may trigger taxes"
+        ]
+      };
+    }
   };
 
   // Parse the structured content
@@ -175,37 +272,118 @@ export default function StructuredReportRenderer({ content, timestamp }: Structu
             <Lightbulb className="w-5 h-5 text-yellow-600 mr-2" />
             Key Strategies
           </h3>
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+          <div className="space-y-4">
             {report.strategies.map((strategy: any, index: number) => {
               const { icon, impactLevel, timeline, impactColor, timelineIcon } = getStrategyMetadata(strategy.name, index);
+              const isExpanded = expandedStrategy === index;
+              const detailedContent = getDetailedStrategyContent(strategy.name);
               
               return (
-                <div key={index} className="bg-white border border-gray-200 rounded-xl p-5 shadow-sm hover:shadow-lg transition-all duration-200 hover:border-gray-300">
-                  {/* Strategy Header */}
-                  <div className="flex items-start justify-between mb-3">
-                    <div className="flex items-center space-x-3">
-                      <div className="bg-blue-50 p-2 rounded-lg">
-                        {icon}
+                <div key={index} className="bg-white border border-gray-200 rounded-xl shadow-sm hover:shadow-lg transition-all duration-200">
+                  {/* Clickable Strategy Header */}
+                  <div 
+                    className="p-5 cursor-pointer hover:bg-gray-50 transition-colors"
+                    onClick={() => setExpandedStrategy(isExpanded ? null : index)}
+                    data-testid={`strategy-card-${index}`}
+                  >
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center space-x-3">
+                        <div className="bg-blue-50 p-2 rounded-lg">
+                          {icon}
+                        </div>
+                        <div>
+                          <h4 className="font-semibold text-gray-900 text-sm">{strategy.name}</h4>
+                          <p className="text-xs text-gray-500 mt-1">{strategy.description}</p>
+                        </div>
                       </div>
-                      <div>
-                        <h4 className="font-semibold text-gray-900 text-sm">{strategy.name}</h4>
-                        <p className="text-xs text-gray-500 mt-1">{strategy.description}</p>
+                      <div className="flex items-center space-x-3">
+                        <div className="flex items-center space-x-2">
+                          <span className={`px-2 py-1 rounded-full text-xs font-medium ${impactColor}`}>
+                            {impactLevel} Impact
+                          </span>
+                          <div className="flex items-center space-x-1 text-xs text-gray-500">
+                            {timelineIcon}
+                            <span>{timeline}</span>
+                          </div>
+                        </div>
+                        {isExpanded ? (
+                          <ChevronDown className="w-4 h-4 text-gray-400" />
+                        ) : (
+                          <ChevronRight className="w-4 h-4 text-gray-400" />
+                        )}
                       </div>
                     </div>
                   </div>
-                  
-                  {/* Strategy Metadata */}
-                  <div className="flex items-center justify-between pt-3 border-t border-gray-100">
-                    <div className="flex items-center space-x-2">
-                      <span className={`px-2 py-1 rounded-full text-xs font-medium ${impactColor}`}>
-                        {impactLevel} Impact
-                      </span>
+
+                  {/* Expandable Detailed Content */}
+                  {isExpanded && (
+                    <div className="px-5 pb-5 border-t border-gray-100 bg-gray-50">
+                      <div className="pt-4 space-y-4">
+                        {/* Overview */}
+                        <div className="bg-blue-50 rounded-lg p-4">
+                          <div className="flex items-start space-x-2">
+                            <Info className="w-4 h-4 text-blue-600 mt-0.5 flex-shrink-0" />
+                            <div>
+                              <h5 className="font-medium text-blue-900 text-sm mb-1">Overview</h5>
+                              <p className="text-xs text-blue-800">{detailedContent.overview}</p>
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                          {/* Implementation Steps */}
+                          <div className="bg-white rounded-lg p-4 border border-gray-200">
+                            <h5 className="font-medium text-gray-900 text-sm mb-3 flex items-center">
+                              <CheckCircle className="w-4 h-4 text-green-600 mr-2" />
+                              Implementation Steps
+                            </h5>
+                            <ul className="space-y-2">
+                              {detailedContent.steps.map((step: string, stepIndex: number) => (
+                                <li key={stepIndex} className="text-xs text-gray-700 flex items-start">
+                                  <span className="flex-shrink-0 w-4 h-4 bg-green-100 text-green-700 rounded-full text-xs flex items-center justify-center mr-2 mt-0.5 font-medium">
+                                    {stepIndex + 1}
+                                  </span>
+                                  {step}
+                                </li>
+                              ))}
+                            </ul>
+                          </div>
+
+                          {/* Benefits */}
+                          <div className="bg-white rounded-lg p-4 border border-gray-200">
+                            <h5 className="font-medium text-gray-900 text-sm mb-3 flex items-center">
+                              <TrendingUp className="w-4 h-4 text-green-600 mr-2" />
+                              Key Benefits
+                            </h5>
+                            <ul className="space-y-2">
+                              {detailedContent.benefits.map((benefit: string, benefitIndex: number) => (
+                                <li key={benefitIndex} className="text-xs text-gray-700 flex items-start">
+                                  <span className="w-1.5 h-1.5 bg-green-500 rounded-full mt-1.5 mr-2 flex-shrink-0"></span>
+                                  {benefit}
+                                </li>
+                              ))}
+                            </ul>
+                          </div>
+
+                          {/* Considerations */}
+                          <div className="bg-white rounded-lg p-4 border border-gray-200">
+                            <h5 className="font-medium text-gray-900 text-sm mb-3 flex items-center">
+                              <AlertTriangle className="w-4 h-4 text-amber-600 mr-2" />
+                              Important Considerations
+                            </h5>
+                            <ul className="space-y-2">
+                              {detailedContent.considerations.map((consideration: string, considerationIndex: number) => (
+                                <li key={considerationIndex} className="text-xs text-gray-700 flex items-start">
+                                  <span className="w-1.5 h-1.5 bg-amber-500 rounded-full mt-1.5 mr-2 flex-shrink-0"></span>
+                                  {consideration}
+                                </li>
+                              ))}
+                            </ul>
+                          </div>
+                        </div>
+                      </div>
                     </div>
-                    <div className="flex items-center space-x-1 text-xs text-gray-500">
-                      {timelineIcon}
-                      <span>{timeline}</span>
-                    </div>
-                  </div>
+                  )}
                 </div>
               );
             })}
