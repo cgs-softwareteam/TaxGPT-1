@@ -61,18 +61,52 @@ export default function ChatInterface({ conversation, isLoading }: ChatInterface
           </div>
         );
       } else {
-        // Standard conversational message
+        // Standard conversational message - enhanced formatting
         return (
           <div key={index} className="flex justify-start" data-testid={`message-ai-${index}`}>
-            <div className="bg-white border border-gray-200 rounded-2xl rounded-bl-md px-4 py-3 max-w-xs md:max-w-md shadow-sm">
-              <div className="flex items-center space-x-2 mb-2">
-                <div className="bg-primary text-white p-1 rounded-full text-xs">
-                  <Bot className="w-3 h-3" />
+            <div className="bg-white border border-gray-200 rounded-2xl rounded-bl-md p-4 max-w-lg md:max-w-2xl shadow-sm">
+              <div className="flex items-center space-x-2 mb-3">
+                <div className="bg-primary text-white p-2 rounded-full">
+                  <Bot className="w-4 h-4" />
                 </div>
-                <span className="text-xs font-medium text-gray-700">TaxGPT</span>
+                <div>
+                  <span className="text-sm font-medium text-gray-900">TaxGPT</span>
+                  <div className="text-xs text-gray-500">Tax Planning Assistant</div>
+                </div>
               </div>
-              <p className="text-sm text-gray-800">{message.content}</p>
-              <div className="text-xs text-gray-500 mt-1">{formatTime(message.timestamp)}</div>
+              
+              <div className="prose prose-sm max-w-none">
+                <ReactMarkdown
+                  components={{
+                    p: ({ children }) => <p className="text-sm text-gray-800 leading-relaxed mb-2 last:mb-0">{children}</p>,
+                    strong: ({ children }) => <strong className="font-semibold text-gray-900">{children}</strong>,
+                    em: ({ children }) => <em className="italic text-gray-700">{children}</em>,
+                    ul: ({ children }) => <ul className="list-disc list-inside space-y-1 my-2">{children}</ul>,
+                    ol: ({ children }) => <ol className="list-decimal list-inside space-y-1 my-2">{children}</ol>,
+                    li: ({ children }) => <li className="text-sm text-gray-700">{children}</li>,
+                    blockquote: ({ children }) => (
+                      <blockquote className="border-l-4 border-blue-200 pl-3 my-2 bg-blue-50 py-2 rounded-r">
+                        {children}
+                      </blockquote>
+                    ),
+                    code: ({ children }) => (
+                      <code className="bg-gray-100 px-1 py-0.5 rounded text-xs font-mono text-gray-800">
+                        {children}
+                      </code>
+                    )
+                  }}
+                >
+                  {message.content}
+                </ReactMarkdown>
+              </div>
+              
+              <div className="flex items-center justify-between mt-3 pt-2 border-t border-gray-100">
+                <div className="text-xs text-gray-500">{formatTime(message.timestamp)}</div>
+                <div className="flex items-center space-x-1 text-xs text-gray-400">
+                  <div className="w-1.5 h-1.5 bg-green-500 rounded-full"></div>
+                  <span>AI Response</span>
+                </div>
+              </div>
             </div>
           </div>
         );
