@@ -117,7 +117,7 @@ export default function ChatInterface({ conversation, isLoading, onRequestExpert
   };
 
   return (
-    <div className="max-w-4xl mx-auto px-4 py-6" data-testid="chat-interface">
+    <div className="max-w-4xl mx-auto px-4 py-6 pb-24" data-testid="chat-interface">
       {conversation.length === 0 && (
         <div className="text-center mb-8" data-testid="welcome-message">
           <div className="bg-white p-8 rounded-xl shadow-sm border border-gray-200 inline-block max-w-2xl">

@@ -103,7 +103,7 @@ export default function Home() {
       </header>
 
       {/* Chat Interface */}
-      <main className="flex-1 overflow-y-auto pb-32" data-testid="chat-main">
+      <main className="flex-1 overflow-y-auto pb-48" data-testid="chat-main">
         <ChatInterface 
           conversation={conversation} 
           isLoading={isLoading}
