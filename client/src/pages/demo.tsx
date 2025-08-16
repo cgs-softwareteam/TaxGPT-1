@@ -92,7 +92,7 @@ export default function Demo() {
     setTimeout(() => {
       const aiMessage: Message = {
         role: 'assistant',
-        content: 'This is a demo interface. To interact with the real TaxGPT AI, please provide an OpenAI API key in the main application.',
+        content: 'This is a demo interface. To interact with the real AITaxMD AI, please provide an OpenAI API key in the main application.',
         timestamp: new Date()
       };
       setConversation(prev => [...prev, aiMessage]);
@@ -117,7 +117,7 @@ export default function Demo() {
                 <Calculator className="text-xl w-6 h-6" />
               </div>
               <div>
-                <h1 className="text-xl font-semibold text-gray-900" data-testid="demo-title">TaxGPT Demo</h1>
+                <h1 className="text-xl font-semibold text-gray-900" data-testid="demo-title">AITaxMD Demo</h1>
                 <p className="text-sm text-gray-600" data-testid="demo-subtitle">Interactive Tax Planning Assistant Preview</p>
               </div>
             </div>
@@ -140,7 +140,7 @@ export default function Demo() {
           <div className="flex items-center space-x-2 text-blue-800">
             <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
             <p className="text-sm font-medium">
-              Demo Mode: This showcases how TaxGPT analyzes financial information and generates structured tax planning reports.
+              Demo Mode: This showcases how AITaxMD analyzes financial information and generates structured tax planning reports.
             </p>
           </div>
         </div>

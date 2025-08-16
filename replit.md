@@ -2,7 +2,7 @@
 
 ## Overview
 
-TaxGPT is a conversational AI tax planning assistant built as a full-stack web application. The system provides users with personalized tax advice through a ChatGPT-like interface, collecting financial information through natural conversation and generating structured tax planning reports.
+AITaxMD is a conversational AI tax planning assistant built as a full-stack web application. The system provides users with personalized tax advice through a ChatGPT-like interface, collecting financial information through natural conversation and generating structured tax planning reports.
 
 ## User Preferences
 
@@ -133,6 +133,7 @@ The architecture supports easy scaling and maintenance while providing a smooth 
 - **User Management**: Added user menu, profile management, and personal usage history pages
 - **Usage Tracking**: Implemented detailed conversation logging with token usage, response times, and analytics for both authenticated and anonymous users
 - **Authentication Flow**: Created login prompt, user menu, and protected routes with role-based access control (admin vs user)
+- **Branding Update**: Changed application name from "TaxGPT" to "AITaxMD" throughout all user-facing interfaces, including page titles, headers, welcome messages, API responses, and system prompts
 
 ### January 29, 2025
 - **Enhanced Conversational Flow**: Fixed AI system prompt to automatically generate tax reports immediately after collecting all required information (income, state, age, tax paid) without asking for user confirmation

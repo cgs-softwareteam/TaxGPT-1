@@ -77,7 +77,7 @@ export default function ChatInterface({ conversation, isLoading, onRequestExpert
                   <Bot className="w-4 h-4" />
                 </div>
                 <div>
-                  <span className="text-sm font-medium text-gray-900">TaxGPT</span>
+                  <span className="text-sm font-medium text-gray-900">AITaxMD</span>
                   <div className="text-xs text-gray-500">Tax Planning Assistant</div>
                 </div>
               </div>
@@ -144,7 +144,7 @@ export default function ChatInterface({ conversation, isLoading, onRequestExpert
             <div className="text-primary text-4xl mb-4">
               <Bot className="w-12 h-12 mx-auto" />
             </div>
-            <h2 className="text-xl font-medium text-gray-900 mb-3">Welcome to TaxGPT</h2>
+            <h2 className="text-xl font-medium text-gray-900 mb-3">Welcome to AITaxMD</h2>
             <p className="text-gray-600 text-sm mb-4">Your AI-powered tax planning assistant. I'll help you discover personalized tax strategies and savings opportunities.</p>
             
             <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
@@ -186,7 +186,7 @@ export default function ChatInterface({ conversation, isLoading, onRequestExpert
                 <div className="bg-primary text-white p-1 rounded-full text-xs">
                   <Bot className="w-3 h-3" />
                 </div>
-                <span className="text-xs font-medium text-gray-700">TaxGPT</span>
+                <span className="text-xs font-medium text-gray-700">AITaxMD</span>
               </div>
               <div className="flex items-center space-x-2">
                 <div className="flex space-x-1">

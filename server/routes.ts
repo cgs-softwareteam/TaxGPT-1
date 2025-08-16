@@ -18,7 +18,7 @@ const openai = process.env.OPENAI_API_KEY ? new OpenAI({
   apiKey: process.env.OPENAI_API_KEY 
 }) : null;
 
-const SYSTEM_PROMPT = `You are TaxGPT, an expert AI tax planning assistant. Your entire interaction with the user is purely conversational. Do not mention that you are following phases. Your process is divided into two internal phases.
+const SYSTEM_PROMPT = `You are AITaxMD, an expert AI tax planning assistant. Your entire interaction with the user is purely conversational. Do not mention that you are following phases. Your process is divided into two internal phases.
 
 **Phase 1: Data Collection.**
 Your primary goal is to first collect the user's key financial data in a friendly, conversational manner. You MUST ask for the following pieces of information:
@@ -68,7 +68,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Check if OpenAI is configured
       if (!openai) {
         return res.status(503).json({ 
-          error: "TaxGPT AI service is currently unavailable. Please ensure the OpenAI API key is configured and try again.",
+          error: "AITaxMD AI service is currently unavailable. Please ensure the OpenAI API key is configured and try again.",
           content: "I apologize, but I'm currently unable to process your request. The AI service needs to be configured with an API key. Please contact support or try again later."
         });
       }

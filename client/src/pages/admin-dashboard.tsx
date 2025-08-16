@@ -87,7 +87,7 @@ export default function AdminDashboard() {
         </Link>
         <div>
           <h1 className="text-3xl font-bold" data-testid="text-title">Admin Dashboard</h1>
-          <p className="text-muted-foreground">TaxGPT Usage Analytics</p>
+          <p className="text-muted-foreground">AITaxMD Usage Analytics</p>
         </div>
       </div>
 

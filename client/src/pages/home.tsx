@@ -184,7 +184,7 @@ export default function Home() {
                   <Calculator className="text-xl w-6 h-6" />
                 </div>
                 <div>
-                  <h1 className="text-xl font-semibold text-gray-900" data-testid="title">TaxGPT</h1>
+                  <h1 className="text-xl font-semibold text-gray-900" data-testid="title">AITaxMD</h1>
                   <p className="text-sm text-gray-600" data-testid="subtitle">AI-Powered Tax Planning Assistant</p>
                 </div>
               </div>

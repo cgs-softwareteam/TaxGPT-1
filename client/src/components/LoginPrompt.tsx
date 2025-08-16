@@ -15,7 +15,7 @@ export function LoginPrompt() {
       <Card className="w-full max-w-md mx-auto" data-testid="card-login">
         <CardHeader className="text-center">
           <CardTitle className="text-2xl font-bold text-gray-900 dark:text-white" data-testid="text-title">
-            Welcome to TaxGPT
+            Welcome to AITaxMD
           </CardTitle>
           <p className="text-gray-600 dark:text-gray-300 mt-2" data-testid="text-description">
             Sign in to access personalized AI tax planning assistance

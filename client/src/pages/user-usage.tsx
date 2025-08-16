@@ -63,7 +63,7 @@ export default function UserUsage() {
         </Link>
         <div>
           <h1 className="text-3xl font-bold" data-testid="text-title">My Usage</h1>
-          <p className="text-muted-foreground">Your TaxGPT conversation history</p>
+          <p className="text-muted-foreground">Your AITaxMD conversation history</p>
         </div>
       </div>
 
@@ -151,7 +151,7 @@ export default function UserUsage() {
             <div className="text-center py-8">
               <p className="text-muted-foreground">No usage history available yet.</p>
               <p className="text-sm text-muted-foreground mt-2">
-                Start a conversation with TaxGPT to see your history here.
+                Start a conversation with AITaxMD to see your history here.
               </p>
             </div>
           )}

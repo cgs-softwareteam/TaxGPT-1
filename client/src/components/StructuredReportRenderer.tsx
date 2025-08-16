@@ -229,7 +229,7 @@ export default function StructuredReportRenderer({ content, timestamp, onRequest
         <div className="bg-primary text-white p-2 rounded-full">
           <Target className="w-4 h-4" />
         </div>
-        <span className="text-sm font-medium text-gray-700">TaxGPT</span>
+        <span className="text-sm font-medium text-gray-700">AITaxMD</span>
         <span className="text-xs bg-green-600 text-white px-3 py-1 rounded-full">Tax Report Generated</span>
       </div>
 
