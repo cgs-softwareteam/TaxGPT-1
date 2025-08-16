@@ -8,7 +8,7 @@ import ConnectPgSimple from 'connect-pg-simple';
 import { getDatabase } from './db';
 
 // Feature flags
-const ENABLE_AUTHENTICATION = process.env.ENABLE_AUTHENTICATION === 'true';
+const ENABLE_AUTHENTICATION = true; // process.env.ENABLE_AUTHENTICATION === 'true' - TEMPORARY OVERRIDE FOR TESTING
 const ENABLE_DATABASE_STORAGE = process.env.ENABLE_DATABASE_STORAGE === 'true';
 
 // Session configuration

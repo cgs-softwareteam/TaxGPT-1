@@ -1,0 +1,27 @@
+You have just completed the foundational upgrade for TaxGPT, which includes the authentication system, database integration, and the admin dashboard. Before we proceed with the next phase of development, I need you to perform a deep, hands-on verification to ensure that all the new systems are enabled and functioning correctly as intended.
+Your task is to activate all the new features using the feature flags and then conduct a series of tests to confirm their operational status.
+Instructions:
+Step 1: Activate the Full Upgrade
+First, configure the environment to enable all the new features you have built. This means you must:
+Set the ENABLE_AUTHENTICATION environment variable (and any other related flags) to true.
+Ensure the application is configured to use the DrizzleStorage with the PostgreSQL database.
+Use placeholder/dummy API keys for Google and Facebook OAuth to allow the authentication flow to be tested.
+Step 2: Perform Comprehensive Functional Tests
+Once the application is running in its fully upgraded mode, perform the following verification checks. For each test, I need you to confirm not just that it looks like it works on the frontend, but that the corresponding backend and database actions are also happening correctly.
+Verification Checklist:
+Authentication Flow:
+Login Page: Is the user correctly presented with the Google and Facebook login options instead of the anonymous chat?
+User Creation: Perform a mock sign-up. Does a new user record get created successfully in the users table in the PostgreSQL database?
+Session Management: After a successful login, is a session correctly created and stored in the database session table?
+User Context: Does the frontend correctly identify the logged-in user? Does the UserMenu component appear and display the user's profile information?
+Logout: Does the logout functionality work, correctly destroying the session and redirecting the user?
+Role-Based Access Control (Admin vs. User):
+Admin Access: Manually update a test user's role in the database to 'admin'. After logging in as that user, can you successfully access the /admin-dashboard route?
+User Restriction: Confirm that a regular user (with the role of 'user') is correctly denied access if they try to navigate to the /admin-dashboard.
+Admin Dashboard Functionality:
+Data Display: Does the admin dashboard correctly fetch and display the list of registered users from the database?
+Usage Statistics: Are the basic usage statistics and analytics on the dashboard populating with data (even if it's just from the test users)?
+Database Integrity:
+Overall, confirm that all user-related actions (creation, login, session start/end) are being correctly and persistently written to and read from the PostgreSQL database via the DrizzleStorage implementation.
+Step 3: Provide a Verification Report
+Your final output should be a detailed verification report. Please structure your report according to the checklist above, confirming the status (e.g., "SUCCESS," "FAILURE," "PARTIAL SUCCESS") for each specific test and adding a brief note on how you verified it. This will serve as the official confirmation that the foundational upgrade is stable and ready for the next phase.
