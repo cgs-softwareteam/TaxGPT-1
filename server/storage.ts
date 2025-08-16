@@ -272,8 +272,8 @@ export class DrizzleStorage implements IStorage {
   }
 }
 
-// Feature flag controlled storage initialization - TEMPORARY OVERRIDE FOR TESTING
-const ENABLE_DATABASE_STORAGE = true; // process.env.ENABLE_DATABASE_STORAGE === 'true';
+// Feature flag controlled storage initialization
+const ENABLE_DATABASE_STORAGE = process.env.ENABLE_DATABASE_STORAGE === 'true';
 
 // Storage factory with feature flag support
 function createStorage(): IStorage {

@@ -5,8 +5,8 @@ import * as schema from "@shared/schema";
 
 neonConfig.webSocketConstructor = ws;
 
-// Feature flag to control database initialization - TEMPORARY OVERRIDE FOR TESTING
-const ENABLE_DATABASE_STORAGE = true; // process.env.ENABLE_DATABASE_STORAGE === 'true';
+// Feature flag to control database initialization
+const ENABLE_DATABASE_STORAGE = process.env.ENABLE_DATABASE_STORAGE === 'true';
 
 let db: ReturnType<typeof drizzle> | null = null;
 let pool: Pool | null = null;
