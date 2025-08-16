@@ -8,6 +8,7 @@ import Home from "@/pages/home";
 import Demo from "@/pages/demo";
 import AdminDashboard from "@/pages/admin-dashboard";
 import UserUsage from "@/pages/user-usage";
+import SavedPlans from "@/pages/SavedPlans";
 import { useAuth } from "@/hooks/useAuth";
 import { LoginPrompt } from "@/components/LoginPrompt";
 
@@ -34,6 +35,7 @@ function Router() {
       <Route path="/demo" component={Demo} />
       <Route path="/admin" component={AdminDashboard} />
       <Route path="/usage" component={UserUsage} />
+      <Route path="/saved-plans" component={SavedPlans} />
       <Route component={NotFound} />
     </Switch>
   );

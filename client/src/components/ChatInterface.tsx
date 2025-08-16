@@ -2,11 +2,15 @@ import { useEffect, useRef } from "react";
 import ReactMarkdown from "react-markdown";
 import { Bot } from "lucide-react";
 import StructuredReportRenderer from "./StructuredReportRenderer";
+import { SaveButton } from "./SaveButton";
+import { ExportButtons } from "./ExportButtons";
+import { useAuth } from "@/hooks/useAuth";
 
 interface Message {
   role: 'user' | 'assistant';
   content: string;
   timestamp: Date;
+  id?: number;
 }
 
 interface ChatInterfaceProps {
@@ -17,6 +21,7 @@ interface ChatInterfaceProps {
 
 export default function ChatInterface({ conversation, isLoading, onRequestExpertAnalysis }: ChatInterfaceProps) {
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const { isAuthenticated, authEnabled } = useAuth();
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -104,9 +109,24 @@ export default function ChatInterface({ conversation, isLoading, onRequestExpert
               
               <div className="flex items-center justify-between mt-3 pt-2 border-t border-gray-100">
                 <div className="text-xs text-gray-500">{formatTime(message.timestamp)}</div>
-                <div className="flex items-center space-x-1 text-xs text-gray-400">
-                  <div className="w-1.5 h-1.5 bg-green-500 rounded-full"></div>
-                  <span>AI Response</span>
+                <div className="flex items-center space-x-2">
+                  {authEnabled && isAuthenticated && (
+                    <>
+                      <SaveButton 
+                        messageId={message.id}
+                        messageContent={message.content}
+                        size="sm"
+                      />
+                      <ExportButtons 
+                        content={message.content} 
+                        size="sm"
+                      />
+                    </>
+                  )}
+                  <div className="flex items-center space-x-1 text-xs text-gray-400">
+                    <div className="w-1.5 h-1.5 bg-green-500 rounded-full"></div>
+                    <span>AI Response</span>
+                  </div>
                 </div>
               </div>
             </div>
