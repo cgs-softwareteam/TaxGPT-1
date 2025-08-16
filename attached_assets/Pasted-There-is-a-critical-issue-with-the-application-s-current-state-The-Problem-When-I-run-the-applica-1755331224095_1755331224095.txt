@@ -1,0 +1,23 @@
+There is a critical issue with the application's current state.
+The Problem: When I run the application in the preview environment, I am seeing the old, anonymous main application interface (the "Welcome to TaxGPT" screen with quick start options), as shown in the screenshot I provided. This is incorrect. Based on our last verification, with the feature flags enabled, I should be seeing the new Login Page that requires user authentication.
+Your Task:
+Conduct a deep, end-to-end analysis of the current setup to find the root cause of this failure. You must investigate why the authentication flow is not being triggered on the frontend.
+Instructions - Perform the following analysis:
+Environment Variable Verification (The Most Likely Cause):
+First, confirm how the application's "run" or "start" command is configured.
+Verify with 100% certainty that the environment variables, specifically ENABLE_AUTHENTICATION=true and SHOW_LOGIN_UI=true, are being successfully loaded and are accessible by both the backend server process and the frontend build process (Vite).
+Report on the exact values of these flags as seen by the running application.
+Server-Side Logic Review:
+Examine the server's startup logs. Does the server explicitly log that it is starting in "Authentication Enabled" mode?
+When the frontend first loads, it should make an API call to check the user's authentication status (e.g., to /api/auth/user). What is the server's actual response to this initial API call in the preview environment? Is it correctly returning an "unauthenticated" status that should signal the frontend to show the login page?
+Frontend Code Path Analysis (The Second Most Likely Cause):
+Go to the main entry point of the React application (likely client/src/App.tsx or a similar routing component).
+Deeply analyze the conditional rendering logic. Is the code that checks the user's authentication status and the SHOW_LOGIN_UI flag being evaluated correctly?
+Is there a potential race condition where the application renders the old UI before the check for authentication is complete?
+Trace the entire rendering path from the moment the app loads to the moment the incorrect UI is displayed.
+Deliverable: A Detailed Root Cause Analysis Report
+Your final output must be a clear and detailed report that answers the following questions:
+What is the precise root cause of the problem? (e.g., "The ENABLE_AUTHENTICATION environment variable is not being passed to the server process correctly.")
+Where is the failure point? Identify the specific file(s) and, if possible, the line(s) of code responsible for the incorrect behavior.
+Provide Evidence: Include log snippets, API responses, or code blocks that prove your conclusion.
+Final Instruction: Do not attempt to fix the issue yet. Your sole task is to conduct this deep analysis and provide the report. We must understand the "why" before we implement a fix.
