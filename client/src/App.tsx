@@ -6,12 +6,34 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import NotFound from "@/pages/not-found";
 import Home from "@/pages/home";
 import Demo from "@/pages/demo";
+import AdminDashboard from "@/pages/admin-dashboard";
+import UserUsage from "@/pages/user-usage";
+import { useAuth } from "@/hooks/useAuth";
+import { LoginPrompt } from "@/components/LoginPrompt";
 
 function Router() {
+  const { isAuthenticated, isLoading, authEnabled } = useAuth();
+
+  // Show loading state while checking authentication
+  if (authEnabled && isLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+      </div>
+    );
+  }
+
+  // Show login prompt if authentication is enabled and user is not authenticated
+  if (authEnabled && !isAuthenticated) {
+    return <LoginPrompt />;
+  }
+
   return (
     <Switch>
       <Route path="/" component={Home} />
       <Route path="/demo" component={Demo} />
+      <Route path="/admin" component={AdminDashboard} />
+      <Route path="/usage" component={UserUsage} />
       <Route component={NotFound} />
     </Switch>
   );

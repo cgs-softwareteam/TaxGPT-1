@@ -3,6 +3,8 @@ import ChatInterface from "@/components/ChatInterface";
 import ChatInput from "@/components/ChatInput";
 import { Calculator, Play } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { UserMenu } from "@/components/UserMenu";
+import { useAuth } from "@/hooks/useAuth";
 import { Link } from "wouter";
 
 interface Message {
@@ -92,12 +94,15 @@ export default function Home() {
                 <p className="text-sm text-gray-600" data-testid="subtitle">AI-Powered Tax Planning Assistant</p>
               </div>
             </div>
-            <Link href="/demo">
-              <Button variant="outline" className="flex items-center space-x-2" data-testid="demo-link">
-                <Play className="w-4 h-4" />
-                <span>View Demo</span>
-              </Button>
-            </Link>
+            <div className="flex items-center space-x-3">
+              <Link href="/demo">
+                <Button variant="outline" className="flex items-center space-x-2" data-testid="demo-link">
+                  <Play className="w-4 h-4" />
+                  <span>View Demo</span>
+                </Button>
+              </Link>
+              <UserMenu />
+            </div>
           </div>
         </div>
       </header>

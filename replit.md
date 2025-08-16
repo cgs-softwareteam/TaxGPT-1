@@ -23,13 +23,18 @@ The application follows a modern full-stack architecture with clear separation b
 - **Runtime**: Node.js with Express.js framework
 - **Language**: TypeScript with ES modules
 - **API Design**: RESTful endpoints with JSON communication
+- **Authentication**: Passport.js with Google/Facebook OAuth 2.0 strategies
+- **Session Management**: Express-session with PostgreSQL session store
+- **Authorization**: Role-based access control (user/admin) with middleware protection
 - **Development**: Hot reload with Vite integration in development mode
 
 ### Database Layer
 - **ORM**: Drizzle ORM for type-safe database operations
-- **Database**: PostgreSQL (configured for Neon Database)
+- **Database**: PostgreSQL with comprehensive user and analytics schema
 - **Schema Management**: Drizzle Kit for migrations and schema management
 - **Session Storage**: PostgreSQL-backed sessions using connect-pg-simple
+- **Analytics**: Detailed usage tracking with token consumption, response times, and user behavior analytics
+- **Feature Flags**: Database and authentication systems controlled by environment variables for safe deployment
 
 ## Key Components
 
@@ -119,6 +124,15 @@ The application is configured for modern deployment practices:
 The architecture supports easy scaling and maintenance while providing a smooth development experience with hot-reload capabilities and type safety throughout the stack.
 
 ## Recent Changes: Latest modifications with dates
+
+### January 30, 2025
+- **OAuth Authentication System**: Implemented complete Google/Facebook OAuth authentication using Passport.js with session management
+- **Feature Flag Architecture**: Added ENABLE_AUTHENTICATION and ENABLE_DATABASE_STORAGE environment flags for safe deployment and gradual rollout
+- **PostgreSQL Integration**: Created comprehensive database schema with users, usage tracking, and session storage using Drizzle ORM
+- **Admin Dashboard**: Built full admin interface with usage statistics, user management, and analytics for system monitoring
+- **User Management**: Added user menu, profile management, and personal usage history pages
+- **Usage Tracking**: Implemented detailed conversation logging with token usage, response times, and analytics for both authenticated and anonymous users
+- **Authentication Flow**: Created login prompt, user menu, and protected routes with role-based access control (admin vs user)
 
 ### January 29, 2025
 - **Enhanced Conversational Flow**: Fixed AI system prompt to automatically generate tax reports immediately after collecting all required information (income, state, age, tax paid) without asking for user confirmation

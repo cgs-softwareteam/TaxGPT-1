@@ -1,6 +1,9 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import OpenAI from "openai";
+import { storage } from "./storage";
+import { requireAuth, requireAdmin } from "./auth";
+import { randomUUID } from "crypto";
 
 // the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
 const openai = process.env.OPENAI_API_KEY ? new OpenAI({ 
@@ -40,10 +43,15 @@ Once you have collected ALL the necessary data from the user through conversatio
 
 CRITICAL: When you have all required information (Income, State, Age, Tax Paid), generate the report IMMEDIATELY without asking for permission or confirmation.`;
 
+const ENABLE_AUTHENTICATION = process.env.ENABLE_AUTHENTICATION === 'true';
+
 export async function registerRoutes(app: Express): Promise<Server> {
-  app.post("/api/generate", async (req, res) => {
+  app.post("/api/generate", ENABLE_AUTHENTICATION ? requireAuth : (req: any, res: any, next: any) => next(), async (req: any, res) => {
     try {
       const { messages } = req.body;
+      const startTime = Date.now();
+      const sessionId = req.sessionID || randomUUID();
+      const userId = req.user?.id || null;
       
       if (!messages || !Array.isArray(messages)) {
         return res.status(400).json({ error: "Messages array is required" });
@@ -90,6 +98,24 @@ Be thorough, technical, and provide the depth of analysis a CPA would deliver to
       });
 
       const aiResponse = response.choices[0].message.content;
+      const endTime = Date.now();
+
+      // Log usage for analytics (both authenticated and anonymous)
+      try {
+        await storage.createUsageLog({
+          userId,
+          sessionId,
+          promptTokens: response.usage?.prompt_tokens || 0,
+          completionTokens: response.usage?.completion_tokens || 0,
+          totalTokens: response.usage?.total_tokens || 0,
+          conversationLength: messages.length,
+          responseTimeMs: endTime - startTime,
+          userMessage: lastMessage.content,
+          aiResponse: aiResponse || '',
+        });
+      } catch (logError) {
+        console.warn('Failed to log usage:', logError);
+      }
       
       res.json({ content: aiResponse });
     } catch (error) {
@@ -100,6 +126,59 @@ Be thorough, technical, and provide the depth of analysis a CPA would deliver to
       });
     }
   });
+
+  // Admin routes (behind authentication + admin role check)
+  if (ENABLE_AUTHENTICATION) {
+    // Get usage statistics
+    app.get("/api/admin/stats", requireAdmin, async (req, res) => {
+      try {
+        const stats = await storage.getUsageStatistics();
+        res.json(stats);
+      } catch (error) {
+        console.error("Failed to get usage statistics:", error);
+        res.status(500).json({ error: "Failed to get usage statistics" });
+      }
+    });
+
+    // Get all users
+    app.get("/api/admin/users", requireAdmin, async (req, res) => {
+      try {
+        const page = parseInt(req.query.page as string) || 1;
+        const limit = Math.min(parseInt(req.query.limit as string) || 50, 100);
+        const offset = (page - 1) * limit;
+        
+        const users = await storage.getAllUsers(limit, offset);
+        const totalUsers = await storage.getUserCount();
+        
+        res.json({
+          users,
+          pagination: {
+            page,
+            limit,
+            total: totalUsers,
+            pages: Math.ceil(totalUsers / limit),
+          },
+        });
+      } catch (error) {
+        console.error("Failed to get users:", error);
+        res.status(500).json({ error: "Failed to get users" });
+      }
+    });
+
+    // Get user's usage history
+    app.get("/api/user/usage", requireAuth, async (req: any, res) => {
+      try {
+        const userId = req.user.id;
+        const limit = Math.min(parseInt(req.query.limit as string) || 50, 100);
+        
+        const usageLogs = await storage.getUserUsageLogs(userId, limit);
+        res.json(usageLogs);
+      } catch (error) {
+        console.error("Failed to get user usage:", error);
+        res.status(500).json({ error: "Failed to get user usage" });
+      }
+    });
+  }
 
   const httpServer = createServer(app);
   return httpServer;
