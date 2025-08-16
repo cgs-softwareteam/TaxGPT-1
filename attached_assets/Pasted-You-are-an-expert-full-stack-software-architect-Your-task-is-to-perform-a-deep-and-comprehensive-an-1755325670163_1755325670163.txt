@@ -1,0 +1,35 @@
+You are an expert full-stack software architect. Your task is to perform a deep and comprehensive analysis of the current TaxGPT application codebase. Based on this analysis, you will create a strategic report detailing how to integrate a new set of client-approved features.
+Objective: To create a detailed architectural plan for upgrading the application with the following features:
+Compulsory User Authentication: Using "Sign in with Google" and "Sign in with Facebook" (OAuth 2.0).
+Persistent User Database: To store user profiles.
+Usage Tracking System: To log user interactions, token usage, and session duration.
+Secure Admin Dashboard: A private page for viewing user lists and usage metrics.
+Core Requirement: The primary goal is a non-disruptive implementation strategy. The current, functional, anonymous chatbot must remain fully operational for users while these new features are being developed and integrated. Your analysis should focus on a phased approach.
+Instructions:
+Analyze the entire codebase, including the frontend (React/Vite), backend (Node.js/Express), and the existing (but currently unused) Drizzle ORM configuration.
+Your report must answer the following questions in detail:
+1. Authentication Layer Integration:
+Backend: Which specific files in the server/ directory (e.g., index.ts, routes.ts) need to be modified to add OAuth 2.0 middleware and callback routes? What new libraries (e.g., Passport.js) would you recommend?
+Frontend: How would you modify the React frontend to handle the user's login state? Should a new component like LoginPage.tsx be created to gate access to the chat interface? How would the application store the session token securely?
+State Management: How will the user's authentication status be managed across the React application to show either the login page or the chatbot?
+2. Activating the Database (Drizzle ORM & PostgreSQL):
+Schema: The app already has a shared/schema.ts. Propose the exact Drizzle schema definitions for the new users table and a usage_logs table. The users table should store profile info from Google/Facebook, and usage_logs should link to a user and store interaction data.
+Replacing MemStorage: The application currently uses server/storage.ts with an in-memory MemStorage class. Outline the steps to create and implement a new DrizzleStorage class within this file that would perform actual database operations without breaking the existing IStorage interface.
+Connection: How will the backend establish a persistent connection to the Neon PostgreSQL database? Where should this connection logic be initialized?
+3. Implementing the Usage Tracking System:
+Data Logging: In which specific backend API route should the logic for logging user interactions be placed? Should it be in the same route that handles messages to the OpenAI API?
+Data Points: What specific data points (e.g., userId, timestamp, prompt_tokens, completion_tokens, chat_duration_ms) should be captured and stored in the usage_logs table after each AI interaction?
+4. Building the Secure Admin Dashboard:
+Backend API: Propose the new API endpoints required for the dashboard (e.g., GET /api/admin/users, GET /api/admin/usage-summary).
+Security: How would you secure these new admin endpoints? Propose a middleware function that checks if the logged-in user has an 'admin' role before allowing access.
+Frontend: Suggest the new React components and routing (e.g., a private /admin route) needed to build the dashboard interface for displaying users and their usage data.
+5. Non-Disruptive Implementation Roadmap:
+Provide a numbered, step-by-step plan for development. For example:
+Setup Database Tables.
+Implement Backend Authentication Logic.
+Build Frontend Login UI behind a feature flag.
+etc.
+How can we use environment variables or a simple feature-flagging system to ensure the new login requirement is not enforced for general users until the entire feature set is complete and tested?
+Deliverable:
+Produce a comprehensive report based on your analysis. The report should be structured with clear headings for each of the five points above. It must identify specific files for modification, propose code structure for new components/modules, and list any new required npm dependencies.
+Final Instruction: Analyze only. Do not change or write any code yet. Your sole output is this strategic report.
