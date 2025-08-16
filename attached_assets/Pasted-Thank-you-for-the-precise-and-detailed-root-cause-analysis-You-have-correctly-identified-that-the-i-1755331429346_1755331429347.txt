@@ -1,0 +1,24 @@
+Thank you for the precise and detailed root cause analysis. You have correctly identified that the issue is a configuration mismatch with the environment variables.
+You are now authorized to fix this issue. Please follow this exact step-by-step implementation and verification plan.
+Step 1: Install and Configure dotenv
+The backend server is not loading the .env file. To fix this, you must:
+Install the dotenv npm package.
+Modify the main server entry point file (server/index.ts) to import and configure dotenv at the very top of the file, ensuring it loads before any other application code.
+Step 2: Correct the Environment Variable Naming
+The frontend is looking for a variable with a VITE_ prefix, and the backend needs its own variable. To fix this:
+Open the .env file.
+Keep the existing ENABLE_AUTHENTICATION=true.
+Add a new line specifically for the frontend: VITE_ENABLE_AUTHENTICATION=true.
+Step 3: Restart and Full System Verification
+After completing the fixes, you must restart the application and perform a final, comprehensive verification to confirm that the fix has worked end-to-end.
+Verification Checklist:
+Server Startup Verification:
+Test: Check the server's startup logs.
+Verify: Do the logs now explicitly state that it is "Starting in Authentication Enabled mode" and "Database storage enabled - using DrizzleStorage"?
+Backend API Verification:
+Test: Make an API call to /api/auth/user.
+Verify: Does this endpoint now correctly return a JSON response indicating an unauthenticated status (e.g., {"isAuthenticated": false}), instead of the old HTML page?
+Frontend User Experience Verification (The Final Proof):
+Test: Load the application in the preview browser.
+Verify: Does the application now correctly and immediately display the Login Page with the Google and Facebook sign-in options, completely hiding the old anonymous chat interface?
+Please proceed with this three-step plan. Your final output should be a confirmation that all verification checks have passed successfully.
