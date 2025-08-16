@@ -1,0 +1,28 @@
+Thank you for the successful backend verification. We have confirmed the engine is working. Now, we must verify the entire car.
+Your next task is to perform a comprehensive end-to-end user experience and frontend functionality verification. The goal is to ensure that every backend feature you've built is correctly and smoothly integrated into the frontend UI, and that the entire system works as one cohesive unit.
+Instructions:
+Step 1: Ensure the System is in "Live" Mode
+First, ensure the application is running with all feature flags enabled, just as you did in the last test. The system should be in its fully upgraded state, requiring user authentication.
+Step 2: Perform an End-to-End Walkthrough from a New User's Perspective
+I need you to simulate a complete user journey and report on the visual and functional outcome at each step. Start the development server and open the application in a browser.
+Verification Checklist (User Journey):
+First Launch & Onboarding:
+Test: When you first load the application, what do you see?
+Verify: Does the new LoginPage.tsx component render correctly, showing the "Sign in with Google" and "Sign in with Facebook" buttons? Is the old anonymous chat interface completely hidden?
+User Sign-Up and Redirection:
+Test: Perform a mock sign-up.
+Verify: After a successful mock authentication, is the user correctly redirected to the main chat interface (home.tsx)? Does the URL change correctly?
+Authenticated User Interface:
+Test: Once logged in and on the main chat page, look at the UI.
+Verify: Does the UserMenu component appear in the corner, displaying the test user's name/email? Is the LoginPage gone, and is the chat interface fully visible and functional?
+Core Chat Functionality (for Logged-in User):
+Test: Send a message in the chat interface.
+Verify: Does the chat still work as expected? Does the AI respond? More importantly, confirm that a usage_log entry linked to the correct user_id is created in the database.
+Admin Dashboard Access:
+Test: Log out. Log back in as the user you previously designated with an 'admin' role.
+Verify (Frontend): Is there a visible link or button to the Admin Dashboard in the UserMenu or elsewhere?
+Verify (Access): Can you successfully navigate to the /admin-dashboard route? Does the AdminDashboard.tsx page render correctly, showing the user list from the database?
+Verify (Security): Log out. Log back in as a regular, non-admin user. Attempt to manually navigate to the /admin-dashboard URL. What happens? Confirm that the user is correctly blocked and redirected away from the admin page.
+Step 3: Provide a Comprehensive Frontend Verification Report
+Your final output should be a detailed report based on the checklist above. For each point, describe what you observed in the UI and confirm that the frontend behavior correctly reflects the backend state. Use screenshots where necessary to illustrate the UI at each stage of the user journey.
+This will be the final confirmation that the entire system, from the database to the pixels on the screen, is working properly.
