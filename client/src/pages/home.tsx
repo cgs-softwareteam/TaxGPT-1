@@ -4,7 +4,7 @@ import { apiRequest } from "@/lib/queryClient";
 import ChatInterface from "@/components/ChatInterface";
 import ChatInput from "@/components/ChatInput";
 import { ConversationSidebar } from "@/components/ConversationSidebar";
-import { Calculator, Play, Star, Menu, X } from "lucide-react";
+import { Calculator, Star, Menu, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { UserMenu } from "@/components/UserMenu";
 import { useAuth } from "@/hooks/useAuth";
@@ -197,12 +197,7 @@ export default function Home() {
                     </Button>
                   </Link>
                 )}
-                <Link href="/demo">
-                  <Button variant="outline" className="flex items-center space-x-2" data-testid="demo-link">
-                    <Play className="w-4 h-4" />
-                    <span>View Demo</span>
-                  </Button>
-                </Link>
+
                 <UserMenu />
               </div>
             </div>
