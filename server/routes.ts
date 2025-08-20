@@ -54,7 +54,7 @@ CRITICAL: When you have all required information (Income, State, Age, Tax Paid),
 const ENABLE_AUTHENTICATION = process.env.ENABLE_AUTHENTICATION === 'true';
 
 export async function registerRoutes(app: Express): Promise<Server> {
-  app.post("/api/generate", ENABLE_AUTHENTICATION ? requireAuth : (req: any, res: any, next: any) => next(), async (req: any, res) => {
+  app.post("/api/generate", async (req: any, res) => {
     try {
       const { messages } = req.body;
       const startTime = Date.now();

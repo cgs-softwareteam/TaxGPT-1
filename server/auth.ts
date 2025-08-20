@@ -36,11 +36,10 @@ export function setupSession(app: Express) {
     saveUninitialized: false,
     store: sessionStore,
     cookie: {
-      secure: false, // Temporarily disable for debugging
+      secure: process.env.NODE_ENV === 'production',
       httpOnly: true,
       maxAge: 7 * 24 * 60 * 60 * 1000, // 1 week
-      sameSite: 'lax', // Allow cross-site requests for OAuth
-      // Remove domain restriction to fix session persistence
+      sameSite: 'lax',
     },
   }));
 }

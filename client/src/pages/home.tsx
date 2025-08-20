@@ -122,6 +122,13 @@ export default function Home() {
         timestamp: new Date()
       };
       setConversation(prev => [...prev, errorMessage]);
+      
+      // Show user-friendly error toast
+      toast({
+        title: "Error",
+        description: "Failed to send message. Please try again.",
+        variant: "destructive",
+      });
     } finally {
       setIsLoading(false);
     }
