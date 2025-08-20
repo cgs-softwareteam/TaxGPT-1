@@ -34,6 +34,7 @@ function Router() {
       <Route path="/" component={Home} />
 
       <Route path="/admin" component={AdminDashboard} />
+      <Route path="/admin-dashboard" component={AdminDashboard} />
       <Route path="/usage" component={UserUsage} />
       <Route path="/saved-plans" component={SavedPlans} />
       <Route component={NotFound} />
