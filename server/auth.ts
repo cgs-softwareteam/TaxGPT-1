@@ -36,9 +36,10 @@ export function setupSession(app: Express) {
     saveUninitialized: false,
     store: sessionStore,
     cookie: {
-      secure: process.env.NODE_ENV === 'production',
+      secure: process.env.REPLIT_DOMAINS ? true : false, // Use HTTPS for Replit domain
       httpOnly: true,
       maxAge: 7 * 24 * 60 * 60 * 1000, // 1 week
+      sameSite: 'lax', // Allow cross-site requests for OAuth
     },
   }));
 }
@@ -200,6 +201,7 @@ export function setupAuthRoutes(app: Express) {
     app.get('/auth/google/callback',
       passport.authenticate('google', { failureRedirect: '/?error=auth_failed' }),
       (req, res) => {
+        console.log('OAuth callback successful, user authenticated:', req.user);
         // Determine the correct base URL for redirect
         const baseUrl = process.env.REPLIT_DOMAINS 
           ? `https://${process.env.REPLIT_DOMAINS}`
