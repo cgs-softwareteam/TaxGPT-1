@@ -52,9 +52,8 @@ export function setupPassport() {
 
   // Google OAuth Strategy
   if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
-    const callbackURL = process.env.REPLIT_DOMAINS 
-      ? `https://${process.env.REPLIT_DOMAINS}/auth/google/callback`
-      : "http://localhost:5000/auth/google/callback";
+    // Dynamic callback URL - will be set per request
+    const callbackURL = "/auth/google/callback";
     
     passport.use(new GoogleStrategy({
       clientID: process.env.GOOGLE_CLIENT_ID,
@@ -202,10 +201,11 @@ export function setupAuthRoutes(app: Express) {
       passport.authenticate('google', { failureRedirect: '/?error=auth_failed' }),
       (req, res) => {
         console.log('OAuth callback successful, user authenticated:', req.user);
-        // Determine the correct base URL for redirect
-        const baseUrl = process.env.REPLIT_DOMAINS 
-          ? `https://${process.env.REPLIT_DOMAINS}`
-          : `http://localhost:5000`;
+        // Dynamic redirect to the same domain user logged in from
+        const protocol = req.secure ? 'https' : 'http';
+        const host = req.get('host');
+        const baseUrl = `${protocol}://${host}`;
+        console.log(`Redirecting to: ${baseUrl}`);
         res.redirect(baseUrl);
       }
     );
@@ -220,7 +220,13 @@ export function setupAuthRoutes(app: Express) {
     app.get('/auth/facebook/callback',
       passport.authenticate('facebook', { failureRedirect: '/?error=auth_failed' }),
       (req, res) => {
-        res.redirect('/');
+        console.log('Facebook OAuth callback successful, user authenticated:', req.user);
+        // Dynamic redirect to the same domain user logged in from
+        const protocol = req.secure ? 'https' : 'http';
+        const host = req.get('host');
+        const baseUrl = `${protocol}://${host}`;
+        console.log(`Redirecting to: ${baseUrl}`);
+        res.redirect(baseUrl);
       }
     );
   }
