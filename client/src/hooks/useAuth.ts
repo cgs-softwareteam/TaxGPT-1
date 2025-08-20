@@ -10,10 +10,7 @@ export function useAuth() {
     staleTime: 5 * 60 * 1000, // 5 minutes
   });
 
-  // Debug logging (remove after testing)
-  if (ENABLE_AUTHENTICATION) {
-    console.log('useAuth - Authentication enabled, user:', user, 'loading:', isLoading, 'error:', error);
-  }
+  // Authentication successfully configured
 
   return {
     user,
