@@ -51,7 +51,7 @@ export function setupPassport() {
 
   // Google OAuth Strategy
   if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
-    const callbackURL = process.env.NODE_ENV === 'production' 
+    const callbackURL = process.env.REPLIT_DOMAINS 
       ? `https://${process.env.REPLIT_DOMAINS}/auth/google/callback`
       : "http://localhost:5000/auth/google/callback";
     
@@ -200,7 +200,11 @@ export function setupAuthRoutes(app: Express) {
     app.get('/auth/google/callback',
       passport.authenticate('google', { failureRedirect: '/?error=auth_failed' }),
       (req, res) => {
-        res.redirect('/');
+        // Determine the correct base URL for redirect
+        const baseUrl = process.env.REPLIT_DOMAINS 
+          ? `https://${process.env.REPLIT_DOMAINS}`
+          : `http://localhost:5000`;
+        res.redirect(baseUrl);
       }
     );
   }
