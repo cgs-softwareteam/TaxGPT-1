@@ -173,6 +173,28 @@ Be thorough, technical, and provide the depth of analysis a CPA would deliver to
       }
     });
 
+    // Update user role (Admin only)
+    app.patch("/api/admin/users/:id/role", requireAdmin, async (req: any, res) => {
+      try {
+        const userId = parseInt(req.params.id);
+        const { role } = req.body;
+
+        if (!role || (role !== 'admin' && role !== 'user')) {
+          return res.status(400).json({ error: "Invalid role. Must be 'admin' or 'user'" });
+        }
+
+        const updatedUser = await storage.updateUserRole(userId, role);
+        if (!updatedUser) {
+          return res.status(404).json({ error: "User not found" });
+        }
+
+        res.json(updatedUser);
+      } catch (error) {
+        console.error("Failed to update user role:", error);
+        res.status(500).json({ error: "Failed to update user role" });
+      }
+    });
+
     // Get user's usage history
     app.get("/api/user/usage", requireAuth, async (req: any, res) => {
       try {

@@ -1,12 +1,15 @@
 import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Users, MessageSquare, DollarSign, TrendingUp, ArrowLeft } from "lucide-react";
 import { Link } from "wouter";
 import { useAuth } from "@/hooks/useAuth";
+import { apiRequest } from "@/lib/queryClient";
+import { useToast } from "@/hooks/use-toast";
 
 interface UsageStatistics {
   totalUsers: number;
@@ -45,6 +48,8 @@ interface AuthUser {
 export default function AdminDashboard() {
   const { user, isAuthenticated } = useAuth() as { user: AuthUser | undefined; isAuthenticated: boolean };
   const [currentPage, setCurrentPage] = useState(1);
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
 
   const { data: stats, isLoading: statsLoading } = useQuery<UsageStatistics>({
     queryKey: ["/api/admin/stats"],
@@ -55,6 +60,33 @@ export default function AdminDashboard() {
     queryKey: ["/api/admin/users", currentPage],
     enabled: isAuthenticated && user?.role === 'admin',
   });
+
+  const updateUserRoleMutation = useMutation({
+    mutationFn: async (data: { userId: number; role: string }) => {
+      const response = await apiRequest("PATCH", `/api/admin/users/${data.userId}/role`, { role: data.role });
+      return response.json();
+    },
+    onSuccess: (data, variables) => {
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/users"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/stats"] });
+      toast({
+        title: "Role Updated",
+        description: `User role changed to ${variables.role}`,
+      });
+    },
+    onError: (error) => {
+      toast({
+        title: "Error",
+        description: "Failed to update user role",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const handleRoleToggle = (userId: number, currentRole: string) => {
+    const newRole = currentRole === 'admin' ? 'user' : 'admin';
+    updateUserRoleMutation.mutate({ userId, role: newRole });
+  };
 
   if (!isAuthenticated || user?.role !== 'admin') {
     return (
@@ -215,23 +247,34 @@ export default function AdminDashboard() {
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
-                  {usersData.users.map((user) => (
-                    <div key={user.id} className="flex items-center justify-between p-4 border rounded" data-testid={`row-user-${user.id}`}>
+                  {usersData.users.map((userItem) => (
+                    <div key={userItem.id} className="flex items-center justify-between p-4 border rounded" data-testid={`row-user-${userItem.id}`}>
                       <div className="space-y-1">
-                        <div className="font-medium" data-testid={`text-user-name-${user.id}`}>{user.name}</div>
-                        <div className="text-sm text-muted-foreground" data-testid={`text-user-email-${user.id}`}>{user.email}</div>
+                        <div className="font-medium" data-testid={`text-user-name-${userItem.id}`}>{userItem.name}</div>
+                        <div className="text-sm text-muted-foreground" data-testid={`text-user-email-${userItem.id}`}>{userItem.email}</div>
                         <div className="text-xs text-muted-foreground">
-                          Joined: {new Date(user.createdAt).toLocaleDateString()}
+                          Joined: {new Date(userItem.createdAt).toLocaleDateString()}
                           {" | "}
-                          Last login: {new Date(user.lastLoginAt).toLocaleDateString()}
+                          Last login: {new Date(userItem.lastLoginAt).toLocaleDateString()}
                         </div>
                       </div>
-                      <Badge 
-                        variant={user.role === 'admin' ? 'destructive' : 'default'}
-                        data-testid={`badge-role-${user.id}`}
-                      >
-                        {user.role}
-                      </Badge>
+                      <div className="flex items-center gap-4">
+                        <Badge 
+                          variant={userItem.role === 'admin' ? 'destructive' : 'default'}
+                          data-testid={`badge-role-${userItem.id}`}
+                        >
+                          {userItem.role}
+                        </Badge>
+                        <div className="flex items-center gap-2">
+                          <span className="text-sm text-muted-foreground">Admin</span>
+                          <Switch
+                            checked={userItem.role === 'admin'}
+                            onCheckedChange={() => handleRoleToggle(userItem.id, userItem.role)}
+                            disabled={updateUserRoleMutation.isPending}
+                            data-testid={`switch-role-${userItem.id}`}
+                          />
+                        </div>
+                      </div>
                     </div>
                   ))}
                 </div>

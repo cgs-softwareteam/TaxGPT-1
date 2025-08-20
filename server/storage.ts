@@ -10,6 +10,7 @@ export interface IStorage {
   getUserByFacebookId(facebookId: string): Promise<User | undefined>;
   createUser(user: InsertUser): Promise<User>;
   updateUser(id: number, updates: Partial<User>): Promise<User>;
+  updateUserRole(id: number, role: string): Promise<User | undefined>;
   
   // Usage tracking
   createUsageLog(log: InsertUsageLog): Promise<UsageLog>;
@@ -140,6 +141,16 @@ export class MemStorage implements IStorage {
   async getUserCount(): Promise<number> {
     return this.users.size;
   }
+
+  async updateUserRole(id: number, role: string): Promise<User | undefined> {
+    const user = this.users.get(id);
+    if (!user) {
+      return undefined;
+    }
+    const updatedUser = { ...user, role };
+    this.users.set(id, updatedUser);
+    return updatedUser;
+  }
 }
 
 import { getDatabase } from "./db";
@@ -269,6 +280,15 @@ export class DrizzleStorage implements IStorage {
       .select({ count: count() })
       .from(users);
     return totalUsers;
+  }
+
+  async updateUserRole(id: number, role: string): Promise<User | undefined> {
+    const [user] = await this.db!
+      .update(users)
+      .set({ role })
+      .where(eq(users.id, id))
+      .returning();
+    return user || undefined;
   }
 }
 
