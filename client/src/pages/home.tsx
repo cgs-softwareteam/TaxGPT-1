@@ -28,8 +28,10 @@ export default function Home() {
   const queryClient = useQueryClient();
 
   const createConversationMutation = useMutation({
-    mutationFn: async (data: { title?: string; initialMessage?: string }) =>
-      apiRequest("/api/conversations", "POST", data),
+    mutationFn: async (data: { title?: string; initialMessage?: string }) => {
+      const response = await apiRequest("POST", "/api/conversations", data);
+      return response.json();
+    },
     onSuccess: (data: any) => {
       setCurrentConversationId(data.id);
       queryClient.invalidateQueries({ queryKey: ["/api/conversations"] });
@@ -37,8 +39,10 @@ export default function Home() {
   });
 
   const addMessageMutation = useMutation({
-    mutationFn: async (data: { conversationId: number; role: string; content: string; tokensUsed?: number; responseTimeMs?: number }) =>
-      apiRequest(`/api/conversations/${data.conversationId}/messages`, "POST", data),
+    mutationFn: async (data: { conversationId: number; role: string; content: string; tokensUsed?: number; responseTimeMs?: number }) => {
+      const response = await apiRequest("POST", `/api/conversations/${data.conversationId}/messages`, data);
+      return response.json();
+    },
   });
 
   const handleSubmit = async (message: string) => {
@@ -142,7 +146,8 @@ export default function Home() {
 
   const handleSelectConversation = async (conversationId: number) => {
     try {
-      const conversationData: any = await apiRequest(`/api/conversations/${conversationId}`);
+      const response = await apiRequest("GET", `/api/conversations/${conversationId}`);
+      const conversationData: any = await response.json();
       setCurrentConversationId(conversationId);
       
       const messages: Message[] = conversationData.messages.map((msg: any) => ({
