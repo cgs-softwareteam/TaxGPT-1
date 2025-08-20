@@ -40,7 +40,7 @@ export function setupSession(app: Express) {
       httpOnly: true,
       maxAge: 7 * 24 * 60 * 60 * 1000, // 1 week
       sameSite: 'lax', // Allow cross-site requests for OAuth
-      domain: process.env.REPLIT_DOMAINS ? `.${process.env.REPLIT_DOMAINS.split('.').slice(-2).join('.')}` : undefined,
+      // Remove domain restriction to fix session persistence
     },
   }));
 }
@@ -203,6 +203,8 @@ export function setupAuthRoutes(app: Express) {
       passport.authenticate('google', { failureRedirect: '/?error=auth_failed' }),
       (req, res) => {
         console.log('OAuth callback successful, user authenticated:', req.user);
+        console.log('OAuth callback - Session ID:', req.sessionID);
+        console.log('OAuth callback - Session:', req.session);
         // Determine the correct base URL for redirect
         const baseUrl = process.env.REPLIT_DOMAINS 
           ? `https://${process.env.REPLIT_DOMAINS}`
