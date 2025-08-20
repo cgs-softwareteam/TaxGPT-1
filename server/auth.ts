@@ -50,25 +50,13 @@ export function setupPassport() {
     return;
   }
 
-  // Google OAuth Strategy
+  // Google OAuth Strategy with production-ready dynamic callback
   if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
-    // We need to create multiple strategies for different domains since Google requires absolute URLs
-    const domains = [
-      'localhost:5000',
-      'tax-gpt-1-pinoaisales.replit.app',
-      'tax-gpt.pino-dev.work'
-    ];
-
-    domains.forEach((domain, index) => {
-      const protocol = domain.includes('localhost') ? 'http' : 'https';
-      const callbackURL = `${protocol}://${domain}/auth/google/callback`;
-      const strategyName = index === 0 ? 'google' : `google-${domain}`;
-      
-      passport.use(strategyName, new GoogleStrategy({
-        clientID: process.env.GOOGLE_CLIENT_ID,
-        clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-        callbackURL: callbackURL
-      }, async (accessToken, refreshToken, profile, done) => {
+    passport.use(new GoogleStrategy({
+      clientID: process.env.GOOGLE_CLIENT_ID,
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+      callbackURL: "/auth/google/callback"
+    }, async (accessToken, refreshToken, profile, done) => {
       try {
         // Check if user exists by Google ID
         let user = await storage.getUserByGoogleId(profile.id);
