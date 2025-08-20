@@ -58,6 +58,14 @@ export default function AdminDashboard() {
 
   const { data: usersData, isLoading: usersLoading } = useQuery<UsersResponse>({
     queryKey: ["/api/admin/users", currentPage],
+    queryFn: () => 
+      fetch(`/api/admin/users?page=${currentPage}`, {
+        credentials: 'include'
+      })
+        .then(res => {
+          if (!res.ok) throw new Error(`HTTP ${res.status}`);
+          return res.json();
+        }),
     enabled: isAuthenticated && user?.role === 'admin',
   });
 
