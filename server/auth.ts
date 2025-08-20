@@ -36,10 +36,11 @@ export function setupSession(app: Express) {
     saveUninitialized: false,
     store: sessionStore,
     cookie: {
-      secure: process.env.REPLIT_DOMAINS ? true : false, // Use HTTPS for Replit domain
+      secure: false, // Temporarily disable for debugging
       httpOnly: true,
       maxAge: 7 * 24 * 60 * 60 * 1000, // 1 week
       sameSite: 'lax', // Allow cross-site requests for OAuth
+      domain: process.env.REPLIT_DOMAINS ? `.${process.env.REPLIT_DOMAINS.split('.').slice(-2).join('.')}` : undefined,
     },
   }));
 }
@@ -237,6 +238,11 @@ export function setupAuthRoutes(app: Express) {
 
   // Current user route
   app.get('/auth/user', (req, res) => {
+    console.log('Auth check - Session ID:', req.sessionID);
+    console.log('Auth check - Session:', req.session);
+    console.log('Auth check - Is authenticated:', req.isAuthenticated());
+    console.log('Auth check - User:', req.user);
+    
     if (req.isAuthenticated()) {
       res.json(req.user);
     } else {
