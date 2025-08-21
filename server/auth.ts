@@ -53,19 +53,14 @@ export function setupPassport() {
 
   console.log('🔐 Initializing authentication system...');
 
-  // Google OAuth Strategy with environment-based absolute callback URL
+  // Google OAuth Strategy with dynamic callback URL  
   if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
-    const appDomain = process.env.APP_DOMAIN || 'http://localhost:5000';
-    const callbackURL = `${appDomain}/auth/google/callback`;
-    
-    console.log(`🔧 Google OAuth Configuration:`);
-    console.log(`   APP_DOMAIN: ${appDomain}`);
-    console.log(`   Callback URL: ${callbackURL}`);
+    console.log(`🔧 Setting up Google OAuth Strategy with relative callback`);
     
     passport.use(new GoogleStrategy({
       clientID: process.env.GOOGLE_CLIENT_ID,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-      callbackURL: callbackURL
+      callbackURL: "/auth/google/callback"  // Use relative URL - Passport will construct absolute URL from request
     }, async (accessToken, refreshToken, profile, done) => {
       try {
         console.log('\n🔐 Google OAuth Strategy callback executing');
@@ -120,6 +115,7 @@ export function setupPassport() {
         return done(error, undefined);
       }
     }));
+  }
   }
 
   // Facebook OAuth Strategy
@@ -194,7 +190,6 @@ export function setupPassport() {
       done(error, null);
     }
   });
-}
 
 // Authentication middleware
 export function requireAuth(req: any, res: any, next: any) {
@@ -250,10 +245,13 @@ export function setupAuthRoutes(app: Express) {
       console.log(`   Callback URL: ${req.protocol}://${req.get('host')}${req.originalUrl}`);
       console.log(`   Query params: ${JSON.stringify(req.query)}`);
       console.log(`   Session ID: ${req.sessionID}`);
+      console.log(`   Expected callback domain: ${process.env.APP_DOMAIN || 'http://localhost:5000'}`);
+      console.log(`   Actual request domain: ${req.protocol}://${req.get('host')}`);
       
       if (req.query.error) {
         console.log(`❌ OAuth Error: ${req.query.error}`);
         console.log(`   Error description: ${req.query.error_description}`);
+        return res.redirect('/?error=oauth_error&details=' + encodeURIComponent(req.query.error_description || req.query.error));
       }
       next();
     }, passport.authenticate('google', { 
