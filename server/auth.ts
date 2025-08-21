@@ -304,11 +304,19 @@ export function setupAuthRoutes(app: Express) {
     });
   });
 
-  // Current user route
+  // Current user route  
   app.get('/auth/user', (req, res) => {
+    console.log('\n🔍 Auth check request received');
+    console.log(`   Session ID: ${req.sessionID}`);
+    console.log(`   Is Authenticated: ${req.isAuthenticated()}`);
+    console.log(`   Session: ${JSON.stringify(req.session, null, 2)}`);
+    console.log(`   User: ${JSON.stringify(req.user, null, 2)}`);
+    
     if (req.isAuthenticated()) {
+      console.log(`   ✅ User authenticated, returning user data`);
       res.json(req.user);
     } else {
+      console.log(`   ❌ User not authenticated`);
       res.status(401).json({ error: 'Not authenticated' });
     }
   });
