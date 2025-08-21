@@ -47,48 +47,34 @@ export function setupSession(app: Express) {
 // Passport configuration
 export function setupPassport() {
   if (!ENABLE_AUTHENTICATION) {
-    console.log('⚠️  Authentication is DISABLED');
     return;
   }
 
-  console.log('🔐 Initializing authentication system...');
-
-  // Google OAuth Strategy with dynamic callback URL  
+  // Google OAuth Strategy
   if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
-    console.log(`🔧 Setting up Google OAuth Strategy with relative callback`);
+    // Dynamic callback URL - will be set per request
+    const callbackURL = "/auth/google/callback";
     
     passport.use(new GoogleStrategy({
       clientID: process.env.GOOGLE_CLIENT_ID,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-      callbackURL: "/auth/google/callback"  // Use relative URL - Passport will construct absolute URL from request
+      callbackURL: callbackURL
     }, async (accessToken, refreshToken, profile, done) => {
       try {
-        console.log('\n🔐 Google OAuth Strategy callback executing');
-        console.log(`   Profile ID: ${profile.id}`);
-        console.log(`   Profile Email: ${profile.emails?.[0]?.value}`);
-        console.log(`   Profile Name: ${profile.displayName}`);
-        console.log(`   Access Token: ${accessToken ? 'Present' : 'Missing'}`);
-        
         // Check if user exists by Google ID
-        console.log(`   Checking for existing user with Google ID: ${profile.id}`);
         let user = await storage.getUserByGoogleId(profile.id);
         
         if (!user) {
-          console.log(`   ✗ No existing user found with Google ID`);
           // Check if user exists by email
           const email = profile.emails?.[0]?.value;
           if (email) {
-            console.log(`   Checking for existing user with email: ${email}`);
             user = await storage.getUserByEmail(email);
           }
           
           if (user) {
-            console.log(`   ✓ Found existing user by email, linking Google account`);
             // Link Google account to existing user
             user = await storage.updateUser(user.id, { googleId: profile.id });
-            console.log(`   ✓ Google account linked to existing user: ${user.id}`);
           } else {
-            console.log(`   Creating new user account`);
             // Create new user
             user = await storage.createUser({
               googleId: profile.id,
@@ -97,40 +83,25 @@ export function setupPassport() {
               profilePicture: profile.photos?.[0]?.value || null,
               role: 'user',
             });
-            console.log(`   ✓ New user created: ${user.id}`);
           }
         } else {
-          console.log(`   ✓ Found existing user: ${user.id}`);
           // Update last login time
           user = await storage.updateUser(user.id, { lastLoginAt: new Date() });
-          console.log(`   ✓ Updated last login time for user: ${user.id}`);
         }
         
-        console.log(`   🎯 Authentication successful, returning user: ${user.id}`);
         return done(null, user);
       } catch (error) {
-        console.error('\n❌ Error in Google OAuth Strategy:');
-        console.error(`   Error: ${error}`);
-        console.error(`   Stack: ${error instanceof Error ? error.stack : 'No stack trace'}`);
         return done(error, undefined);
       }
     }));
   }
-  }
 
   // Facebook OAuth Strategy
   if (process.env.FACEBOOK_APP_ID && process.env.FACEBOOK_APP_SECRET) {
-    const appDomain = process.env.APP_DOMAIN || 'http://localhost:5000';
-    const facebookCallbackURL = `${appDomain}/auth/facebook/callback`;
-    
-    console.log(`🔧 Facebook OAuth Configuration:`);
-    console.log(`   APP_DOMAIN: ${appDomain}`);
-    console.log(`   Callback URL: ${facebookCallbackURL}`);
-    
     passport.use(new FacebookStrategy({
       clientID: process.env.FACEBOOK_APP_ID,
       clientSecret: process.env.FACEBOOK_APP_SECRET,
-      callbackURL: facebookCallbackURL,
+      callbackURL: "/auth/facebook/callback",
       profileFields: ['id', 'displayName', 'photos', 'email']
     }, async (accessToken, refreshToken, profile, done) => {
       try {
@@ -171,25 +142,18 @@ export function setupPassport() {
 
   // Serialize/deserialize user for session
   passport.serializeUser((user: any, done) => {
-    console.log(`📦 Serializing user to session: ${user.id}`);
     done(null, user.id);
   });
 
   passport.deserializeUser(async (id: number, done) => {
     try {
-      console.log(`📦 Deserializing user from session: ${id}`);
       const user = await storage.getUser(id);
-      if (user) {
-        console.log(`✅ User found in database: ${user.name}`);
-      } else {
-        console.log(`❌ User not found in database for ID: ${id}`);
-      }
       done(null, user);
     } catch (error) {
-      console.error(`❌ Error deserializing user: ${error}`);
       done(error, null);
     }
   });
+}
 
 // Authentication middleware
 export function requireAuth(req: any, res: any, next: any) {
@@ -220,11 +184,8 @@ export function requireAdmin(req: any, res: any, next: any) {
 // Setup authentication routes
 export function setupAuthRoutes(app: Express) {
   if (!ENABLE_AUTHENTICATION) {
-    console.log('⚠️  Authentication routes DISABLED');
     return;
   }
-
-  console.log('🛣️  Setting up authentication routes...');
 
   // Initialize passport
   app.use(passport.initialize());
@@ -232,44 +193,22 @@ export function setupAuthRoutes(app: Express) {
 
   // Google OAuth routes
   if (process.env.GOOGLE_CLIENT_ID) {
-    app.get('/auth/google', (req, res, next) => {
-      console.log('\n🚀 Starting Google OAuth login process');
-      console.log(`   Request URL: ${req.protocol}://${req.get('host')}${req.originalUrl}`);
-      console.log(`   User Agent: ${req.get('User-Agent')}`);
-      console.log(`   Referer: ${req.get('Referer')}`);
-      next();
-    }, passport.authenticate('google', { scope: ['profile', 'email'] }));
+    app.get('/auth/google',
+      passport.authenticate('google', { scope: ['profile', 'email'] })
+    );
 
-    app.get('/auth/google/callback', (req, res, next) => {
-      console.log('\n📥 Google OAuth callback received');
-      console.log(`   Callback URL: ${req.protocol}://${req.get('host')}${req.originalUrl}`);
-      console.log(`   Query params: ${JSON.stringify(req.query)}`);
-      console.log(`   Session ID: ${req.sessionID}`);
-      console.log(`   Expected callback domain: ${process.env.APP_DOMAIN || 'http://localhost:5000'}`);
-      console.log(`   Actual request domain: ${req.protocol}://${req.get('host')}`);
-      
-      if (req.query.error) {
-        console.log(`❌ OAuth Error: ${req.query.error}`);
-        console.log(`   Error description: ${req.query.error_description}`);
-        return res.redirect('/?error=oauth_error&details=' + encodeURIComponent(req.query.error_description || req.query.error));
+    app.get('/auth/google/callback',
+      passport.authenticate('google', { failureRedirect: '/?error=auth_failed' }),
+      (req, res) => {
+        console.log('OAuth callback successful, user authenticated:', req.user);
+        // Dynamic redirect to the same domain user logged in from
+        const protocol = req.secure ? 'https' : 'http';
+        const host = req.get('host');
+        const baseUrl = `${protocol}://${host}`;
+        console.log(`Redirecting to: ${baseUrl}`);
+        res.redirect(baseUrl);
       }
-      next();
-    }, passport.authenticate('google', { 
-      failureRedirect: '/?error=auth_failed',
-      failureFlash: false 
-    }), (req, res) => {
-      console.log('\n✅ OAuth callback successful!');
-      console.log(`   User authenticated: ${JSON.stringify(req.user, null, 2)}`);
-      console.log(`   Session authenticated: ${req.isAuthenticated()}`);
-      
-      // Dynamic redirect to the same domain user logged in from
-      const protocol = req.secure ? 'https' : 'http';
-      const host = req.get('host');
-      const baseUrl = `${protocol}://${host}`;
-      console.log(`   Redirecting to: ${baseUrl}`);
-      
-      res.redirect(baseUrl);
-    });
+    );
   }
 
   // Facebook OAuth routes
@@ -302,19 +241,11 @@ export function setupAuthRoutes(app: Express) {
     });
   });
 
-  // Current user route  
+  // Current user route
   app.get('/auth/user', (req, res) => {
-    console.log('\n🔍 Auth check request received');
-    console.log(`   Session ID: ${req.sessionID}`);
-    console.log(`   Is Authenticated: ${req.isAuthenticated()}`);
-    console.log(`   Session: ${JSON.stringify(req.session, null, 2)}`);
-    console.log(`   User: ${JSON.stringify(req.user, null, 2)}`);
-    
     if (req.isAuthenticated()) {
-      console.log(`   ✅ User authenticated, returning user data`);
       res.json(req.user);
     } else {
-      console.log(`   ❌ User not authenticated`);
       res.status(401).json({ error: 'Not authenticated' });
     }
   });
