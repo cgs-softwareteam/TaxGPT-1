@@ -50,12 +50,19 @@ export function setupPassport() {
     return;
   }
 
-  // Google OAuth Strategy with production-ready dynamic callback
+  // Google OAuth Strategy with environment-based absolute callback URL
   if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
+    const appDomain = process.env.APP_DOMAIN || 'http://localhost:5000';
+    const callbackURL = `${appDomain}/auth/google/callback`;
+    
+    console.log(`🔧 Google OAuth Configuration:`);
+    console.log(`   APP_DOMAIN: ${appDomain}`);
+    console.log(`   Callback URL: ${callbackURL}`);
+    
     passport.use(new GoogleStrategy({
       clientID: process.env.GOOGLE_CLIENT_ID,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-      callbackURL: "/auth/google/callback"
+      callbackURL: callbackURL
     }, async (accessToken, refreshToken, profile, done) => {
       try {
         // Check if user exists by Google ID
@@ -95,10 +102,17 @@ export function setupPassport() {
 
   // Facebook OAuth Strategy
   if (process.env.FACEBOOK_APP_ID && process.env.FACEBOOK_APP_SECRET) {
+    const appDomain = process.env.APP_DOMAIN || 'http://localhost:5000';
+    const facebookCallbackURL = `${appDomain}/auth/facebook/callback`;
+    
+    console.log(`🔧 Facebook OAuth Configuration:`);
+    console.log(`   APP_DOMAIN: ${appDomain}`);
+    console.log(`   Callback URL: ${facebookCallbackURL}`);
+    
     passport.use(new FacebookStrategy({
       clientID: process.env.FACEBOOK_APP_ID,
       clientSecret: process.env.FACEBOOK_APP_SECRET,
-      callbackURL: "/auth/facebook/callback",
+      callbackURL: facebookCallbackURL,
       profileFields: ['id', 'displayName', 'photos', 'email']
     }, async (accessToken, refreshToken, profile, done) => {
       try {
