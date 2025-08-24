@@ -1,0 +1,80 @@
+I need you to perform a comparative analysis of two proposed implementation plans for the Google OAuth callback handler in server/auth.ts. Your task is to evaluate both proposals based on correctness, code quality, and adherence to standard Passport.js practices.
+Proposal A (Original Plan)
+code
+TypeScript
+app.get('/auth/google/callback',
+  passport.authenticate('google', { session: false }),
+  (req, res, next) => {
+    const { error, user } = req.authInfo || {};
+    
+    // Handle system errors (database failures, etc.)
+    if (error) {
+      console.error('Google OAuth callback system error:', error);
+      const baseUrl = process.env.REPLIT_DOMAINS 
+        ? `https://${process.env.REPLIT_DOMAINS}`
+        : `http://localhost:5000`;
+      return res.redirect(`${baseUrl}/?error=system_error`);
+    }
+    
+    // Handle authentication failures
+    if (!user) {
+      const baseUrl = process.env.REPLIT_DOMAINS 
+        ? `https://${process.env.REPLIT_DOMAINS}`
+        : `http://localhost:5000`;
+      return res.redirect(`${baseUrl}/?error=auth_failed`);
+    }
+    
+    // Handle successful authentication
+    req.logIn(user, (err) => {
+      if (err) {
+        console.error('Session establishment error:', err);
+        const baseUrl = process.env.REPLIT_DOMAINS 
+          ? `https://${process.env.REPLIT_DOMAINS}`
+          : `http://localhost:5000`;
+        return res.redirect(`${baseUrl}/?error=session_error`);
+      }
+      
+      console.log('OAuth callback successful, user authenticated:', req.user);
+      const baseUrl = process.env.REPLIT_DOMAINS 
+        ? `https://${process.env.REPLIT_DOMAINS}`
+        : `http://localhost:5000`;
+      res.redirect(baseUrl);
+    });
+  }
+);
+Proposal B (Refined Plan)
+code
+TypeScript
+app.get('/auth/google/callback', (req, res, next) => {
+  const baseUrl = process.env.REPLIT_DOMAINS
+    ? `https://${process.env.REPLIT_DOMAINS}`
+    : `http://localhost:5000`;
+
+  passport.authenticate('google', (err: any, user: any, info: any) => {
+    if (err) {
+      console.error("Authentication system error:", err);
+      return res.redirect(`${baseUrl}/?error=internal_failure`);
+    }
+
+    if (!user) {
+      return res.redirect(`${baseUrl}/?error=auth_failed`);
+    }
+
+    req.logIn(user, (loginErr) => {
+      if (loginErr) {
+        console.error("Session login error:", loginErr);
+        return res.redirect(`${baseUrl}/?error=session_failure`);
+      }
+      
+      console.log('OAuth callback successful, user authenticated:', user.email);
+      return res.redirect(baseUrl);
+    });
+  })(req, res, next);
+});
+Analysis Required
+Please answer the following questions to compare the two proposals:
+Functional Equivalence: Do both proposals correctly solve the user experience problem?
+Code Duplication (DRY Principle): Compare how each proposal calculates the baseUrl. Which proposal is more efficient and maintainable in this regard?
+Passport.js Pattern: Compare the two methods of invoking Passport's custom logic. Proposal A uses a middleware chain. Proposal B uses a custom callback function provided directly to passport.authenticate. Which is the more standard, idiomatic, and documented pattern for this task in Passport.js?
+Error Handling Correctness: In Proposal A, the error and user are accessed from req.authInfo. Is this a reliable way to get this data, or is the direct callback signature (err, user, info) in Proposal B more robust?
+Recommendation: Based on your analysis, which proposal (A or B) do you recommend for implementation, and why?
