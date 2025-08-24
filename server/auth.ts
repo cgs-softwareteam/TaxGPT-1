@@ -17,7 +17,12 @@ export function setupSession(app: Express) {
     return;
   }
 
-  const sessionSecret = process.env.SESSION_SECRET || 'dev-secret-change-in-production';
+  const sessionSecret = process.env.SESSION_SECRET;
+
+  if (!sessionSecret) {
+    console.error("FATAL ERROR: SESSION_SECRET environment variable is not set.");
+    process.exit(1);
+  }
   
   let sessionStore;
   if (ENABLE_DATABASE_STORAGE && process.env.DATABASE_URL) {
