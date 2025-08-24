@@ -203,17 +203,35 @@ export function setupAuthRoutes(app: Express) {
       passport.authenticate('google', { scope: ['profile', 'email'] })
     );
 
-    app.get('/auth/google/callback',
-      passport.authenticate('google', { failureRedirect: '/?error=auth_failed' }),
-      (req, res) => {
-        console.log('OAuth callback successful, user authenticated:', req.user);
-        // Determine the correct base URL for redirect
-        const baseUrl = process.env.REPLIT_DOMAINS 
-          ? `https://${process.env.REPLIT_DOMAINS}`
-          : `http://localhost:5000`;
-        res.redirect(baseUrl);
-      }
-    );
+    app.get('/auth/google/callback', (req, res, next) => {
+      const baseUrl = process.env.REPLIT_DOMAINS
+        ? `https://${process.env.REPLIT_DOMAINS}`
+        : `http://localhost:5000`;
+
+      passport.authenticate('google', (err: any, user: any, info: any) => {
+        // Case 1: A system error occurred (e.g., database failure).
+        if (err) {
+          console.error("Authentication system error:", err);
+          return res.redirect(`${baseUrl}/?error=internal_failure`);
+        }
+
+        // Case 2: Authentication failed (e.g., user denied permission).
+        if (!user) {
+          return res.redirect(`${baseUrl}/?error=auth_failed`);
+        }
+
+        // Case 3: Success. Manually log the user in.
+        req.logIn(user, (loginErr) => {
+          if (loginErr) {
+            console.error("Session login error:", loginErr);
+            return res.redirect(`${baseUrl}/?error=session_failure`);
+          }
+          
+          console.log('OAuth callback successful, user authenticated:', user.email);
+          return res.redirect(baseUrl);
+        });
+      })(req, res, next);
+    });
   }
 
   // Facebook OAuth routes
