@@ -1,0 +1,47 @@
+I need you to perform a final review of a proposed code change for the Facebook OAuth callback handler. The goal is to ensure the proposal is correct and consistent with our previous fix for the Google login.
+Context: Current State
+Your last investigation confirmed that the Facebook callback handler in server/auth.ts has a user experience flaw where database errors result in a raw JSON response. Here is the current code:
+code
+TypeScript
+app.get('/auth/facebook/callback',
+  passport.authenticate('facebook', { failureRedirect: '/?error=auth_failed' }),
+  (req, res) => {
+    res.redirect('/');
+  }
+);
+Proposed Solution
+Below is the proposed replacement code, which is intended to mirror the "Proposal B" pattern we successfully used for the Google login.
+code
+TypeScript
+app.get('/auth/facebook/callback', (req, res, next) => {
+  const baseUrl = process.env.REPLIT_DOMAINS
+    ? `https://${process.env.REPLIT_DOMAINS}`
+    : `http://localhost:5000`;
+
+  passport.authenticate('facebook', (err: any, user: any, info: any) => {
+    if (err) {
+      console.error("Facebook Authentication system error:", err);
+      return res.redirect(`${baseUrl}/?error=internal_failure`);
+    }
+
+    if (!user) {
+      return res.redirect(`${baseUrl}/?error=auth_failed`);
+    }
+
+    req.logIn(user, (loginErr) => {
+      if (loginErr) {
+        console.error("Facebook Session login error:", loginErr);
+        return res.redirect(`${baseUrl}/?error=session_failure`);
+      }
+      
+      console.log('Facebook OAuth callback successful, user authenticated:', user.email);
+      return res.redirect(baseUrl);
+    });
+  })(req, res, next);
+});
+Review and Validation Required
+Please answer the following specific questions:
+Architectural Consistency: Does the proposed solution for Facebook correctly and consistently apply the same "Proposal B" pattern (custom Passport callback, DRY principle for baseUrl, robust error handling) that we previously implemented for Google?
+Correctness: Will this proposed code successfully solve the user experience problem for the Facebook login, ensuring users are redirected to a friendly error page instead of seeing a JSON response?
+Improvement Analysis: The original code used res.redirect('/'). The proposed code uses res.redirect(baseUrl). Is this a beneficial change? Explain why.
+Final Recommendation: Based on your analysis, do you recommend this proposed solution for implementation? Are there any potential negative side effects or required modifications?
