@@ -6,6 +6,27 @@ import { setupSession, setupPassport, setupAuthRoutes } from "./auth";
 import { initializeDatabase } from "./db";
 
 const app = express();
+
+// --- START: HTTPS REDIRECT MIDDLEWARE ---
+if (process.env.NODE_ENV === 'production') {
+  // Configure Express to trust the first proxy hop, which is standard for Replit.
+  app.set('trust proxy', 1);
+  
+  app.use((req: Request, res: Response, next: NextFunction) => {
+    // Use Express's built-in `req.secure` property, which is now reliable
+    // due to the 'trust proxy' setting.
+    if (!req.secure) {
+      // If the request is not secure, redirect to the HTTPS version of the same URL.
+      const httpsUrl = `https://${req.get('host')}${req.originalUrl}`;
+      return res.redirect(301, httpsUrl);
+    }
+    
+    // If the request is already secure, proceed to the next middleware.
+    next();
+  });
+}
+// --- END: HTTPS REDIRECT MIDDLEWARE ---
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
