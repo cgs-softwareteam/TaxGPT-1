@@ -36,7 +36,7 @@ export function ConversationSidebar({
 
   const { data: conversations = [], isLoading } = useQuery<Conversation[]>({
     queryKey: ["/api/conversations"],
-    staleTime: 30000, // 30 seconds
+    staleTime: 0, // Ensures the sidebar always has the freshest data after an invalidation.
   });
 
   // DISABLED: Out-of-scope edit functionality
