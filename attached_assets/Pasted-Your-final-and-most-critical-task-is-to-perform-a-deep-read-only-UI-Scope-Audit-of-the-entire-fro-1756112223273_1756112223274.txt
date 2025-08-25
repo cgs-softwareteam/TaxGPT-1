@@ -1,0 +1,26 @@
+Your final and most critical task is to perform a deep, read-only "UI Scope Audit" of the entire frontend. Your mission is to identify every single visible, interactive feature and classify it: is it part of the original functionality or the "Core Foundation" contract, or does it represent un-scoped, future work that requires significant development?
+You must investigate the following key components and report on every interactive element you find.
+1. Deep Audit of the Main Page (client/src/pages/home.tsx)
+Action: Analyze the top-level page component.
+Evidence: Look for any navigation links, buttons, or menus outside of the main chat interface itself. I have a specific concern about a "Saved Plans" link seen in a previous audit.
+Analysis: If you find "Saved Plans" or similar links, determine what they do. Do they link to a functional page or a placeholder? Classify this as "In-Scope" or "Out-of-Scope."
+2. Deep Audit of the Conversation Sidebar (client/src/components/ConversationSidebar.tsx)
+Action: Scrutinize every button and interaction in this component.
+Evidence & Classification:
+New Conversation Button: Classify its scope.
+Conversation List Items (Click to Load): Classify its scope.
+Edit/Rename Button & UI: We know this is out of scope. Confirm and document.
+Delete Conversation Button: Is deleting a conversation a simple UI action, or does it require complex backend logic? Classify its scope.
+3. Deep Audit of the Export/Action Buttons (client/src/components/ExportButtons.tsx)
+Action: The "Core Foundation" contract only specified "Copy to Clipboard." You must analyze every other button in this component.
+Evidence & Classification: For each button below, describe its implementation. Is it a simple frontend action (like a mailto: link) or does it imply a complex backend feature?
+"Save" Button: What does this do? Does it save to a user's "Saved Plans"? If so, this is a major un-scoped feature.
+"PDF Export" Button: How is the PDF generated? Does it use a simple client-side library or does it require a server-side rendering engine?
+"Email Share" Button: Is this a simple mailto: link or does it use a backend email service like SendGrid (which we saw an API key for in a previous audit)? A backend service implies a significant feature.
+4. Final Actionable Report
+Based on your deep audit, create a definitive report with two lists:
+List A: "Approved for Deployment"
+Every UI feature that is 100% complete and falls within the original scope or the "Core Foundation" contract.
+List B: "Out-of-Scope Features - MUST BE DISABLED"
+Every UI feature that represents scope creep or future work.
+For each item on this list, provide a precise, actionable plan to comment it out or disable it in the JSX, including the file name and approximate line numbers.
