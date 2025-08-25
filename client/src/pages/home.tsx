@@ -36,6 +36,13 @@ export default function Home() {
       setCurrentConversationId(data.id);
       queryClient.invalidateQueries({ queryKey: ["/api/conversations"] });
     },
+    onError: (error: Error) => {
+      toast({
+        title: "Failed to Create Conversation",
+        description: `Unable to create new conversation: ${error.message}`,
+        variant: "destructive",
+      });
+    },
   });
 
   const addMessageMutation = useMutation({
@@ -61,11 +68,18 @@ export default function Home() {
       // Create conversation if authenticated and none exists
       let conversationId = currentConversationId;
       if (authEnabled && isAuthenticated && !conversationId) {
-        const newConv = await createConversationMutation.mutateAsync({
-          title: `Chat ${new Date().toLocaleDateString()}`,
-          initialMessage: message,
-        });
-        conversationId = newConv.id;
+        try {
+          const newConv = await createConversationMutation.mutateAsync({
+            title: `Chat ${new Date().toLocaleDateString()}`,
+            initialMessage: message,
+          });
+          conversationId = newConv.id;
+        } catch (error) {
+          // Conversation creation failed, continue without persisting to database
+          // The onError handler will show the specific error message
+          console.warn("Conversation creation failed:", error);
+          conversationId = null; // Ensure we don't try to save messages
+        }
       }
 
       const startTime = Date.now();
