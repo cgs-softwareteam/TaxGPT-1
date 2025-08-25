@@ -240,12 +240,37 @@ export function setupAuthRoutes(app: Express) {
       passport.authenticate('facebook', { scope: ['email'] })
     );
 
-    app.get('/auth/facebook/callback',
-      passport.authenticate('facebook', { failureRedirect: '/?error=auth_failed' }),
-      (req, res) => {
-        res.redirect('/');
-      }
-    );
+    app.get('/auth/facebook/callback', (req, res, next) => {
+      // Use the same robust baseUrl calculation for consistency.
+      const baseUrl = process.env.REPLIT_DOMAINS
+        ? `https://${process.env.REPLIT_DOMAINS}`
+        : `http://localhost:5000`;
+
+      passport.authenticate('facebook', (err: any, user: any, info: any) => {
+        // Case 1: A system error occurred (e.g., database failure).
+        if (err) {
+          console.error("Facebook Authentication system error:", err);
+          return res.redirect(`${baseUrl}/?error=internal_failure`);
+        }
+
+        // Case 2: Authentication failed (e.g., user denied permission).
+        if (!user) {
+          return res.redirect(`${baseUrl}/?error=auth_failed`);
+        }
+
+        // Case 3: Success. Manually log the user in.
+        req.logIn(user, (loginErr) => {
+          if (loginErr) {
+            console.error("Facebook Session login error:", loginErr);
+            return res.redirect(`${baseUrl}/?error=session_failure`);
+          }
+          
+          console.log('Facebook OAuth callback successful, user authenticated:', user.email);
+          // Redirect to the dynamic base URL, an improvement over the original hardcoded '/'.
+          return res.redirect(baseUrl);
+        });
+      })(req, res, next);
+    });
   }
 
   // Logout route
