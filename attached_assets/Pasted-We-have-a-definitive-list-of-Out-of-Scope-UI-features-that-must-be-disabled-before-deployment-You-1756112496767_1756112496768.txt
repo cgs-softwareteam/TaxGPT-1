@@ -1,0 +1,20 @@
+We have a definitive list of "Out-of-Scope" UI features that must be disabled before deployment. Your final task is to perform a deep "Dependency and Impact Analysis" to guarantee that the plan to disable them is safe and will not break any core, in-scope functionality.
+For each of the "MUST BE DISABLED" features identified in the previous audit, you will perform the following analysis:
+1. Impact Analysis: Disabling the "Saved Plans" System
+Target File 1: client/src/pages/home.tsx
+Action: Analyze the proposal to comment out the <Link href="/saved-plans"> block (lines 205-210).
+Safety Check: Is this component self-contained? Does any other part of home.tsx depend on it? State if this removal is SAFE.
+Target File 2: client/src/components/ChatInterface.tsx
+Action: Analyze the proposal to remove the <SaveButton /> component (lines 115-119).
+Safety Check: Show the import statement for SaveButton. Confirm that removing both the import and the JSX usage will not affect any other element in the ChatInterface. State if this removal is SAFE.
+2. Impact Analysis: Disabling Advanced Export Buttons
+Target File: client/src/components/ExportButtons.tsx
+Action: Analyze the proposal to comment out the "PDF Export" and "Email Share" button blocks, leaving only the "Copy to Clipboard" button.
+Safety Check: Examine the component's structure. Are these three buttons independent siblings in the JSX? Will removing two of them affect the layout or functionality of the remaining "Copy" button? State if this removal is SAFE.
+3. Impact Analysis: Disabling Conversation Management Buttons
+Target File: client/src/components/ConversationSidebar.tsx
+Action: Analyze the proposal to comment out the "Edit/Rename" and "Delete" button blocks. This is the most complex component, so be thorough.
+Safety Check ("Edit"): Confirm that all edit-related state (isEditing, etc.) and handlers (handleEditClick, etc.) are only used by the "Edit" button and its UI. Confirm that removing them will not affect the core logic of selecting and loading a conversation. State if this removal is SAFE.
+Safety Check ("Delete"): The "Delete" button is next to the "Edit" button. Confirm that its onClick handler and associated logic are self-contained and not entangled with the primary onClick of the conversation item itself (which is used to load the chat). State if this removal is SAFE.
+Final Verdict
+Conclude with a definitive statement. For each proposed removal action, provide a "Safety Confirmation" (SAFE or UNSAFE). If any action is deemed unsafe, you must provide a revised, safe plan for disabling that feature. Provide a final "Go / No-Go" recommendation for proceeding with the disabling plan.
