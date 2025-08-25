@@ -1,0 +1,15 @@
+We have a plan to hide the incomplete "Conversation Titles" feature by removing the title field from the /api/conversations API response. Before we implement this backend change, we must perform a critical follow-up investigation on the frontend to ensure this change is safe and that no other incomplete features are visually exposed to the client.
+Your task is to conduct a "Client-Facing UI Audit."
+1. Assess the Impact of Hiding conversation.title:
+Action: Search the entire client/src directory for any and all usages of the property conversation.title.
+Evidence: Display every line of code where conversation.title is referenced in the frontend components.
+Analysis: Based on the code, answer this critical question: If the title property becomes undefined in the API response, will the frontend crash (e.g., from conversation.title.toUpperCase()) or will it fail gracefully (e.g., due to optional chaining conversation.title? or a fallback conversation.title || 'New Conversation')?
+2. Search for Incomplete "Conversation Search" UI:
+Action: Review the React components responsible for the main UI, specifically ConversationSidebar.tsx and ChatInterface.tsx.
+Evidence: Look for any UI elements that appear to be for "search" functionality (e.g., <input type="search" ...>, a search icon button, etc.).
+Analysis: State definitively whether a non-functional search bar or button is currently visible to the user.
+3. Final Visual Sweep of All Interactive Elements:
+Action: In the same primary UI components (ConversationSidebar.tsx, ChatInterface.tsx, ExportButtons.tsx), create a checklist of all visible, interactive UI elements (buttons, links, menus).
+Analysis: For each UI element on the checklist, confirm that it corresponds to a feature that was completed in the "Core Foundation" contract. Note any elements that seem out of place or do not map to a completed feature.
+Final Recommendation
+Conclude with a final recommendation on whether it is safe to proceed with the backend modification. If the frontend is not safe, specify the exact frontend code changes required to make it safe.
