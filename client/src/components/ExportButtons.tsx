@@ -160,7 +160,7 @@ export function ExportButtons({ messageId, content, className }: ExportButtonsPr
         )}
       </Button>
 
-      {/* Export PDF */}
+      {/* DISABLED: Out-of-scope PDF Export feature
       <Button
         variant="outline"
         size="sm"
@@ -180,8 +180,9 @@ export function ExportButtons({ messageId, content, className }: ExportButtonsPr
           </>
         )}
       </Button>
+      */}
 
-      {/* Share via Email */}
+      {/* DISABLED: Out-of-scope Email Share feature
       <Dialog open={isEmailDialogOpen} onOpenChange={setIsEmailDialogOpen}>
         <DialogTrigger asChild>
           <Button
@@ -252,6 +253,7 @@ export function ExportButtons({ messageId, content, className }: ExportButtonsPr
           </DialogFooter>
         </DialogContent>
       </Dialog>
+      */}
     </div>
   );
 }

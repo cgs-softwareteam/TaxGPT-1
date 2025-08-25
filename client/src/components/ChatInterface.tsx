@@ -2,7 +2,7 @@ import { useEffect, useRef } from "react";
 import ReactMarkdown from "react-markdown";
 import { Bot } from "lucide-react";
 import StructuredReportRenderer from "./StructuredReportRenderer";
-import { SaveButton } from "./SaveButton";
+// import { SaveButton } from "./SaveButton"; // DISABLED: Out-of-scope feature
 import { ExportButtons } from "./ExportButtons";
 import { useAuth } from "@/hooks/useAuth";
 
@@ -112,11 +112,13 @@ export default function ChatInterface({ conversation, isLoading, onRequestExpert
                 <div className="flex items-center space-x-2">
                   {authEnabled && isAuthenticated && (
                     <>
+                      {/* DISABLED: Out-of-scope Save feature
                       <SaveButton 
                         messageId={message.id}
                         messageContent={message.content}
                         size="sm"
                       />
+                      */}
                       <ExportButtons 
                         content={message.content} 
                         size="sm"

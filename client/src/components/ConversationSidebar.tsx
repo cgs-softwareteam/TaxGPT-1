@@ -29,8 +29,9 @@ export function ConversationSidebar({
   isCollapsed,
   onToggleCollapse
 }: ConversationSidebarProps) {
-  const [editingId, setEditingId] = useState<number | null>(null);
-  const [editTitle, setEditTitle] = useState("");
+  // DISABLED: Out-of-scope edit functionality
+  // const [editingId, setEditingId] = useState<number | null>(null);
+  // const [editTitle, setEditTitle] = useState("");
   const queryClient = useQueryClient();
 
   const { data: conversations = [], isLoading } = useQuery<Conversation[]>({
@@ -38,6 +39,8 @@ export function ConversationSidebar({
     staleTime: 30000, // 30 seconds
   });
 
+  // DISABLED: Out-of-scope edit functionality
+  /*
   const updateConversationMutation = useMutation({
     mutationFn: ({ id, title }: { id: number; title: string }) =>
       apiRequest(`/api/conversations/${id}`, {
@@ -49,7 +52,10 @@ export function ConversationSidebar({
       setEditingId(null);
     },
   });
+  */
 
+  // DISABLED: Out-of-scope delete functionality
+  /*
   const deleteConversationMutation = useMutation({
     mutationFn: (id: number) =>
       apiRequest(`/api/conversations/${id}`, {
@@ -59,7 +65,10 @@ export function ConversationSidebar({
       queryClient.invalidateQueries({ queryKey: ["/api/conversations"] });
     },
   });
+  */
 
+  // DISABLED: Out-of-scope edit and delete functionality
+  /*
   const handleStartEdit = (conversation: Conversation) => {
     setEditingId(conversation.id);
     setEditTitle(conversation.title || `Conversation ${conversation.id}`);
@@ -84,6 +93,7 @@ export function ConversationSidebar({
       deleteConversationMutation.mutate(id);
     }
   };
+  */
 
   if (isCollapsed) {
     return (
@@ -166,6 +176,7 @@ export function ConversationSidebar({
                   onClick={() => onSelectConversation(conversation.id)}
                   data-testid={`conversation-${conversation.id}`}
                 >
+                  {/* DISABLED: Out-of-scope edit mode UI
                   {editingId === conversation.id ? (
                     <div className="space-y-2" onClick={(e) => e.stopPropagation()}>
                       <input
@@ -200,6 +211,7 @@ export function ConversationSidebar({
                       </div>
                     </div>
                   ) : (
+                  */} (
                     <>
                       <div className="flex items-start justify-between">
                         <div className="flex-1 min-w-0">
@@ -217,6 +229,7 @@ export function ConversationSidebar({
                             <span>{conversation.messageCount} messages</span>
                           </div>
                         </div>
+                        {/* DISABLED: Out-of-scope edit and delete buttons
                         <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                           <Button
                             variant="ghost"
@@ -241,6 +254,7 @@ export function ConversationSidebar({
                             <Trash2 className="w-3 h-3 text-red-500" />
                           </Button>
                         </div>
+                        */}
                       </div>
                     </>
                   )}

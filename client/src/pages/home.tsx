@@ -201,6 +201,7 @@ export default function Home() {
                 </div>
               </div>
               <div className="flex items-center space-x-3">
+                {/* DISABLED: Out-of-scope Saved Plans feature
                 {authEnabled && isAuthenticated && (
                   <Link href="/saved-plans">
                     <Button variant="outline" className="flex items-center space-x-2" data-testid="saved-plans-link">
@@ -209,6 +210,7 @@ export default function Home() {
                     </Button>
                   </Link>
                 )}
+                */}
 
                 <UserMenu />
               </div>
