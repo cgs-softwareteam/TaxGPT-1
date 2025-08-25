@@ -301,7 +301,7 @@ function createStorage(): IStorage {
     try {
       return new DrizzleStorage();
     } catch (error) {
-      console.warn('Failed to initialize database storage, falling back to memory storage:', error);
+      // Silently fall back to memory storage
       return new MemStorage();
     }
   }

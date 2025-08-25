@@ -257,7 +257,7 @@ export function ConversationSidebar({
                         */}
                       </div>
                     </>
-                  )}
+                  {/* )} */}
                 </div>
               ))}
             </div>

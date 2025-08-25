@@ -227,7 +227,6 @@ export function setupAuthRoutes(app: Express) {
             return res.redirect(`${baseUrl}/?error=session_failure`);
           }
           
-          console.log('OAuth callback successful, user authenticated:', user.email);
           return res.redirect(baseUrl);
         });
       })(req, res, next);
@@ -265,7 +264,6 @@ export function setupAuthRoutes(app: Express) {
             return res.redirect(`${baseUrl}/?error=session_failure`);
           }
           
-          console.log('Facebook OAuth callback successful, user authenticated:', user.email);
           // Redirect to the dynamic base URL, an improvement over the original hardcoded '/'.
           return res.redirect(baseUrl);
         });

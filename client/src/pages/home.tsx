@@ -119,7 +119,6 @@ export default function Home() {
       }
 
     } catch (error) {
-      console.error('Error sending message:', error);
       const errorMessage: Message = {
         role: 'assistant',
         content: 'I apologize, but I encountered an error processing your request. Please try again.',

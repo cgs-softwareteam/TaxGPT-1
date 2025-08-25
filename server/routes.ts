@@ -122,7 +122,7 @@ Be thorough, technical, and provide the depth of analysis a CPA would deliver to
           aiResponse: aiResponse || '',
         });
       } catch (logError) {
-        console.warn('Failed to log usage:', logError);
+        // Silently continue if usage logging fails
       }
       
       res.json({ content: aiResponse });

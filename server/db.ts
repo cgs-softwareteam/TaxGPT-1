@@ -13,7 +13,6 @@ let pool: Pool | null = null;
 
 export function initializeDatabase() {
   if (!ENABLE_DATABASE_STORAGE) {
-    console.log('Database storage disabled - using in-memory storage');
     return null;
   }
 
@@ -26,7 +25,6 @@ export function initializeDatabase() {
   try {
     pool = new Pool({ connectionString: process.env.DATABASE_URL });
     db = drizzle({ client: pool, schema });
-    console.log('Database connection initialized successfully');
     return db;
   } catch (error) {
     console.error('Failed to initialize database:', error);
