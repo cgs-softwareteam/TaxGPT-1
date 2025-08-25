@@ -1,0 +1,26 @@
+We have diagnosed a session persistence failure in our deployed application. The root cause is that the Replit environment forwards external HTTP (port 80) traffic directly to our Express application, which breaks our secure: true session cookies.
+The proposed solution is to implement a redirect middleware at the application level. Below is the proposal from the Strategic Co-pilot.
+Your task is to critically review this proposal and, if necessary, provide a superior alternative.
+Co-pilot's Proposed Implementation
+File: server/index.ts
+Placement: Immediately after const app = express();, before all other middleware.
+Code:
+code
+TypeScript
+// --- START: NEW HTTPS REDIRECT MIDDLEWARE ---
+if (process.env.NODE_ENV === 'production') {
+  app.use((req: Request, res: Response, next: NextFunction) => {
+    if (req.headers['x-forwarded-proto'] !== 'https') {
+      return res.redirect(301, `https://${req.hostname}${req.url}`);
+    }
+    next();
+  });
+}
+// --- END: NEW HTTPS REDIRECT MIDDLEWARE ---
+Verification and Challenge Questions
+Please answer the following questions to validate this proposal:
+Correctness and Effectiveness: Does this proposed middleware correctly solve the diagnosed problem of HTTP traffic breaking secure cookies? Will it successfully redirect users to HTTPS?
+Placement: Is the proposed placement—at the very beginning of the middleware chain in server/index.ts—the correct location? Explain why this placement is or is not critical for it to function correctly.
+Mechanism (x-forwarded-proto): Is checking the x-forwarded-proto header the standard and most reliable method for determining the original request protocol in a reverse-proxy environment like the one Replit uses?
+Alternative Proposals: Is there a better, more robust, or simpler way to achieve this same result within an Express application running on Replit? For example, should we use the Express trust proxy setting? If you believe there is a superior alternative, please provide the full code for your proposal and a detailed justification explaining its advantages over the co-pilot's proposal.
+Final Recommendation: Based on your analysis, should we implement the co-pilot's proposal as-is, or do you recommend your alternative?
