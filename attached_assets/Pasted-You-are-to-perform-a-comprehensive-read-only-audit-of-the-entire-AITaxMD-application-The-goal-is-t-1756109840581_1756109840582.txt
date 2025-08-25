@@ -1,0 +1,28 @@
+You are to perform a comprehensive, read-only audit of the entire AITaxMD application. The goal is to verify completed work against a signed contract and then identify gaps for a future proposal. Please structure your report in the exact two-part format below, providing specific file paths and code snippets as evidence for every claim.
+Part 1: Audit Against the "Core Foundation" Contract
+For each feature below, confirm its existence and functionality.
+Full Google & Facebook Login:
+Open server/auth.ts and show the final, hardened custom callback handlers for both the /auth/google/callback and /auth/facebook/callback routes to prove they are robust.
+User Database & Persistent History:
+Display the schema definitions for the users and conversations tables from server/db/schema.ts.
+Identify the backend API endpoint that serves a user's conversation history.
+Find the frontend code (likely a hook or component in client/src) that calls this API endpoint to load the user's chat history.
+Basic Admin Dashboard (List all users):
+Show the backend API route that retrieves all users (e.g., /api/admin/users).
+Show the middleware or logic that protects this route, ensuring only users with an 'admin' role can access it.
+Core Usage Tracking:
+Inspect the Passport strategy callbacks in server/auth.ts. Show evidence of a user's lastLoginAt timestamp being updated or a new record being created in an interactions table upon login.
+"Copy to Clipboard" Feature:
+Search the client/src directory. Find the UI component for a chat message and show the "Copy" button element and its onClick handler function that uses navigator.clipboard.writeText.
+Part 2: Gap Analysis Against the "TaxGPT v2.0" Proposal
+For each of these proposed future features, investigate whether it has been implemented or not.
+Profile Management (Password Change):
+Search the entire project for any evidence of a local (email/password) authentication strategy (e.g., passport-local).
+Inspect the users table schema in server/db/schema.ts for a password_hash column. State clearly if these exist or not.
+Enhanced Conversation Management (Search & Titles):
+Inspect the conversations table schema in server/db/schema.ts for a title column.
+Search the backend for any API endpoints that would enable searching conversations by keyword. State clearly if these exist or not.
+UI/UX Improvements (Loading Indicator):
+Analyze the main chat component in the frontend (client/src). Find the function that sends a user's message to the AI. Show evidence of an isLoading state being set to true before the API call and false after.
+Confirm that this isLoading state conditionally renders a loading spinner or similar UI element.
+After presenting all evidence, provide a final summary concluding the audit.
