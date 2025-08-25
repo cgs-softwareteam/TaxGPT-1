@@ -1,0 +1,24 @@
+Your mission is to perform a final, comprehensive "Client-Facing UI Audit" of the AITaxMD application. Act as a Quality Assurance engineer whose only goal is to ensure that what the client sees is polished, functional, and perfectly aligned with the "Core Foundation" contract.
+You will systematically investigate the key UI components and, for each one, report on any visible elements that are not 100% complete and functional.
+1. Audit the Conversation Sidebar (client/src/components/ConversationSidebar.tsx)
+Action: Analyze the component's JSX. This is the most likely place for incomplete features.
+Checklist & Evidence:
+Conversation List: Confirm it displays a list of past conversations (as per the contract).
+Conversation Titles: Does the code attempt to render a conversation.title for each item in the list? Show the exact line of code. This is a high-risk feature.
+Conversation Search: Is there a visible search bar (<input type="search">) or a search icon/button? State definitively if this UI element exists.
+Other Actions: Are there any other interactive elements visible, such as "New Chat," "Delete," or "Rename" buttons? If so, verify they are fully functional.
+2. Audit the Main Chat Interface (client/src/pages/home.tsx & client/src/components/ChatInterface.tsx)
+Action: Analyze the components responsible for displaying the chat messages and user input.
+Checklist & Evidence:
+Message Display: Confirm it correctly renders user and AI messages.
+"Copy to Clipboard": Confirm the "Copy" button is present and functional (as per the contract). We know this is in ExportButtons.tsx.
+Loading Indicator: Confirm the loading animation is present and functional.
+Other Actions: Are there any other buttons or features visible on or near the chat messages, such as "Share," "Export," "Regenerate Response," or a feedback mechanism (thumbs up/down)? If so, state if they are functional.
+3. Synthesize Findings into an Actionable Pre-Deployment Report
+Action: Based on your audit, create a final report with two sections.
+Section A: "Deployment-Ready Features"
+List all UI elements that are complete, functional, and aligned with the contract.
+Section B: "Critical Pre-Deployment Fixes"
+List every UI element that is visible but not functional or not part of the contract.
+For each item on this list, provide a concrete plan to hide it. For example: "The search bar in ConversationSidebar.tsx must be commented out" or "The conversation.title being rendered on line XX of ConversationSidebar.tsx should be replaced with a static string like 'Tax Conversation'."
+Your final output should be a clear go/no-go recommendation for deployment, contingent on implementing the fixes you identify.
