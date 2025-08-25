@@ -32,8 +32,8 @@ export default function Home() {
       const response = await apiRequest("POST", "/api/conversations", data);
       return response.json();
     },
-    onSuccess: (data: any) => {
-      setCurrentConversationId(data.id);
+    onSuccess: () => {
+      // State management now handled directly in handleSubmit to avoid async issues
       queryClient.invalidateQueries({ queryKey: ["/api/conversations"] });
     },
     onError: (error: Error) => {
@@ -65,26 +65,58 @@ export default function Home() {
     setIsLoading(true);
 
     try {
-      // Create conversation if authenticated and none exists
-      let conversationId = currentConversationId;
-      if (authEnabled && isAuthenticated && !conversationId) {
+      // Handle new conversation creation (authenticated users)
+      if (authEnabled && isAuthenticated && !currentConversationId) {
         try {
           const newConv = await createConversationMutation.mutateAsync({
             title: `Chat ${new Date().toLocaleDateString()}`,
             initialMessage: message,
           });
-          conversationId = newConv.id;
+          
+          // Immediately update state with new conversation ID to eliminate async issues
+          setCurrentConversationId(newConv.id);
+          
+          // Get AI response for the new conversation
+          const startTime = Date.now();
+          const response = await fetch('/api/generate', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            credentials: 'include',
+            body: JSON.stringify({
+              messages: [{ role: 'user', content: message }]
+            }),
+          });
+
+          if (!response.ok) {
+            throw new Error('Failed to get AI response');
+          }
+
+          const data = await response.json();
+          const aiMessage: Message = {
+            role: 'assistant',
+            content: data.content,
+            timestamp: new Date()
+          };
+
+          setConversation([userMessage, aiMessage]);
+
+          // Save AI response to database (user message already saved during conversation creation)
+          await addMessageMutation.mutateAsync({
+            conversationId: newConv.id,
+            role: 'assistant',
+            content: data.content,
+            responseTimeMs: Date.now() - startTime,
+          });
+
+          return; // Early exit for new conversation flow
         } catch (error) {
-          // Conversation creation failed, continue without persisting to database
-          // The onError handler will show the specific error message
           console.warn("Conversation creation failed:", error);
-          conversationId = null; // Ensure we don't try to save messages
+          // Continue with local-only conversation
         }
       }
 
+      // Handle existing conversation or unauthenticated users
       const startTime = Date.now();
-      
-      // Send conversation to backend API
       const response = await fetch('/api/generate', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -112,20 +144,16 @@ export default function Home() {
 
       setConversation(prev => [...prev, aiMessage]);
 
-      // Save messages to database if authenticated
-      if (authEnabled && isAuthenticated && conversationId) {
-        // Save user message if it wasn't already saved during conversation creation
-        if (currentConversationId) {
-          await addMessageMutation.mutateAsync({
-            conversationId,
-            role: 'user',
-            content: message,
-          });
-        }
-        
-        // Save AI response
+      // Save messages to database for existing conversations
+      if (authEnabled && isAuthenticated && currentConversationId) {
         await addMessageMutation.mutateAsync({
-          conversationId,
+          conversationId: currentConversationId,
+          role: 'user',
+          content: message,
+        });
+        
+        await addMessageMutation.mutateAsync({
+          conversationId: currentConversationId,
           role: 'assistant',
           content: data.content,
           responseTimeMs,
@@ -140,7 +168,6 @@ export default function Home() {
       };
       setConversation(prev => [...prev, errorMessage]);
       
-      // Show user-friendly error toast
       toast({
         title: "Error",
         description: "Failed to send message. Please try again.",
