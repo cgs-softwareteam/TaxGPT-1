@@ -1,0 +1,42 @@
+CRITICAL ANALYSIS REQUIRED: The client has submitted a list of new feature requests. Before an implementation plan can be created, you must conduct a deep, read-only investigation to determine the true scope and complexity of each request. Your mission is to analyze the existing architecture and identify the "hidden abstractions" and potential risks associated with these changes.
+You will structure your report into three parts, based on complexity.
+Part 1: UI & Layout Analysis (Low Complexity)
+Welcome Text Change:
+Action: Search the client/src directory to find the component that renders the "Welcome to TaxGPT" text.
+Evidence: Show the file name and the specific line of code containing this text.
+Analysis: Confirm that this is a simple text replacement with no side effects.
+Sticky Header:
+Action: Identify the main header component.
+Evidence: Show the component's file name and its root JSX element with its current CSS classes.
+Analysis: Determine if the project uses Tailwind CSS. If so, state that making the header sticky is likely a low-risk change by adding the sticky top-0 z-50 classes.
+Mobile Responsiveness:
+Action: Analyze the primary UI components (ChatInterface.tsx, ConversationSidebar.tsx).
+Evidence: Look for the use of responsive Tailwind CSS prefixes (e.g., md:, lg:).
+Analysis: Identify specific areas where responsive styles are missing. For example, "The main chat container uses a fixed width without md: prefixes, causing overflow on mobile." Provide a high-level summary of the responsiveness gap.
+Part 2: Core AI Logic Analysis (High Complexity)
+Intelligent Follow-up Prompts (PDF/Download):
+Action: Go to server/routes.ts and find the /api/generate endpoint. This is the core of the AI logic.
+Evidence: Analyze how the current AI prompt is constructed. Describe the current, simple "Request -> Response" flow.
+Analysis (The Hidden Abstraction): Explain why this is a major architectural change. A robust implementation would require:
+A new, more complex system prompt that instructs the AI to suggest actions.
+A mechanism for the AI to return structured data (e.g., JSON with a type: 'action') instead of just plain text, so the frontend can render a button instead of a sentence.
+New frontend components to handle and display these "action buttons."
+Re-enabling and integrating the backend API endpoints we previously disabled (like /api/export/pdf).
+Part 3: Core Data Model Analysis (Very High Complexity)
+Doctor Types (Employee vs. Employer):
+Action: Re-examine the system prompt and the data model (shared/schema.ts).
+Evidence: Is there any concept of "doctor type" or employment status in the current prompt or database schema?
+Analysis (The Hidden Abstraction): Explain why this is the most complex request. It fundamentally changes the AI's "world model." A proper implementation would require:
+Data Model Changes: Potentially new columns in the users table.
+Data Collection Changes: The AI would now need to ask the user for this information early in the conversation.
+Core Prompt Rework: The main system prompt would need to be rewritten to incorporate this distinction and provide different advice based on the user's type.
+Extensive QA: Rigorous testing would be needed to ensure the AI's tax advice is accurate for both doctor types.
+Final Output: A Tiered Implementation Plan for Approval
+Based on your complete analysis, synthesize the findings into a tiered implementation plan for the developer to present to the client for approval.
+Tier 1 (Low Effort - UI Polish):
+List the text change, sticky header, and responsiveness fixes. Provide a rough time/effort estimate.
+Tier 2 (High Effort - New Feature Development):
+Describe the work for the "Intelligent Follow-up Prompts." Frame it as building a new "AI Action System." Provide a rough effort estimate.
+Tier 3 (Very High Effort - Architectural Rework):
+Describe the work for the "Doctor Types" feature. Frame it as a "Core AI Model and Data Rework." Emphasize the need for domain expertise and rigorous testing. Provide a rough effort estimate.
+Your final report should give the developer a clear, evidence-based breakdown of the true scope of work.
