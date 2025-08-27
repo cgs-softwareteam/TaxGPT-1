@@ -47,7 +47,7 @@ export default function ChatInterface({ conversation, isLoading, onRequestExpert
     if (message.role === 'user') {
       return (
         <div key={index} className="flex justify-end" data-testid={`message-user-${index}`}>
-          <div className="bg-[hsl(217,91%,60%)] text-white rounded-2xl rounded-br-md px-4 py-3 max-w-xs md:max-w-md shadow-sm">
+          <div className="bg-[hsl(217,91%,60%)] text-white rounded-2xl rounded-br-md px-3 md:px-4 py-3 max-w-xs md:max-w-md shadow-sm">
             <p className="text-sm">{message.content}</p>
             <div className="text-xs opacity-75 mt-1">{formatTime(message.timestamp)}</div>
           </div>
@@ -71,7 +71,7 @@ export default function ChatInterface({ conversation, isLoading, onRequestExpert
         // Standard conversational message - enhanced formatting
         return (
           <div key={index} className="flex justify-start" data-testid={`message-ai-${index}`}>
-            <div className="bg-white border border-gray-200 rounded-2xl rounded-bl-md p-4 max-w-lg md:max-w-2xl shadow-sm">
+            <div className="bg-white border border-gray-200 rounded-2xl rounded-bl-md p-3 md:p-4 max-w-lg md:max-w-2xl shadow-sm">
               <div className="flex items-center space-x-2 mb-3">
                 <div className="bg-primary text-white p-2 rounded-full">
                   <Bot className="w-4 h-4" />
@@ -139,10 +139,10 @@ export default function ChatInterface({ conversation, isLoading, onRequestExpert
   };
 
   return (
-    <div className="max-w-4xl mx-auto px-4 py-6 pb-24" data-testid="chat-interface">
+    <div className="max-w-4xl mx-auto px-2 md:px-4 py-6 pb-24" data-testid="chat-interface">
       {conversation.length === 0 && (
         <div className="text-center mb-8" data-testid="welcome-message">
-          <div className="bg-white p-8 rounded-xl shadow-sm border border-gray-200 inline-block max-w-2xl">
+          <div className="bg-white p-4 md:p-8 rounded-xl shadow-sm border border-gray-200 inline-block max-w-2xl mx-2 md:mx-0">
             <div className="text-primary text-4xl mb-4">
               <Bot className="w-12 h-12 mx-auto" />
             </div>

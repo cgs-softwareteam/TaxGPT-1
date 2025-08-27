@@ -229,18 +229,18 @@ export default function Home() {
       <div className="flex-1 flex flex-col">
         {/* Header */}
         <header className="bg-white border-b border-gray-200 shadow-sm" data-testid="header">
-          <div className="max-w-4xl mx-auto px-4 py-4">
+          <div className="max-w-4xl mx-auto px-2 md:px-4 py-4">
             <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-3">
+              <div className="flex items-center space-x-2 md:space-x-3">
                 <div className="bg-primary text-white p-2 rounded-lg" data-testid="logo">
-                  <Calculator className="text-xl w-6 h-6" />
+                  <Calculator className="text-xl w-5 h-5 md:w-6 md:h-6" />
                 </div>
                 <div>
-                  <h1 className="text-xl font-semibold text-gray-900" data-testid="title">AITaxMD</h1>
-                  <p className="text-sm text-gray-600" data-testid="subtitle">AI-Powered Tax Planning Assistant</p>
+                  <h1 className="text-lg md:text-xl font-semibold text-gray-900" data-testid="title">AITaxMD</h1>
+                  <p className="text-xs md:text-sm text-gray-600 hidden sm:block" data-testid="subtitle">AI-Powered Tax Planning Assistant</p>
                 </div>
               </div>
-              <div className="flex items-center space-x-3">
+              <div className="flex items-center space-x-2 md:space-x-3">
                 {/* DISABLED: Out-of-scope Saved Plans feature
                 {authEnabled && isAuthenticated && (
                   <Link href="/saved-plans">
@@ -268,7 +268,7 @@ export default function Home() {
         </main>
 
         {/* Chat Input */}
-        <div className="fixed bottom-0 right-0 bg-white border-t border-gray-200 shadow-lg" 
+        <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 shadow-lg md:left-auto" 
              style={{ left: authEnabled && isAuthenticated && !sidebarCollapsed ? '320px' : '0' }}
              data-testid="chat-input-container">
           <ChatInput 

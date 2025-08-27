@@ -27,7 +27,7 @@ export default function ChatInput({ onSubmit, isLoading }: ChatInputProps) {
   };
 
   return (
-    <div className="max-w-4xl mx-auto p-4" data-testid="chat-input">
+    <div className="max-w-4xl mx-auto p-2 md:p-4" data-testid="chat-input">
       <form onSubmit={handleSubmit} className="flex space-x-3" data-testid="chat-form">
         <div className="flex-1 relative">
           <Input
@@ -51,7 +51,7 @@ export default function ChatInput({ onSubmit, isLoading }: ChatInputProps) {
         </div>
         <Button
           type="submit"
-          className="bg-primary text-white px-6 py-3 rounded-xl hover:bg-blue-700 transition-colors duration-200 flex items-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed"
+          className="bg-primary text-white px-3 md:px-6 py-3 rounded-xl hover:bg-blue-700 transition-colors duration-200 flex items-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed"
           disabled={!message.trim() || isLoading}
           data-testid="button-send"
         >
@@ -64,38 +64,42 @@ export default function ChatInput({ onSubmit, isLoading }: ChatInputProps) {
       {message.trim() === '' && (
         <div className="mt-3 mb-2" data-testid="quick-start-suggestions">
           <div className="text-xs text-gray-500 mb-2">Quick start options:</div>
-          <div className="flex flex-wrap gap-2">
+          <div className="flex flex-wrap gap-1 md:gap-2">
             <button
               type="button"
               onClick={() => setMessage("I need help with tax planning. I make $75,000 per year and live in California.")}
-              className="text-xs bg-gray-100 hover:bg-gray-200 text-gray-700 px-3 py-2 rounded-lg transition-colors duration-200"
+              className="text-xs bg-gray-100 hover:bg-gray-200 text-gray-700 px-2 md:px-3 py-2 rounded-lg transition-colors duration-200"
               data-testid="quick-start-california"
             >
-              💼 California resident, $75k income
+              <span className="hidden sm:inline">💼 California resident, $75k income</span>
+              <span className="sm:hidden">💼 CA, $75k</span>
             </button>
             <button
               type="button"
               onClick={() => setMessage("I'm self-employed and need tax strategies for my small business.")}
-              className="text-xs bg-gray-100 hover:bg-gray-200 text-gray-700 px-3 py-2 rounded-lg transition-colors duration-200"
+              className="text-xs bg-gray-100 hover:bg-gray-200 text-gray-700 px-2 md:px-3 py-2 rounded-lg transition-colors duration-200"
               data-testid="quick-start-selfemployed"
             >
-              🏢 Self-employed tax help
+              <span className="hidden sm:inline">🏢 Self-employed tax help</span>
+              <span className="sm:hidden">🏢 Self-employed</span>
             </button>
             <button
               type="button"
               onClick={() => setMessage("I want to maximize my retirement savings and reduce taxes.")}
-              className="text-xs bg-gray-100 hover:bg-gray-200 text-gray-700 px-3 py-2 rounded-lg transition-colors duration-200"
+              className="text-xs bg-gray-100 hover:bg-gray-200 text-gray-700 px-2 md:px-3 py-2 rounded-lg transition-colors duration-200"
               data-testid="quick-start-retirement"
             >
-              💰 Retirement tax strategies
+              <span className="hidden sm:inline">💰 Retirement tax strategies</span>
+              <span className="sm:hidden">💰 Retirement</span>
             </button>
             <button
               type="button"
               onClick={() => setMessage("I recently got married and need to understand how this affects my taxes.")}
-              className="text-xs bg-gray-100 hover:bg-gray-200 text-gray-700 px-3 py-2 rounded-lg transition-colors duration-200"
+              className="text-xs bg-gray-100 hover:bg-gray-200 text-gray-700 px-2 md:px-3 py-2 rounded-lg transition-colors duration-200"
               data-testid="quick-start-married"
             >
-              💒 Marriage tax planning
+              <span className="hidden sm:inline">💒 Marriage tax planning</span>
+              <span className="sm:hidden">💒 Marriage</span>
             </button>
           </div>
         </div>
