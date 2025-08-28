@@ -23,6 +23,7 @@ export default function Home() {
   const [isLoading, setIsLoading] = useState(false);
   const [currentConversationId, setCurrentConversationId] = useState<number | null>(null);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [isMobileSidebarOpen, setMobileSidebarOpen] = useState(false);
   const { isAuthenticated, authEnabled } = useAuth();
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -222,6 +223,8 @@ export default function Home() {
           onNewConversation={handleNewConversation}
           isCollapsed={sidebarCollapsed}
           onToggleCollapse={() => setSidebarCollapsed(!sidebarCollapsed)}
+          isMobileOpen={isMobileSidebarOpen}
+          onMobileClose={() => setMobileSidebarOpen(false)}
         />
       )}
 
@@ -232,6 +235,17 @@ export default function Home() {
           <div className="max-w-4xl mx-auto px-2 md:px-4 py-4">
             <div className="flex items-center justify-between">
               <div className="flex items-center space-x-2 md:space-x-3">
+                {authEnabled && isAuthenticated && (
+                  <Button 
+                    variant="ghost"
+                    size="icon"
+                    className="md:hidden" 
+                    onClick={() => setMobileSidebarOpen(true)}
+                    data-testid="mobile-menu-button"
+                  >
+                    <Menu className="w-5 h-5" />
+                  </Button>
+                )}
                 <div className="bg-primary text-white p-2 rounded-lg" data-testid="logo">
                   <Calculator className="text-xl w-5 h-5 md:w-6 md:h-6" />
                 </div>

@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { MessageSquare, Plus, Trash2, Edit3, Calendar } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
+import { cn } from "@/lib/utils";
 
 interface Conversation {
   id: number;
@@ -20,6 +21,8 @@ interface ConversationSidebarProps {
   onNewConversation: () => void;
   isCollapsed: boolean;
   onToggleCollapse: () => void;
+  isMobileOpen?: boolean;
+  onMobileClose?: () => void;
 }
 
 export function ConversationSidebar({
@@ -27,7 +30,9 @@ export function ConversationSidebar({
   onSelectConversation,
   onNewConversation,
   isCollapsed,
-  onToggleCollapse
+  onToggleCollapse,
+  isMobileOpen,
+  onMobileClose
 }: ConversationSidebarProps) {
   // DISABLED: Out-of-scope edit functionality
   // const [editingId, setEditingId] = useState<number | null>(null);
@@ -121,7 +126,22 @@ export function ConversationSidebar({
   }
 
   return (
-    <div className="w-80 bg-gray-50 border-r border-gray-200 flex flex-col hidden md:flex">
+    <>
+      {isMobileOpen && (
+        <div 
+          className="fixed inset-0 bg-black/80 z-40 md:hidden" 
+          onClick={onMobileClose}
+          data-testid="mobile-sidebar-backdrop"
+        />
+      )}
+      <div className={cn(
+        "w-80 bg-gray-50 border-r border-gray-200 flex flex-col transition-transform duration-300 ease-in-out",
+        // Logic for mobile view
+        "fixed inset-y-0 left-0 z-50",
+        isMobileOpen ? "translate-x-0" : "-translate-x-full",
+        // Logic for desktop view
+        "md:relative md:translate-x-0"
+      )}>
       {/* Header */}
       <div className="p-4 border-b border-gray-200">
         <div className="flex items-center justify-between mb-3">
@@ -264,6 +284,7 @@ export function ConversationSidebar({
           )}
         </div>
       </ScrollArea>
-    </div>
+      </div>
+    </>
   );
 }
