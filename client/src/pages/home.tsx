@@ -282,10 +282,9 @@ export default function Home() {
         </main>
 
         {/* Chat Input */}
-        <div className="fixed bottom-0 inset-x-0 bg-white border-t border-gray-200 shadow-lg md:left-auto md:right-auto" 
+        <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 shadow-lg" 
              style={{ 
-               left: authEnabled && isAuthenticated && !sidebarCollapsed ? '320px' : '0',
-               right: 'auto'
+               marginLeft: authEnabled && isAuthenticated && !sidebarCollapsed ? '320px' : '0'
              }}
              data-testid="chat-input-container">
           <ChatInput 
