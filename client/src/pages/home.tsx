@@ -283,7 +283,9 @@ export default function Home() {
 
         {/* Chat Input */}
         <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 shadow-lg md:left-auto" 
-             style={{ left: authEnabled && isAuthenticated && !sidebarCollapsed ? '320px' : '0' }}
+             style={{ 
+               left: authEnabled && isAuthenticated && !sidebarCollapsed ? '320px' : '0'
+             }}
              data-testid="chat-input-container">
           <ChatInput 
             onSubmit={handleSubmit} 

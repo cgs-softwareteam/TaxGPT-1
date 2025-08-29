@@ -27,8 +27,8 @@ export default function ChatInput({ onSubmit, isLoading }: ChatInputProps) {
   };
 
   return (
-    <div className="w-full p-2 md:p-4" data-testid="chat-input">
-      <div className="max-w-4xl mx-auto">
+    <div className="w-full" data-testid="chat-input">
+      <div className="max-w-4xl mx-auto px-2 py-2 md:px-4 md:py-4">
         <form onSubmit={handleSubmit} className="flex space-x-3" data-testid="chat-form">
           <div className="flex-1 relative">
           <Input
