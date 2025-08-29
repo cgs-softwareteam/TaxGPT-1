@@ -10,6 +10,7 @@ import { UserMenu } from "@/components/UserMenu";
 import { useAuth } from "@/hooks/useAuth";
 import { Link } from "wouter";
 import { useToast } from "@/hooks/use-toast";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 interface Message {
   role: 'user' | 'assistant';
@@ -27,6 +28,7 @@ export default function Home() {
   const { isAuthenticated, authEnabled } = useAuth();
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const isMobile = useIsMobile();
 
   const createConversationMutation = useMutation({
     mutationFn: async (data: { title?: string; initialMessage?: string }) => {
@@ -284,7 +286,7 @@ export default function Home() {
         {/* Chat Input */}
         <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 shadow-lg" 
              style={{ 
-               marginLeft: authEnabled && isAuthenticated && !sidebarCollapsed ? '20rem' : '0'
+               marginLeft: isMobile ? '0' : (authEnabled && isAuthenticated && !sidebarCollapsed ? '20rem' : '0')
              }}
              data-testid="chat-input-container">
           <ChatInput 
