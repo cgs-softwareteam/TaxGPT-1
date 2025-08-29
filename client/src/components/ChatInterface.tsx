@@ -120,8 +120,7 @@ export default function ChatInterface({ conversation, isLoading, onRequestExpert
                       />
                       */}
                       <ExportButtons 
-                        content={message.content} 
-                        size="sm"
+                        content={message.content}
                       />
                     </>
                   )}
