@@ -502,13 +502,12 @@ Always ask clarifying questions about employment structure when medical professi
           lastLoginAt: user.lastLoginAt?.toISOString(),
         }));
 
-        const csvString = await new Promise<string>((resolve, reject) => {
-          const rows: string[] = [];
-          csvWriter.writeToString(csvData, { headers: true })
-            .on('data', (row: string) => rows.push(row))
-            .on('end', () => resolve(rows.join('')))
-            .on('error', reject);
-        });
+        // Simple CSV generation for user export
+        const csvHeader = 'id,email,name,role,createdAt,lastLoginAt\n';
+        const csvRows = csvData.map(user => 
+          `${user.id},"${user.email}","${user.name}","${user.role}","${user.createdAt}","${user.lastLoginAt}"`
+        ).join('\n');
+        const csvString = csvHeader + csvRows;
         
         res.send(csvString);
       } catch (error) {
@@ -630,6 +629,109 @@ Always ask clarifying questions about employment structure when medical professi
         }
         console.error("Failed to get top prompts:", error);
         res.status(500).json({ error: "Failed to get top prompts" });
+      }
+    });
+
+    // HEALTH CHECK ENDPOINTS (Required for Render deployment)
+    
+    // Primary health check endpoint
+    app.get("/health", async (req, res) => {
+      try {
+        const startTime = Date.now();
+        const dbHealth = await storage.testConnection();
+        const responseTime = Date.now() - startTime;
+        
+        const status = dbHealth ? 'healthy' : 'unhealthy';
+        const httpStatus = dbHealth ? 200 : 503;
+        
+        res.status(httpStatus).json({
+          status,
+          timestamp: new Date().toISOString(),
+          version: process.env.npm_package_version || '1.0.0',
+          environment: process.env.NODE_ENV || 'development',
+          database: {
+            status: dbHealth ? 'connected' : 'disconnected',
+            responseTimeMs: responseTime
+          },
+          storage: {
+            type: process.env.ENABLE_DATABASE_STORAGE === 'true' ? 'database' : 'memory',
+            status: storage.getConnectionStatus()
+          },
+          features: {
+            authentication: process.env.ENABLE_AUTHENTICATION === 'true',
+            database: process.env.ENABLE_DATABASE_STORAGE === 'true'
+          }
+        });
+      } catch (error) {
+        console.error("Health check failed:", error);
+        res.status(503).json({
+          status: 'unhealthy',
+          timestamp: new Date().toISOString(),
+          error: 'Health check failed',
+          database: { status: 'error' }
+        });
+      }
+    });
+
+    // Detailed health check for monitoring systems
+    app.get("/health/detailed", async (req, res) => {
+      try {
+        const checks = {
+          database: { status: 'unknown', responseTimeMs: 0 },
+          storage: { status: 'unknown', type: 'unknown' },
+          openai: { status: 'unknown', configured: !!openai },
+          environment: { status: 'unknown', variables: {} }
+        };
+
+        // Database health check
+        const dbStart = Date.now();
+        try {
+          checks.database.status = await storage.testConnection() ? 'healthy' : 'unhealthy';
+          checks.database.responseTimeMs = Date.now() - dbStart;
+        } catch (error) {
+          checks.database.status = 'error';
+          checks.database.responseTimeMs = Date.now() - dbStart;
+        }
+
+        // Storage health check
+        checks.storage.status = storage.getConnectionStatus();
+        checks.storage.type = process.env.ENABLE_DATABASE_STORAGE === 'true' ? 'database' : 'memory';
+
+        // OpenAI configuration check
+        checks.openai.status = openai ? 'configured' : 'not_configured';
+
+        // Environment variables check
+        const requiredEnvVars = ['NODE_ENV'];
+        if (process.env.ENABLE_DATABASE_STORAGE === 'true') {
+          requiredEnvVars.push('DATABASE_URL');
+        }
+        if (process.env.ENABLE_AUTHENTICATION === 'true') {
+          requiredEnvVars.push('SESSION_SECRET');
+        }
+
+        const missingVars = requiredEnvVars.filter(varName => !process.env[varName]);
+        checks.environment.status = missingVars.length === 0 ? 'healthy' : 'missing_variables';
+        checks.environment.variables = {
+          missing: missingVars,
+          present: requiredEnvVars.filter(varName => !!process.env[varName])
+        };
+
+        const overallHealthy = Object.values(checks).every(check => 
+          ['healthy', 'connected', 'configured'].includes(check.status)
+        );
+
+        res.status(overallHealthy ? 200 : 503).json({
+          status: overallHealthy ? 'healthy' : 'unhealthy',
+          timestamp: new Date().toISOString(),
+          checks
+        });
+      } catch (error) {
+        console.error("Detailed health check failed:", error);
+        res.status(503).json({
+          status: 'error',
+          timestamp: new Date().toISOString(),
+          error: 'Detailed health check failed'
+        });
       }
     });
   }

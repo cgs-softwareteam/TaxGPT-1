@@ -4,6 +4,7 @@ import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
 import { setupSession, setupPassport, setupAuthRoutes } from "./auth";
 import { initializeDatabase } from "./db";
+import { validateProductionEnvironment, validateRenderCompatibility, logProductionStartup } from './utils/production-safety';
 
 const app = express();
 
@@ -61,6 +62,18 @@ app.use((req, res, next) => {
 });
 
 (async () => {
+  // Production safety validation
+  try {
+    validateProductionEnvironment();
+    validateRenderCompatibility();
+    logProductionStartup();
+  } catch (error) {
+    console.error('Production safety validation failed:', error);
+    if (process.env.NODE_ENV === 'production') {
+      process.exit(1); // Fail fast in production
+    }
+  }
+
   // Initialize database if enabled
   initializeDatabase();
 
@@ -88,6 +101,25 @@ app.use((req, res, next) => {
     serveStatic(app);
   }
 
+  // Graceful shutdown handlers for production deployment
+  const gracefulShutdown = () => {
+    console.log('Received shutdown signal, closing server gracefully...');
+    server.close(() => {
+      console.log('HTTP server closed.');
+      process.exit(0);
+    });
+
+    // Force close after 30 seconds
+    setTimeout(() => {
+      console.error('Could not close connections in time, forcefully shutting down');
+      process.exit(1);
+    }, 30000);
+  };
+
+  // Listen for shutdown signals
+  process.on('SIGTERM', gracefulShutdown);
+  process.on('SIGINT', gracefulShutdown);
+
   // ALWAYS serve the app on the port specified in the environment variable PORT
   // Other ports are firewalled. Default to 5000 if not specified.
   // this serves both the API and the client.
@@ -99,5 +131,8 @@ app.use((req, res, next) => {
     reusePort: true,
   }, () => {
     log(`serving on port ${port}`);
+    console.log(`Environment: ${process.env.NODE_ENV || 'development'}`);
+    console.log(`Database enabled: ${process.env.ENABLE_DATABASE_STORAGE === 'true'}`);
+    console.log(`Authentication enabled: ${process.env.ENABLE_AUTHENTICATION === 'true'}`);
   });
 })();

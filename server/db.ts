@@ -23,7 +23,15 @@ export function initializeDatabase() {
   }
 
   try {
-    pool = new Pool({ connectionString: process.env.DATABASE_URL });
+    // Optimize connection pool for Render deployment
+    pool = new Pool({ 
+      connectionString: process.env.DATABASE_URL,
+      max: process.env.NODE_ENV === 'production' ? 20 : 10, // Render connection limits
+      min: 2, // Keep minimum connections open
+      idleTimeoutMillis: 30000, // Close idle connections after 30s
+      connectionTimeoutMillis: 5000, // Connection timeout for responsiveness
+      allowExitOnIdle: false // Keep pool alive
+    });
     db = drizzle({ client: pool, schema });
     return db;
   } catch (error) {

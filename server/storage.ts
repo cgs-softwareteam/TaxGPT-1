@@ -307,7 +307,7 @@ export class MemStorage implements IStorage {
     const id = this.messageIdCounter++;
     const message: Message = {
       id,
-      conversationId: data.conversationId,
+      conversationId: data.conversationId!,
       role: data.role,
       content: data.content,
       timestamp: data.timestamp || new Date(),
@@ -353,7 +353,7 @@ export class MemStorage implements IStorage {
     const savedPlan: SavedPlan = {
       id,
       userId: data.userId,
-      messageId: data.messageId,
+      messageId: data.messageId!,
       title: data.title || 'Untitled Plan',
       tags: data.tags || [],
       savedAt: new Date(),
@@ -394,7 +394,7 @@ export class MemStorage implements IStorage {
     const shareLog: ShareLog = {
       id,
       userId: data.userId,
-      messageId: data.messageId,
+      messageId: data.messageId!,
       recipientEmail: data.recipientEmail || null,
       sharedAt: new Date(),
     };
@@ -636,7 +636,7 @@ export class DrizzleStorage implements IStorage {
           offset,
         }
       }
-    });
+    }) as (Conversation & { messages: Message[] }) | undefined;
 
     return conversation;
   }
@@ -808,16 +808,35 @@ export class DrizzleStorage implements IStorage {
 // Feature flag controlled storage initialization
 const ENABLE_DATABASE_STORAGE = process.env.ENABLE_DATABASE_STORAGE === 'true';
 
-// Storage factory with feature flag support
+// Production safety: Force database storage in production
 function createStorage(): IStorage {
+  const isProduction = process.env.NODE_ENV === 'production';
+  
+  // CRITICAL: Production deployments must use database storage
+  if (isProduction && !ENABLE_DATABASE_STORAGE) {
+    console.error('PRODUCTION ERROR: Database storage must be enabled in production');
+    console.error('Set ENABLE_DATABASE_STORAGE=true in production environment');
+    throw new Error('Production requires database storage - MemStorage not allowed');
+  }
+  
   if (ENABLE_DATABASE_STORAGE) {
     try {
       return new DrizzleStorage();
     } catch (error) {
-      // Silently fall back to memory storage
+      if (isProduction) {
+        console.error('PRODUCTION FATAL: Database storage failed to initialize:', error);
+        throw new Error('Production database storage initialization failed');
+      }
+      // Only fall back to memory storage in development
+      console.warn('Database storage failed, falling back to memory storage (development only)');
       return new MemStorage();
     }
   }
+  
+  if (isProduction) {
+    throw new Error('Production deployment requires database storage');
+  }
+  
   return new MemStorage();
 }
 
