@@ -166,6 +166,8 @@ export type Message = typeof messages.$inferSelect;
 export type InsertMessage = typeof messages.$inferInsert;
 export type SavedPlan = typeof savedPlans.$inferSelect;
 export type InsertSavedPlan = typeof savedPlans.$inferInsert;
+export type ShareLog = typeof shareLog.$inferSelect;
+export type InsertShareLog = typeof shareLog.$inferInsert;
 
 // Admin statistics type
 export type UsageStatistics = {

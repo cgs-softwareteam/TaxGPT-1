@@ -7,6 +7,7 @@ import { randomUUID } from "crypto";
 import { eq, desc, sql, and, gte, count, max, asc } from "drizzle-orm";
 import { conversations, messages, savedPlans, shareLog, usageLogs, users } from "@shared/schema";
 import { db } from "./db";
+import { ApplicationError } from "./utils/database-safety";
 import puppeteer from "puppeteer";
 import * as csvWriter from "fast-csv";
 import nodemailer from "nodemailer";
@@ -255,22 +256,16 @@ Always ask clarifying questions about employment structure when medical professi
     app.get("/api/conversations", requireAuth, async (req: any, res) => {
       try {
         const userId = req.user.id;
-        const userConversations = await db
-          .select({
-            id: conversations.id,
-            title: conversations.title,
-            updatedAt: conversations.updatedAt,
-            createdAt: conversations.createdAt,
-            messageCount: count(messages.id),
-          })
-          .from(conversations)
-          .leftJoin(messages, eq(conversations.id, messages.conversationId))
-          .where(and(eq(conversations.userId, userId), eq(conversations.isActive, true)))
-          .groupBy(conversations.id)
-          .orderBy(desc(conversations.updatedAt));
-
+        const userConversations = await storage.getConversationsByUser(userId);
         res.json(userConversations);
       } catch (error) {
+        if (error instanceof ApplicationError) {
+          return res.status(error.statusCode).json({ 
+            error: error.message,
+            type: error.type,
+            code: error.code 
+          });
+        }
         console.error("Failed to get conversations:", error);
         res.status(500).json({ error: "Failed to get conversations" });
       }
@@ -282,28 +277,16 @@ Always ask clarifying questions about employment structure when medical professi
         const userId = req.user.id;
         const { title, initialMessage } = req.body;
 
-        const result = await db.transaction(async (tx) => {
-          const [conversation] = await tx.insert(conversations).values({
-            userId,
-            title: title || 'New Conversation',
-            createdAt: new Date(),
-            updatedAt: new Date(),
-          }).returning();
-
-          if (initialMessage) {
-            await tx.insert(messages).values({
-              conversationId: conversation.id,
-              role: 'user',
-              content: initialMessage,
-              timestamp: new Date(),
-            });
-          }
-
-          return conversation;
-        });
-
-        res.json(result);
+        const conversation = await storage.createConversation(userId, title, initialMessage);
+        res.json(conversation);
       } catch (error) {
+        if (error instanceof ApplicationError) {
+          return res.status(error.statusCode).json({ 
+            error: error.message,
+            type: error.type,
+            code: error.code 
+          });
+        }
         console.error("Failed to create conversation:", error);
         res.status(500).json({ error: "Failed to create conversation" });
       }
@@ -315,22 +298,8 @@ Always ask clarifying questions about employment structure when medical professi
         const conversationId = parseInt(req.params.id);
         const userId = req.user.id;
         const page = parseInt(req.query.page as string) || 1;
-        const limit = 50;
-        const offset = (page - 1) * limit;
 
-        const conversation = await db.query.conversations.findFirst({
-          where: and(
-            eq(conversations.id, conversationId),
-            eq(conversations.userId, userId)
-          ),
-          with: {
-            messages: {
-              orderBy: [asc(messages.timestamp)],
-              limit,
-              offset,
-            }
-          }
-        });
+        const conversation = await storage.getConversationWithMessages(conversationId, userId, page);
 
         if (!conversation) {
           return res.status(404).json({ error: "Conversation not found" });
@@ -338,6 +307,13 @@ Always ask clarifying questions about employment structure when medical professi
 
         res.json(conversation);
       } catch (error) {
+        if (error instanceof ApplicationError) {
+          return res.status(error.statusCode).json({ 
+            error: error.message,
+            type: error.type,
+            code: error.code 
+          });
+        }
         console.error("Failed to get conversation:", error);
         res.status(500).json({ error: "Failed to get conversation" });
       }
@@ -350,34 +326,30 @@ Always ask clarifying questions about employment structure when medical professi
         const userId = req.user.id;
         const { role, content, tokensUsed, responseTimeMs } = req.body;
 
-        // Verify conversation belongs to user
-        const conversation = await db.query.conversations.findFirst({
-          where: and(
-            eq(conversations.id, conversationId),
-            eq(conversations.userId, userId)
-          )
-        });
-
+        // First verify the conversation belongs to user
+        const conversation = await storage.getConversationWithMessages(conversationId, userId, 1);
         if (!conversation) {
           return res.status(404).json({ error: "Conversation not found" });
         }
 
-        const [message] = await db.insert(messages).values({
+        const message = await storage.addMessageToConversation({
           conversationId,
           role,
           content,
           timestamp: new Date(),
           tokensUsed,
           responseTimeMs,
-        }).returning();
-
-        // Update conversation timestamp
-        await db.update(conversations)
-          .set({ updatedAt: new Date() })
-          .where(eq(conversations.id, conversationId));
+        });
 
         res.json(message);
       } catch (error) {
+        if (error instanceof ApplicationError) {
+          return res.status(error.statusCode).json({ 
+            error: error.message,
+            type: error.type,
+            code: error.code 
+          });
+        }
         console.error("Failed to add message:", error);
         res.status(500).json({ error: "Failed to add message" });
       }
@@ -390,13 +362,7 @@ Always ask clarifying questions about employment structure when medical professi
         const userId = req.user.id;
         const { title } = req.body;
 
-        const [updatedConversation] = await db.update(conversations)
-          .set({ title, updatedAt: new Date() })
-          .where(and(
-            eq(conversations.id, conversationId),
-            eq(conversations.userId, userId)
-          ))
-          .returning();
+        const updatedConversation = await storage.updateConversationTitle(conversationId, userId, title);
 
         if (!updatedConversation) {
           return res.status(404).json({ error: "Conversation not found" });
@@ -404,6 +370,13 @@ Always ask clarifying questions about employment structure when medical professi
 
         res.json(updatedConversation);
       } catch (error) {
+        if (error instanceof ApplicationError) {
+          return res.status(error.statusCode).json({ 
+            error: error.message,
+            type: error.type,
+            code: error.code 
+          });
+        }
         console.error("Failed to update conversation:", error);
         res.status(500).json({ error: "Failed to update conversation" });
       }
@@ -415,20 +388,21 @@ Always ask clarifying questions about employment structure when medical professi
         const conversationId = parseInt(req.params.id);
         const userId = req.user.id;
 
-        const [deletedConversation] = await db.update(conversations)
-          .set({ isActive: false, updatedAt: new Date() })
-          .where(and(
-            eq(conversations.id, conversationId),
-            eq(conversations.userId, userId)
-          ))
-          .returning();
+        const success = await storage.deleteConversation(conversationId, userId);
 
-        if (!deletedConversation) {
+        if (!success) {
           return res.status(404).json({ error: "Conversation not found" });
         }
 
         res.json({ success: true });
       } catch (error) {
+        if (error instanceof ApplicationError) {
+          return res.status(error.statusCode).json({ 
+            error: error.message,
+            type: error.type,
+            code: error.code 
+          });
+        }
         console.error("Failed to delete conversation:", error);
         res.status(500).json({ error: "Failed to delete conversation" });
       }
@@ -442,16 +416,22 @@ Always ask clarifying questions about employment structure when medical professi
         const userId = req.user.id;
         const { messageId, title, tags } = req.body;
 
-        const [savedPlan] = await db.insert(savedPlans).values({
+        const savedPlan = await storage.savePlan({
           userId,
           messageId,
-          title: title || 'Untitled Plan',
-          tags: tags || [],
-          savedAt: new Date(),
-        }).returning();
+          title,
+          tags
+        });
 
         res.json(savedPlan);
       } catch (error) {
+        if (error instanceof ApplicationError) {
+          return res.status(error.statusCode).json({ 
+            error: error.message,
+            type: error.type,
+            code: error.code 
+          });
+        }
         console.error("Failed to save plan:", error);
         res.status(500).json({ error: "Failed to save plan" });
       }
@@ -462,20 +442,16 @@ Always ask clarifying questions about employment structure when medical professi
       try {
         const userId = req.user.id;
         
-        const userSavedPlans = await db.query.savedPlans.findMany({
-          where: eq(savedPlans.userId, userId),
-          with: {
-            message: {
-              with: {
-                conversation: true
-              }
-            }
-          },
-          orderBy: [desc(savedPlans.savedAt)]
-        });
-
+        const userSavedPlans = await storage.getSavedPlansByUser(userId);
         res.json(userSavedPlans);
       } catch (error) {
+        if (error instanceof ApplicationError) {
+          return res.status(error.statusCode).json({ 
+            error: error.message,
+            type: error.type,
+            code: error.code 
+          });
+        }
         console.error("Failed to get saved plans:", error);
         res.status(500).json({ error: "Failed to get saved plans" });
       }
@@ -487,14 +463,21 @@ Always ask clarifying questions about employment structure when medical professi
         const planId = parseInt(req.params.id);
         const userId = req.user.id;
 
-        const deleted = await db.delete(savedPlans)
-          .where(and(
-            eq(savedPlans.id, planId),
-            eq(savedPlans.userId, userId)
-          ));
+        const success = await storage.deleteSavedPlan(planId, userId);
+
+        if (!success) {
+          return res.status(404).json({ error: "Saved plan not found" });
+        }
 
         res.json({ success: true });
       } catch (error) {
+        if (error instanceof ApplicationError) {
+          return res.status(error.statusCode).json({ 
+            error: error.message,
+            type: error.type,
+            code: error.code 
+          });
+        }
         console.error("Failed to delete saved plan:", error);
         res.status(500).json({ error: "Failed to delete saved plan" });
       }
@@ -508,7 +491,7 @@ Always ask clarifying questions about employment structure when medical professi
         res.setHeader('Content-Type', 'text/csv');
         res.setHeader('Content-Disposition', 'attachment; filename="users-export.csv"');
 
-        const allUsers = await db.select().from(users).orderBy(desc(users.createdAt));
+        const allUsers = await storage.getAllUsers(1000, 0); // Get up to 1000 users for export
         
         const csvData = allUsers.map(user => ({
           id: user.id,
@@ -529,6 +512,13 @@ Always ask clarifying questions about employment structure when medical professi
         
         res.send(csvString);
       } catch (error) {
+        if (error instanceof ApplicationError) {
+          return res.status(error.statusCode).json({ 
+            error: error.message,
+            type: error.type,
+            code: error.code 
+          });
+        }
         console.error("Failed to export users CSV:", error);
         res.status(500).json({ error: "Failed to export users CSV" });
       }
@@ -540,16 +530,9 @@ Always ask clarifying questions about employment structure when medical professi
         const messageId = parseInt(req.params.id);
         const userId = req.user.id;
 
-        const message = await db.query.messages.findFirst({
-          where: eq(messages.id, messageId),
-          with: { 
-            conversation: { 
-              with: { user: true } 
-            } 
-          }
-        });
+        const message = await storage.getMessageById(messageId, userId);
 
-        if (!message || message.conversation?.userId !== userId) {
+        if (!message) {
           return res.status(404).json({ error: "Message not found" });
         }
 
@@ -585,16 +568,9 @@ Always ask clarifying questions about employment structure when medical professi
         const { messageId, recipientEmail, senderNote } = req.body;
         const userId = req.user.id;
 
-        const message = await db.query.messages.findFirst({
-          where: eq(messages.id, messageId),
-          with: { 
-            conversation: { 
-              with: { user: true } 
-            } 
-          }
-        });
+        const message = await storage.getMessageById(messageId, userId);
 
-        if (!message || message.conversation?.userId !== userId) {
+        if (!message) {
           return res.status(404).json({ error: "Message not found" });
         }
 
@@ -604,7 +580,7 @@ Always ask clarifying questions about employment structure when medical professi
             const emailHtml = generateEmailTemplate(message, senderNote, message.conversation.user);
             
             if (process.env.SENDGRID_API_KEY) {
-              const transporter = nodemailer.createTransporter({
+              const transporter = nodemailer.createTransport({
                 service: 'SendGrid',
                 auth: {
                   user: 'apikey',
@@ -622,11 +598,10 @@ Always ask clarifying questions about employment structure when medical professi
             }
 
             // Log the share
-            await db.insert(shareLog).values({
+            await storage.logShare({
               userId,
               messageId,
-              recipientEmail,
-              sharedAt: new Date()
+              recipientEmail
             });
           } catch (error) {
             console.error('Email sharing failed:', error);
@@ -643,20 +618,16 @@ Always ask clarifying questions about employment structure when medical professi
     // Get admin analytics - top prompts
     app.get("/api/admin/top-prompts", requireAdmin, async (req, res) => {
       try {
-        const topPrompts = await db
-          .select({
-            prompt: usageLogs.userMessage,
-            count: count(usageLogs.id),
-            avgTokens: sql<number>`avg(${usageLogs.totalTokens})`,
-            avgResponseTime: sql<number>`avg(${usageLogs.responseTimeMs})`
-          })
-          .from(usageLogs)
-          .groupBy(usageLogs.userMessage)
-          .orderBy(desc(count(usageLogs.id)))
-          .limit(20);
-
+        const topPrompts = await storage.getTopPrompts(20);
         res.json(topPrompts);
       } catch (error) {
+        if (error instanceof ApplicationError) {
+          return res.status(error.statusCode).json({ 
+            error: error.message,
+            type: error.type,
+            code: error.code 
+          });
+        }
         console.error("Failed to get top prompts:", error);
         res.status(500).json({ error: "Failed to get top prompts" });
       }

@@ -1,7 +1,21 @@
-import { type User, type InsertUser, type UsageLog, type InsertUsageLog, type UsageStatistics } from "@shared/schema";
+import { 
+  type User, 
+  type InsertUser, 
+  type UsageLog, 
+  type InsertUsageLog, 
+  type UsageStatistics,
+  type Conversation,
+  type InsertConversation,
+  type Message,
+  type InsertMessage,
+  type SavedPlan,
+  type InsertSavedPlan,
+  type ShareLog,
+  type InsertShareLog
+} from "@shared/schema";
 import { randomUUID } from "crypto";
 
-// OAuth-focused storage interface
+// Complete storage interface with all operations
 export interface IStorage {
   // User operations
   getUser(id: number): Promise<User | undefined>;
@@ -20,20 +34,67 @@ export interface IStorage {
   // Admin operations
   getAllUsers(limit?: number, offset?: number): Promise<User[]>;
   getUserCount(): Promise<number>;
+  
+  // CONVERSATION OPERATIONS
+  createConversation(userId: number, title?: string, initialMessage?: string): Promise<Conversation>;
+  getConversationsByUser(userId: number): Promise<Array<Conversation & { messageCount: number }>>;
+  getConversationWithMessages(conversationId: number, userId: number, page?: number): Promise<Conversation & { messages: Message[] } | undefined>;
+  updateConversationTitle(conversationId: number, userId: number, title: string): Promise<Conversation | undefined>;
+  deleteConversation(conversationId: number, userId: number): Promise<boolean>;
+  
+  // MESSAGE OPERATIONS
+  addMessageToConversation(data: Omit<InsertMessage, 'id'>): Promise<Message>;
+  getMessageById(messageId: number, userId: number): Promise<Message & { conversation: { userId: number; user: User } } | undefined>;
+  
+  // SAVED PLANS OPERATIONS
+  savePlan(data: Omit<InsertSavedPlan, 'id' | 'savedAt'>): Promise<SavedPlan>;
+  getSavedPlansByUser(userId: number): Promise<Array<SavedPlan & { message: { conversation: Conversation } }>>;
+  deleteSavedPlan(planId: number, userId: number): Promise<boolean>;
+  
+  // SHARE LOG OPERATIONS
+  logShare(data: Omit<InsertShareLog, 'id' | 'sharedAt'>): Promise<ShareLog>;
+  
+  // ADMIN ANALYTICS
+  getTopPrompts(limit?: number): Promise<Array<{
+    prompt: string;
+    count: number;
+    avgTokens: number;
+    avgResponseTime: number;
+  }>>;
+  
+  // CONNECTION HEALTH
+  testConnection(): Promise<boolean>;
+  getConnectionStatus(): 'connected' | 'disconnected' | 'error' | 'unknown';
 }
 
 // In-memory storage for backward compatibility
 export class MemStorage implements IStorage {
   private users: Map<number, User>;
   private usageLogs: Map<number, UsageLog>;
+  private conversations: Map<number, Conversation>;
+  private messages: Map<number, Message>;
+  private savedPlans: Map<number, SavedPlan>;
+  private shareLogs: Map<number, ShareLog>;
   private userIdCounter: number;
   private logIdCounter: number;
+  private conversationIdCounter: number;
+  private messageIdCounter: number;
+  private savedPlanIdCounter: number;
+  private shareLogIdCounter: number;
 
   constructor() {
     this.users = new Map();
     this.usageLogs = new Map();
+    this.conversations = new Map();
+    this.messages = new Map();
+    this.savedPlans = new Map();
+    this.shareLogs = new Map();
     this.userIdCounter = 1;
     this.logIdCounter = 1;
+    this.conversationIdCounter = 1;
+    this.messageIdCounter = 1;
+    this.savedPlanIdCounter = 1;
+    this.shareLogIdCounter = 1;
   }
 
   async getUser(id: number): Promise<User | undefined> {
@@ -151,11 +212,234 @@ export class MemStorage implements IStorage {
     this.users.set(id, updatedUser);
     return updatedUser;
   }
+
+  // CONVERSATION OPERATIONS
+  async createConversation(userId: number, title?: string, initialMessage?: string): Promise<Conversation> {
+    const id = this.conversationIdCounter++;
+    const now = new Date();
+    const conversation: Conversation = {
+      id,
+      userId,
+      title: title || 'New Conversation',
+      createdAt: now,
+      updatedAt: now,
+      isActive: true,
+    };
+    this.conversations.set(id, conversation);
+
+    // Add initial message if provided
+    if (initialMessage) {
+      await this.addMessageToConversation({
+        conversationId: id,
+        role: 'user',
+        content: initialMessage,
+        timestamp: now,
+        tokensUsed: null,
+        responseTimeMs: null,
+      });
+    }
+
+    return conversation;
+  }
+
+  async getConversationsByUser(userId: number): Promise<Array<Conversation & { messageCount: number }>> {
+    const userConversations = Array.from(this.conversations.values())
+      .filter(conv => conv.userId === userId && conv.isActive)
+      .sort((a, b) => b.updatedAt.getTime() - a.updatedAt.getTime());
+
+    return userConversations.map(conv => ({
+      ...conv,
+      messageCount: Array.from(this.messages.values()).filter(msg => msg.conversationId === conv.id).length
+    }));
+  }
+
+  async getConversationWithMessages(conversationId: number, userId: number, page = 1): Promise<Conversation & { messages: Message[] } | undefined> {
+    const conversation = this.conversations.get(conversationId);
+    if (!conversation || conversation.userId !== userId) {
+      return undefined;
+    }
+
+    const limit = 50;
+    const offset = (page - 1) * limit;
+    const conversationMessages = Array.from(this.messages.values())
+      .filter(msg => msg.conversationId === conversationId)
+      .sort((a, b) => a.timestamp.getTime() - b.timestamp.getTime())
+      .slice(offset, offset + limit);
+
+    return {
+      ...conversation,
+      messages: conversationMessages
+    };
+  }
+
+  async updateConversationTitle(conversationId: number, userId: number, title: string): Promise<Conversation | undefined> {
+    const conversation = this.conversations.get(conversationId);
+    if (!conversation || conversation.userId !== userId) {
+      return undefined;
+    }
+
+    const updatedConversation = {
+      ...conversation,
+      title,
+      updatedAt: new Date()
+    };
+    this.conversations.set(conversationId, updatedConversation);
+    return updatedConversation;
+  }
+
+  async deleteConversation(conversationId: number, userId: number): Promise<boolean> {
+    const conversation = this.conversations.get(conversationId);
+    if (!conversation || conversation.userId !== userId) {
+      return false;
+    }
+
+    const updatedConversation = {
+      ...conversation,
+      isActive: false,
+      updatedAt: new Date()
+    };
+    this.conversations.set(conversationId, updatedConversation);
+    return true;
+  }
+
+  // MESSAGE OPERATIONS
+  async addMessageToConversation(data: Omit<InsertMessage, 'id'>): Promise<Message> {
+    const id = this.messageIdCounter++;
+    const message: Message = {
+      id,
+      conversationId: data.conversationId,
+      role: data.role,
+      content: data.content,
+      timestamp: data.timestamp || new Date(),
+      tokensUsed: data.tokensUsed || null,
+      responseTimeMs: data.responseTimeMs || null,
+    };
+    this.messages.set(id, message);
+
+    // Update conversation timestamp
+    const conversation = this.conversations.get(data.conversationId!);
+    if (conversation) {
+      this.conversations.set(data.conversationId!, {
+        ...conversation,
+        updatedAt: new Date()
+      });
+    }
+
+    return message;
+  }
+
+  async getMessageById(messageId: number, userId: number): Promise<Message & { conversation: { userId: number; user: User } } | undefined> {
+    const message = this.messages.get(messageId);
+    if (!message) return undefined;
+
+    const conversation = this.conversations.get(message.conversationId!);
+    if (!conversation || conversation.userId !== userId) return undefined;
+
+    const user = this.users.get(conversation.userId);
+    if (!user) return undefined;
+
+    return {
+      ...message,
+      conversation: {
+        userId: conversation.userId,
+        user
+      }
+    };
+  }
+
+  // SAVED PLANS OPERATIONS
+  async savePlan(data: Omit<InsertSavedPlan, 'id' | 'savedAt'>): Promise<SavedPlan> {
+    const id = this.savedPlanIdCounter++;
+    const savedPlan: SavedPlan = {
+      id,
+      userId: data.userId,
+      messageId: data.messageId,
+      title: data.title || 'Untitled Plan',
+      tags: data.tags || [],
+      savedAt: new Date(),
+    };
+    this.savedPlans.set(id, savedPlan);
+    return savedPlan;
+  }
+
+  async getSavedPlansByUser(userId: number): Promise<Array<SavedPlan & { message: { conversation: Conversation } }>> {
+    const userPlans = Array.from(this.savedPlans.values())
+      .filter(plan => plan.userId === userId)
+      .sort((a, b) => b.savedAt.getTime() - a.savedAt.getTime());
+
+    return userPlans.map(plan => {
+      const message = this.messages.get(plan.messageId!);
+      const conversation = message ? this.conversations.get(message.conversationId!) : undefined;
+      return {
+        ...plan,
+        message: {
+          conversation: conversation!
+        }
+      };
+    });
+  }
+
+  async deleteSavedPlan(planId: number, userId: number): Promise<boolean> {
+    const plan = this.savedPlans.get(planId);
+    if (!plan || plan.userId !== userId) {
+      return false;
+    }
+    this.savedPlans.delete(planId);
+    return true;
+  }
+
+  // SHARE LOG OPERATIONS
+  async logShare(data: Omit<InsertShareLog, 'id' | 'sharedAt'>): Promise<ShareLog> {
+    const id = this.shareLogIdCounter++;
+    const shareLog: ShareLog = {
+      id,
+      userId: data.userId,
+      messageId: data.messageId,
+      recipientEmail: data.recipientEmail || null,
+      sharedAt: new Date(),
+    };
+    this.shareLogs.set(id, shareLog);
+    return shareLog;
+  }
+
+  // ADMIN ANALYTICS
+  async getTopPrompts(limit = 20): Promise<Array<{prompt: string; count: number; avgTokens: number; avgResponseTime: number}>> {
+    const promptStats = new Map<string, {count: number; totalTokens: number; totalResponseTime: number}>();
+
+    Array.from(this.usageLogs.values()).forEach(log => {
+      const prompt = log.userMessage;
+      const existing = promptStats.get(prompt) || {count: 0, totalTokens: 0, totalResponseTime: 0};
+      promptStats.set(prompt, {
+        count: existing.count + 1,
+        totalTokens: existing.totalTokens + log.totalTokens,
+        totalResponseTime: existing.totalResponseTime + log.responseTimeMs
+      });
+    });
+
+    return Array.from(promptStats.entries())
+      .map(([prompt, stats]) => ({
+        prompt,
+        count: stats.count,
+        avgTokens: Math.round(stats.totalTokens / stats.count),
+        avgResponseTime: Math.round(stats.totalResponseTime / stats.count)
+      }))
+      .sort((a, b) => b.count - a.count)
+      .slice(0, limit);
+  }
+
+  // CONNECTION HEALTH
+  async testConnection(): Promise<boolean> {
+    return true; // Memory storage is always available
+  }
+
+  getConnectionStatus(): 'connected' | 'disconnected' | 'error' | 'unknown' {
+    return 'connected';
+  }
 }
 
 import { getDatabase } from "./db";
-import { users, usageLogs } from "@shared/schema";
-import { eq, desc, count, sum, gte, and } from "drizzle-orm";
+import { users, usageLogs, conversations, messages, savedPlans, shareLog } from "@shared/schema";
+import { eq, desc, count, sum, gte, and, sql, asc } from "drizzle-orm";
 
 // Drizzle-based database storage
 export class DrizzleStorage implements IStorage {
@@ -289,6 +573,235 @@ export class DrizzleStorage implements IStorage {
       .where(eq(users.id, id))
       .returning();
     return user || undefined;
+  }
+
+  // CONVERSATION OPERATIONS
+  async createConversation(userId: number, title?: string, initialMessage?: string): Promise<Conversation> {
+    const [conversation] = await this.db!.transaction(async (tx) => {
+      const [conv] = await tx.insert(conversations).values({
+        userId,
+        title: title || 'New Conversation',
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      }).returning();
+
+      if (initialMessage) {
+        await tx.insert(messages).values({
+          conversationId: conv.id,
+          role: 'user',
+          content: initialMessage,
+          timestamp: new Date(),
+        });
+      }
+
+      return [conv];
+    });
+
+    return conversation;
+  }
+
+  async getConversationsByUser(userId: number): Promise<Array<Conversation & { messageCount: number }>> {
+    const userConversations = await this.db!
+      .select({
+        id: conversations.id,
+        userId: conversations.userId,
+        title: conversations.title,
+        updatedAt: conversations.updatedAt,
+        createdAt: conversations.createdAt,
+        isActive: conversations.isActive,
+        messageCount: count(messages.id),
+      })
+      .from(conversations)
+      .leftJoin(messages, eq(conversations.id, messages.conversationId))
+      .where(and(eq(conversations.userId, userId), eq(conversations.isActive, true)))
+      .groupBy(conversations.id)
+      .orderBy(desc(conversations.updatedAt));
+
+    return userConversations;
+  }
+
+  async getConversationWithMessages(conversationId: number, userId: number, page = 1): Promise<Conversation & { messages: Message[] } | undefined> {
+    const limit = 50;
+    const offset = (page - 1) * limit;
+
+    const conversation = await this.db!.query.conversations.findFirst({
+      where: and(
+        eq(conversations.id, conversationId),
+        eq(conversations.userId, userId)
+      ),
+      with: {
+        messages: {
+          orderBy: [asc(messages.timestamp)],
+          limit,
+          offset,
+        }
+      }
+    });
+
+    return conversation;
+  }
+
+  async updateConversationTitle(conversationId: number, userId: number, title: string): Promise<Conversation | undefined> {
+    const [updated] = await this.db!
+      .update(conversations)
+      .set({ title, updatedAt: new Date() })
+      .where(and(
+        eq(conversations.id, conversationId),
+        eq(conversations.userId, userId)
+      ))
+      .returning();
+
+    return updated || undefined;
+  }
+
+  async deleteConversation(conversationId: number, userId: number): Promise<boolean> {
+    const [deleted] = await this.db!
+      .update(conversations)
+      .set({ isActive: false, updatedAt: new Date() })
+      .where(and(
+        eq(conversations.id, conversationId),
+        eq(conversations.userId, userId)
+      ))
+      .returning();
+
+    return !!deleted;
+  }
+
+  // MESSAGE OPERATIONS
+  async addMessageToConversation(data: Omit<InsertMessage, 'id'>): Promise<Message> {
+    const [message] = await this.db!.transaction(async (tx) => {
+      const [msg] = await tx.insert(messages).values({
+        conversationId: data.conversationId,
+        role: data.role,
+        content: data.content,
+        timestamp: data.timestamp || new Date(),
+        tokensUsed: data.tokensUsed,
+        responseTimeMs: data.responseTimeMs,
+      }).returning();
+
+      // Update conversation timestamp
+      await tx.update(conversations)
+        .set({ updatedAt: new Date() })
+        .where(eq(conversations.id, data.conversationId!));
+
+      return [msg];
+    });
+
+    return message;
+  }
+
+  async getMessageById(messageId: number, userId: number): Promise<Message & { conversation: { userId: number; user: User } } | undefined> {
+    const message = await this.db!.query.messages.findFirst({
+      where: eq(messages.id, messageId),
+      with: { 
+        conversation: { 
+          with: { user: true } 
+        } 
+      }
+    });
+
+    if (!message || message.conversation?.userId !== userId) {
+      return undefined;
+    }
+
+    return {
+      ...message,
+      conversation: {
+        userId: message.conversation.userId,
+        user: message.conversation.user
+      }
+    };
+  }
+
+  // SAVED PLANS OPERATIONS
+  async savePlan(data: Omit<InsertSavedPlan, 'id' | 'savedAt'>): Promise<SavedPlan> {
+    const [plan] = await this.db!.insert(savedPlans).values({
+      userId: data.userId,
+      messageId: data.messageId,
+      title: data.title || 'Untitled Plan',
+      tags: data.tags || [],
+      savedAt: new Date(),
+    }).returning();
+
+    return plan;
+  }
+
+  async getSavedPlansByUser(userId: number): Promise<Array<SavedPlan & { message: { conversation: Conversation } }>> {
+    const userSavedPlans = await this.db!.query.savedPlans.findMany({
+      where: eq(savedPlans.userId, userId),
+      with: {
+        message: {
+          with: {
+            conversation: true
+          }
+        }
+      },
+      orderBy: [desc(savedPlans.savedAt)]
+    });
+
+    return userSavedPlans;
+  }
+
+  async deleteSavedPlan(planId: number, userId: number): Promise<boolean> {
+    const result = await this.db!.delete(savedPlans)
+      .where(and(
+        eq(savedPlans.id, planId),
+        eq(savedPlans.userId, userId)
+      ));
+
+    return result.rowCount! > 0;
+  }
+
+  // SHARE LOG OPERATIONS
+  async logShare(data: Omit<InsertShareLog, 'id' | 'sharedAt'>): Promise<ShareLog> {
+    const [log] = await this.db!.insert(shareLog).values({
+      userId: data.userId,
+      messageId: data.messageId,
+      recipientEmail: data.recipientEmail,
+      sharedAt: new Date()
+    }).returning();
+
+    return log;
+  }
+
+  // ADMIN ANALYTICS
+  async getTopPrompts(limit = 20): Promise<Array<{prompt: string; count: number; avgTokens: number; avgResponseTime: number}>> {
+    const topPrompts = await this.db!
+      .select({
+        prompt: usageLogs.userMessage,
+        count: count(usageLogs.id),
+        avgTokens: sql<number>`avg(${usageLogs.totalTokens})`,
+        avgResponseTime: sql<number>`avg(${usageLogs.responseTimeMs})`
+      })
+      .from(usageLogs)
+      .groupBy(usageLogs.userMessage)
+      .orderBy(desc(count(usageLogs.id)))
+      .limit(limit);
+
+    return topPrompts.map(row => ({
+      prompt: row.prompt,
+      count: row.count,
+      avgTokens: Math.round(Number(row.avgTokens)),
+      avgResponseTime: Math.round(Number(row.avgResponseTime))
+    }));
+  }
+
+  // CONNECTION HEALTH
+  async testConnection(): Promise<boolean> {
+    try {
+      await this.db!.select({ count: count() }).from(users).limit(1);
+      return true;
+    } catch (error) {
+      return false;
+    }
+  }
+
+  getConnectionStatus(): 'connected' | 'disconnected' | 'error' | 'unknown' {
+    try {
+      return this.db ? 'connected' : 'disconnected';
+    } catch (error) {
+      return 'error';
+    }
   }
 }
 
