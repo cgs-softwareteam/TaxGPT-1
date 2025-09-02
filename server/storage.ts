@@ -353,7 +353,7 @@ export class MemStorage implements IStorage {
     const savedPlan: SavedPlan = {
       id,
       userId: data.userId,
-      messageId: data.messageId!,
+      messageId: data.messageId || 0,
       title: data.title || 'Untitled Plan',
       tags: data.tags || [],
       savedAt: new Date(),
@@ -394,7 +394,7 @@ export class MemStorage implements IStorage {
     const shareLog: ShareLog = {
       id,
       userId: data.userId,
-      messageId: data.messageId!,
+      messageId: data.messageId || 0,
       recipientEmail: data.recipientEmail || null,
       sharedAt: new Date(),
     };
