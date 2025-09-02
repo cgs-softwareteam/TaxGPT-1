@@ -26,7 +26,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 
 interface ExportButtonsProps {
-  messageId: number;
+  messageId?: number;
   content: string;
   className?: string;
 }
@@ -77,13 +77,10 @@ export function ExportButtons({ messageId, content, className }: ExportButtonsPr
 
   const shareEmailMutation = useMutation({
     mutationFn: async (data: { recipientEmail: string; senderNote: string }) => {
-      return apiRequest("/api/share/email", {
-        method: "POST",
-        body: {
-          messageId,
-          recipientEmail: data.recipientEmail,
-          senderNote: data.senderNote,
-        },
+      return apiRequest("POST", "/api/share/email", {
+        messageId,
+        recipientEmail: data.recipientEmail,
+        senderNote: data.senderNote,
       });
     },
     onSuccess: () => {

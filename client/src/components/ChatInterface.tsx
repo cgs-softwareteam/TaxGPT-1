@@ -120,6 +120,7 @@ export default function ChatInterface({ conversation, isLoading, onRequestExpert
                       />
                       */}
                       <ExportButtons 
+                        messageId={message.id}
                         content={message.content}
                       />
                     </>
