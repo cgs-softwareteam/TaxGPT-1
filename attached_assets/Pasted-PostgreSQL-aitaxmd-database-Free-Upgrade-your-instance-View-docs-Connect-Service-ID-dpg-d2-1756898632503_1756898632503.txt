@@ -1,0 +1,116 @@
+PostgreSQL
+aitaxmd-database
+Free
+Upgrade your instance
+View docs
+
+Connect
+Service ID:
+dpg-d2s29kmr433s738fu070-a
+
+Info
+Your database will expire on October 3, 2025. The database will be deleted unless you upgrade to a paid instance type.
+General
+Name
+A unique name for your database.
+
+aitaxmd-database
+
+Edit
+Created
+a few seconds ago
+Status
+available
+PostgreSQL Version
+15
+Region
+Oregon (US West)
+Read Replicas
+
+Add Read Replica
+Storage
+Fetching storage metrics
+Datadog API Key
+
+Add Datadog API Key
+Postgres Instance
+Instance Type
+Free
+256 MB
+ RAM
+0.1
+ CPU
+1 GB
+ Storage
+Update
+High Availability
+Run a standby instance of your database and automatically fail over to it if the primary encounters an issue.
+
+
+Disabled
+Only available for Pro instances and higher.
+See upgrade options
+Connections
+Hostname
+An internal hostname used by your Render services.
+
+dpg-d2s29kmr433s738fu070-a
+
+Port
+5432
+
+Database
+aitaxmd_prod
+
+Username
+aitaxmd_user
+
+Password
+fQT89cCLuLw1UNcXdLCBp0vPaBwdODGn
+
+
+Internal Database URL
+postgresql://aitaxmd_user:fQT89cCLuLw1UNcXdLCBp0vPaBwdODGn@dpg-d2s29kmr433s738fu070-a/aitaxmd_prod
+
+
+External Database URL
+postgresql://aitaxmd_user:fQT89cCLuLw1UNcXdLCBp0vPaBwdODGn@dpg-d2s29kmr433s738fu070-a.oregon-postgres.render.com/aitaxmd_prod
+
+
+PSQL Command
+PGPASSWORD=fQT89cCLuLw1UNcXdLCBp0vPaBwdODGn psql -h dpg-d2s29kmr433s738fu070-a.oregon-postgres.render.com -U aitaxmd_user aitaxmd_prod
+
+
+Access Control
+1 IP range is allowed from outside of your private network.
+
+Sources are specified CIDR block notation.
+
+Source
+Description
+0.0.0.0/0
+everywhere
+
+Validate IP address
+0.0.0.0
+
+Add source
+Cancel
+Save
+Log Stream
+Forward Render service logs to your third-party logging provider. Learn more
+Destination
+Use your workspace's default log stream or override for this service.
+
+Log endpoint
+None
+Token
+None
+Override service log stream
+Using workspace default
+
+Delete Database
+
+Restart Database
+
+Suspend Database
