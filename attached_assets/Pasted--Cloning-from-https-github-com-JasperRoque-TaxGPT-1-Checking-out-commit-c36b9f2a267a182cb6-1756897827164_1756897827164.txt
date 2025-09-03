@@ -1,0 +1,72 @@
+==> Cloning from https://github.com/JasperRoque/TaxGPT-1
+==> Checking out commit c36b9f2a267a182cb633e8fd1158e8b7d0f4a47f in branch main
+==> Downloading cache...
+==> Transferred 219MB in 8s. Extraction took 5s.
+==> Using Node.js version 22.16.0 (default)
+==> Docs on specifying a Node.js version: https://render.com/docs/node-version
+==> Running build command 'npm install; npm run build'...
+added 219 packages, changed 2 packages, and audited 781 packages in 10s
+153 packages are looking for funding
+  run `npm fund` for details
+11 vulnerabilities (3 low, 8 moderate)
+To address issues that do not require attention, run:
+  npm audit fix
+To address all issues (including breaking changes), run:
+  npm audit fix --force
+Run `npm audit` for details.
+> rest-express@1.0.0 build
+> vite build && esbuild server/index.ts --platform=node --packages=external --bundle --format=esm --outdir=dist
+vite v5.4.19 building for production...
+transforming...
+Browserslist: browsers data (caniuse-lite) is 11 months old. Please run:
+  npx update-browserslist-db@latest
+  Why you should do it regularly: https://github.com/browserslist/update-db#readme
+✓ 2194 modules transformed.
+rendering chunks...
+computing gzip size...
+../dist/public/index.html                   2.77 kB │ gzip:   0.92 kB
+../dist/public/assets/index-yLg8b3Or.css   88.18 kB │ gzip:  14.38 kB
+../dist/public/assets/index-DXV1yDgv.js   531.48 kB │ gzip: 163.76 kB
+(!) Some chunks are larger than 500 kB after minification. Consider:
+- Using dynamic import() to code-split the application
+- Use build.rollupOptions.output.manualChunks to improve chunking: https://rollupjs.org/configuration-options/#output-manualchunks
+- Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.
+✓ built in 4.88s
+  dist/index.js  72.0kb
+⚡ Done in 26ms
+==> Uploading build...
+==> Uploaded in 6.8s. Compression took 25.5s
+==> Build successful 🎉
+==> Deploying...
+==> Running 'npm run start'
+> rest-express@1.0.0 start
+> NODE_ENV=production node dist/index.js
+PRODUCTION ERROR: Database storage must be enabled in production
+Set ENABLE_DATABASE_STORAGE=true in production environment
+file:///opt/render/project/src/dist/index.js:779
+    throw new Error("Production requires database storage - MemStorage not allowed");
+          ^
+Error: Production requires database storage - MemStorage not allowed
+    at createStorage (file:///opt/render/project/src/dist/index.js:779:11)
+    at file:///opt/render/project/src/dist/index.js:798:15
+    at ModuleJob.run (node:internal/modules/esm/module_job:274:25)
+    at async onImport.tracePromise.__proto__ (node:internal/modules/esm/loader:644:26)
+    at async asyncRunEntryPointWithESMLoader (node:internal/modules/run_main:117:5)
+Node.js v22.16.0
+==> Exited with status 1
+==> Common ways to troubleshoot your deploy: https://render.com/docs/troubleshooting-deploys
+==> Running 'npm run start'
+> rest-express@1.0.0 start
+> NODE_ENV=production node dist/index.js
+PRODUCTION ERROR: Database storage must be enabled in production
+Set ENABLE_DATABASE_STORAGE=true in production environment
+file:///opt/render/project/src/dist/index.js:779
+    throw new Error("Production requires database storage - MemStorage not allowed");
+          ^
+Error: Production requires database storage - MemStorage not allowed
+    at createStorage (file:///opt/render/project/src/dist/index.js:779:11)
+    at file:///opt/render/project/src/dist/index.js:798:15
+    at ModuleJob.run (node:internal/modules/esm/module_job:274:25)
+    at async onImport.tracePromise.__proto__ (node:internal/modules/esm/loader:644:26)
+    at async asyncRunEntryPointWithESMLoader (node:internal/modules/run_main:117:5)
+Node.js v22.16.0
