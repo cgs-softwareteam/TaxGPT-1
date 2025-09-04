@@ -1,0 +1,127 @@
+==> Cloning from https://github.com/JasperRoque/TaxGPT-1
+==> Checking out commit 251e7f5d01a0cfc41788c2bc23758289f9d31259 in branch main
+==> Downloading cache...
+==> Transferred 488MB in 8s. Extraction took 9s.
+==> Using Node.js version 22.16.0 (default)
+==> Docs on specifying a Node.js version: https://render.com/docs/node-version
+==> Running build command 'npm install --include=dev; npm run build'...
+up to date, audited 782 packages in 2s
+153 packages are looking for funding
+  run `npm fund` for details
+11 vulnerabilities (3 low, 8 moderate)
+To address issues that do not require attention, run:
+  npm audit fix
+To address all issues (including breaking changes), run:
+  npm audit fix --force
+Run `npm audit` for details.
+> rest-express@1.0.0 build
+> vite build && esbuild server/index.ts --platform=node --packages=external --bundle --format=esm --outdir=dist
+vite v5.4.19 building for production...
+transforming...
+Browserslist: browsers data (caniuse-lite) is 11 months old. Please run:
+  npx update-browserslist-db@latest
+  Why you should do it regularly: https://github.com/browserslist/update-db#readme
+✓ 2194 modules transformed.
+rendering chunks...
+computing gzip size...
+../dist/public/index.html                   2.77 kB │ gzip:   0.92 kB
+../dist/public/assets/index-yLg8b3Or.css   88.18 kB │ gzip:  14.38 kB
+../dist/public/assets/index-BVyx9UBb.js   531.48 kB │ gzip: 163.76 kB
+(!) Some chunks are larger than 500 kB after minification. Consider:
+- Using dynamic import() to code-split the application
+- Use build.rollupOptions.output.manualChunks to improve chunking: https://rollupjs.org/configuration-options/#output-manualchunks
+- Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.
+✓ built in 4.25s
+  dist/index.js  72.0kb
+⚡ Done in 6ms
+==> Uploading build...
+==> Uploaded in 5.6s. Compression took 4.0s
+==> Build successful 🎉
+==> Deploying...
+==> Running 'npm run start'
+> rest-express@1.0.0 start
+> NODE_ENV=production node dist/index.js
+🔒 Running production safety validation...
+⚠️ Database URL format may be incorrect for PostgreSQL
+✅ Production safety validation passed
+🚀 Validating Render deployment compatibility...
+✅ Render deployment environment detected
+Render service: tax-gpt-ywbk
+✅ Port configured: 10000
+✅ Render compatibility validation passed
+============================================================
+🏥 AITaxMD Server Starting - PRODUCTION Mode
+============================================================
+🔒 Production mode: Enhanced security and monitoring active
+📊 Database: PostgreSQL (production-only)
+🔄 Session store: PostgreSQL-backed
+⚡ Connection pooling: Optimized for Render
+🛡️ Graceful shutdown: SIGTERM/SIGINT handlers active
+============================================================
+3:03:50 PM [express] serving on port 10000
+Environment: production
+Database enabled: true
+Authentication enabled: true
+==> Your service is live 🎉
+==> 
+==> ///////////////////////////////////////////////////////////
+==> 
+==> Available at your primary URL https://www.aitaxmd.com + 1 more domain
+==> 
+==> ///////////////////////////////////////////////////////////
+Authentication system error: AggregateError [ECONNREFUSED]: 
+    at /opt/render/project/src/node_modules/pg-pool/index.js:45:11
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async file:///opt/render/project/src/node_modules/drizzle-orm/node-postgres/session.js:83:22
+    at async DrizzleStorage.getUserByGoogleId (file:///opt/render/project/src/dist/index.js:533:20)
+    at async Strategy._verify (file:///opt/render/project/src/dist/index.js:850:20) {
+  code: 'ECONNREFUSED',
+  [errors]: [
+    Error: connect ECONNREFUSED ::1:5432
+        at createConnectionError (node:net:1677:14)
+        at afterConnectMultiple (node:net:1707:16) {
+      errno: -111,
+      code: 'ECONNREFUSED',
+      syscall: 'connect',
+      address: '::1',
+      port: 5432
+    },
+    Error: connect ECONNREFUSED 127.0.0.1:5432
+        at createConnectionError (node:net:1677:14)
+        at afterConnectMultiple (node:net:1707:16) {
+      errno: -111,
+      code: 'ECONNREFUSED',
+      syscall: 'connect',
+      address: '127.0.0.1',
+      port: 5432
+    }
+  ]
+}
+Authentication system error: AggregateError [ECONNREFUSED]: 
+    at /opt/render/project/src/node_modules/pg-pool/index.js:45:11
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async file:///opt/render/project/src/node_modules/drizzle-orm/node-postgres/session.js:83:22
+    at async DrizzleStorage.getUserByGoogleId (file:///opt/render/project/src/dist/index.js:533:20)
+    at async Strategy._verify (file:///opt/render/project/src/dist/index.js:850:20) {
+  code: 'ECONNREFUSED',
+  [errors]: [
+    Error: connect ECONNREFUSED ::1:5432
+        at createConnectionError (node:net:1677:14)
+        at afterConnectMultiple (node:net:1707:16) {
+      errno: -111,
+      code: 'ECONNREFUSED',
+      syscall: 'connect',
+      address: '::1',
+      port: 5432
+    },
+    Error: connect ECONNREFUSED 127.0.0.1:5432
+        at createConnectionError (node:net:1677:14)
+        at afterConnectMultiple (node:net:1707:16) {
+      errno: -111,
+      code: 'ECONNREFUSED',
+      syscall: 'connect',
+      address: '127.0.0.1',
+      port: 5432
+    }
+  ]
+}
