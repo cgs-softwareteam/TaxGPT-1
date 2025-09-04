@@ -104,10 +104,14 @@ export function setupPassport() {
 
   // Facebook OAuth Strategy
   if (process.env.FACEBOOK_APP_ID && process.env.FACEBOOK_APP_SECRET) {
+    const callbackURL = process.env.REPLIT_DOMAINS 
+      ? `https://${process.env.REPLIT_DOMAINS}/auth/facebook/callback`
+      : "http://localhost:5000/auth/facebook/callback";
+    
     passport.use(new FacebookStrategy({
       clientID: process.env.FACEBOOK_APP_ID,
       clientSecret: process.env.FACEBOOK_APP_SECRET,
-      callbackURL: "/auth/facebook/callback",
+      callbackURL: callbackURL,
       profileFields: ['id', 'displayName', 'photos', 'email']
     }, async (accessToken, refreshToken, profile, done) => {
       try {
