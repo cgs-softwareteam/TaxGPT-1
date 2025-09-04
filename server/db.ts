@@ -1,9 +1,6 @@
-import { Pool, neonConfig } from '@neondatabase/serverless';
-import { drizzle } from 'drizzle-orm/neon-serverless';
-import ws from "ws";
+import { Pool } from 'pg';
+import { drizzle } from 'drizzle-orm/node-postgres';
 import * as schema from "@shared/schema";
-
-neonConfig.webSocketConstructor = ws;
 
 // Feature flag to control database initialization
 const ENABLE_DATABASE_STORAGE = process.env.ENABLE_DATABASE_STORAGE === 'true';
@@ -32,7 +29,7 @@ export function initializeDatabase() {
       connectionTimeoutMillis: 5000, // Connection timeout for responsiveness
       allowExitOnIdle: false // Keep pool alive
     });
-    db = drizzle({ client: pool, schema });
+    db = drizzle(pool, { schema });
     return db;
   } catch (error) {
     console.error('Failed to initialize database:', error);
