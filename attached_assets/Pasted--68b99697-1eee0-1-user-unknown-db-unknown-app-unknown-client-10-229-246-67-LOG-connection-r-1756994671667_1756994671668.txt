@@ -1,0 +1,313 @@
+[68b99697.1eee0-1] user=[unknown],db=[unknown],app=[unknown],client=10.229.246.67,LOG:  connection received: host=10.229.246.67 port=43346
+[68b99697.1eee1-1] user=[unknown],db=[unknown],app=[unknown],client=10.229.246.67,LOG:  connection received: host=10.229.246.67 port=43360
+[68b99697.1eee1-2] user=postgres,db=aitaxmd_prod,app=[unknown],client=10.229.246.67,LOG:  connection authenticated: identity="postgres" method=md5 (/pgdata/dpg-d2s29kmr433s738fu070-a/pg_hba.conf:88)
+[68b99697.1eee1-3] user=postgres,db=aitaxmd_prod,app=[unknown],client=10.229.246.67,LOG:  connection authorized: user=postgres database=aitaxmd_prod SSL enabled (protocol=TLSv1.2, cipher=ECDHE-RSA-AES256-GCM-SHA384, bits=256)
+[68b99697.1eee1-4] user=postgres,db=aitaxmd_prod,app=[unknown],client=10.229.246.67,LOG:  disconnection: session time: 0:00:03.105 user=postgres database=aitaxmd_prod host=10.229.246.67 port=43360
+[68b996a7.1eefa-1] user=[unknown],db=[unknown],app=[unknown],client=10.229.246.67,LOG:  connection received: host=10.229.246.67 port=35890
+[68b996a7.1eefb-1] user=[unknown],db=[unknown],app=[unknown],client=10.229.246.67,LOG:  connection received: host=10.229.246.67 port=35892
+[68b996a8.1eefc-1] user=[unknown],db=[unknown],app=[unknown],client=10.229.246.67,LOG:  connection received: host=10.229.246.67 port=35900
+[68b996a8.1eefc-2] user=postgres,db=aitaxmd_prod,app=[unknown],client=10.229.246.67,LOG:  connection authenticated: identity="postgres" method=md5 (/pgdata/dpg-d2s29kmr433s738fu070-a/pg_hba.conf:88)
+[68b996a8.1eefc-3] user=postgres,db=aitaxmd_prod,app=[unknown],client=10.229.246.67,LOG:  connection authorized: user=postgres database=aitaxmd_prod SSL enabled (protocol=TLSv1.2, cipher=ECDHE-RSA-AES256-GCM-SHA384, bits=256)
+[68b996a8.1eefc-4] user=postgres,db=aitaxmd_prod,app=[unknown],client=10.229.246.67,LOG:  disconnection: session time: 0:00:03.042 user=postgres database=aitaxmd_prod host=10.229.246.67 port=35900
+[68b996d3.1ef31-1] user=[unknown],db=[unknown],app=[unknown],client=10.229.246.67,LOG:  connection received: host=10.229.246.67 port=39912
+[68b996d3.1ef30-1] user=[unknown],db=[unknown],app=[unknown],client=10.229.246.67,LOG:  connection received: host=10.229.246.67 port=39910
+[68b996d3.1ef32-1] user=[unknown],db=[unknown],app=[unknown],client=10.229.246.67,LOG:  connection received: host=10.229.246.67 port=39918
+[68b996d3.1ef32-2] user=postgres,db=aitaxmd_prod,app=[unknown],client=10.229.246.67,LOG:  connection authenticated: identity="postgres" method=md5 (/pgdata/dpg-d2s29kmr433s738fu070-a/pg_hba.conf:88)
+[68b996d3.1ef32-3] user=postgres,db=aitaxmd_prod,app=[unknown],client=10.229.246.67,LOG:  connection authorized: user=postgres database=aitaxmd_prod SSL enabled (protocol=TLSv1.2, cipher=ECDHE-RSA-AES256-GCM-SHA384, bits=256)
+[68b996d3.1ef32-4] user=postgres,db=aitaxmd_prod,app=[unknown],client=10.229.246.67,LOG:  disconnection: session time: 0:00:03.100 user=postgres database=aitaxmd_prod host=10.229.246.67 port=39918
+[68b996e3.1ef4b-1] user=[unknown],db=[unknown],app=[unknown],client=10.229.246.67,LOG:  connection received: host=10.229.246.67 port=44952
+[68b996e3.1ef4c-1] user=[unknown],db=[unknown],app=[unknown],client=10.229.246.67,LOG:  connection received: host=10.229.246.67 port=44964
+[68b996e4.1ef4d-1] user=[unknown],db=[unknown],app=[unknown],client=10.229.246.67,LOG:  connection received: host=10.229.246.67 port=44972
+[68b996e4.1ef4d-2] user=postgres,db=aitaxmd_prod,app=[unknown],client=10.229.246.67,LOG:  connection authenticated: identity="postgres" method=md5 (/pgdata/dpg-d2s29kmr433s738fu070-a/pg_hba.conf:88)
+[68b996e4.1ef4d-3] user=postgres,db=aitaxmd_prod,app=[unknown],client=10.229.246.67,LOG:  connection authorized: user=postgres database=aitaxmd_prod SSL enabled (protocol=TLSv1.2, cipher=ECDHE-RSA-AES256-GCM-SHA384, bits=256)
+[68b996e4.1ef4d-4] user=postgres,db=aitaxmd_prod,app=[unknown],client=10.229.246.67,LOG:  disconnection: session time: 0:00:03.074 user=postgres database=aitaxmd_prod host=10.229.246.67 port=44972
+[68b9970f.1ef80-1] user=[unknown],db=[unknown],app=[unknown],client=10.229.246.67,LOG:  connection received: host=10.229.246.67 port=43110
+[68b9970f.1ef81-1] user=[unknown],db=[unknown],app=[unknown],client=10.229.246.67,LOG:  connection received: host=10.229.246.67 port=43126
+[68b9970f.1ef82-1] user=[unknown],db=[unknown],app=[unknown],client=10.229.246.67,LOG:  connection received: host=10.229.246.67 port=43130
+[68b9970f.1ef82-2] user=postgres,db=aitaxmd_prod,app=[unknown],client=10.229.246.67,LOG:  connection authenticated: identity="postgres" method=md5 (/pgdata/dpg-d2s29kmr433s738fu070-a/pg_hba.conf:88)
+[68b9970f.1ef82-3] user=postgres,db=aitaxmd_prod,app=[unknown],client=10.229.246.67,LOG:  connection authorized: user=postgres database=aitaxmd_prod SSL enabled (protocol=TLSv1.2, cipher=ECDHE-RSA-AES256-GCM-SHA384, bits=256)
+[68b9970f.1ef82-4] user=postgres,db=aitaxmd_prod,app=[unknown],client=10.229.246.67,LOG:  disconnection: session time: 0:00:03.022 user=postgres database=aitaxmd_prod host=10.229.246.67 port=43130
+[68b9971f.1ef9b-1] user=[unknown],db=[unknown],app=[unknown],client=10.229.246.67,LOG:  connection received: host=10.229.246.67 port=52942
+[68b9971f.1ef9c-1] user=[unknown],db=[unknown],app=[unknown],client=10.229.246.67,LOG:  connection received: host=10.229.246.67 port=52944
+[68b99720.1ef9d-1] user=[unknown],db=[unknown],app=[unknown],client=10.229.246.67,LOG:  connection received: host=10.229.246.67 port=52954
+[68b99720.1ef9d-2] user=postgres,db=aitaxmd_prod,app=[unknown],client=10.229.246.67,LOG:  connection authenticated: identity="postgres" method=md5 (/pgdata/dpg-d2s29kmr433s738fu070-a/pg_hba.conf:88)
+[68b99720.1ef9d-3] user=postgres,db=aitaxmd_prod,app=[unknown],client=10.229.246.67,LOG:  connection authorized: user=postgres database=aitaxmd_prod SSL enabled (protocol=TLSv1.2, cipher=ECDHE-RSA-AES256-GCM-SHA384, bits=256)
+[68b99720.1ef9d-4] user=postgres,db=aitaxmd_prod,app=[unknown],client=10.229.246.67,LOG:  disconnection: session time: 0:00:03.103 user=postgres database=aitaxmd_prod host=10.229.246.67 port=52954
+[68b9974b.1efd0-1] user=[unknown],db=[unknown],app=[unknown],client=10.229.246.67,LOG:  connection received: host=10.229.246.67 port=39564
+[68b9974b.1efd1-1] user=[unknown],db=[unknown],app=[unknown],client=10.229.246.67,LOG:  connection received: host=10.229.246.67 port=39576
+[68b9974b.1efd2-1] user=[unknown],db=[unknown],app=[unknown],client=10.229.246.67,LOG:  connection received: host=10.229.246.67 port=39582
+[68b9974b.1efd2-2] user=postgres,db=aitaxmd_prod,app=[unknown],client=10.229.246.67,LOG:  connection authenticated: identity="postgres" method=md5 (/pgdata/dpg-d2s29kmr433s738fu070-a/pg_hba.conf:88)
+[68b9974b.1efd2-3] user=postgres,db=aitaxmd_prod,app=[unknown],client=10.229.246.67,LOG:  connection authorized: user=postgres database=aitaxmd_prod SSL enabled (protocol=TLSv1.2, cipher=ECDHE-RSA-AES256-GCM-SHA384, bits=256)
+[68b9974b.1efd2-4] user=postgres,db=aitaxmd_prod,app=[unknown],client=10.229.246.67,LOG:  disconnection: session time: 0:00:03.103 user=postgres database=aitaxmd_prod host=10.229.246.67 port=39582
+[68b9975b.1efeb-1] user=[unknown],db=[unknown],app=[unknown],client=10.229.246.67,LOG:  connection received: host=10.229.246.67 port=49734
+[68b9975b.1efec-1] user=[unknown],db=[unknown],app=[unknown],client=10.229.246.67,LOG:  connection received: host=10.229.246.67 port=49746
+[68b9975c.1efed-1] user=[unknown],db=[unknown],app=[unknown],client=10.229.246.67,LOG:  connection received: host=10.229.246.67 port=49750
+[68b9975c.1efed-2] user=postgres,db=aitaxmd_prod,app=[unknown],client=10.229.246.67,LOG:  connection authenticated: identity="postgres" method=md5 (/pgdata/dpg-d2s29kmr433s738fu070-a/pg_hba.conf:88)
+[68b9975c.1efed-3] user=postgres,db=aitaxmd_prod,app=[unknown],client=10.229.246.67,LOG:  connection authorized: user=postgres database=aitaxmd_prod SSL enabled (protocol=TLSv1.2, cipher=ECDHE-RSA-AES256-GCM-SHA384, bits=256)
+[68b9975c.1efed-4] user=postgres,db=aitaxmd_prod,app=[unknown],client=10.229.246.67,LOG:  disconnection: session time: 0:00:03.091 user=postgres database=aitaxmd_prod host=10.229.246.67 port=49750
+[68b824ef.8c-631] user=,db=,app=,client=,LOG:  checkpoint starting: time
+[68b824ef.8c-632] user=,db=,app=,client=,LOG:  checkpoint complete: wrote 1 buffers (0.0%); 0 WAL file(s) added, 0 removed, 0 recycled; write=0.004 s, sync=0.002 s, total=0.023 s; sync files=1, longest=0.002 s, average=0.002 s; distance=1 kB, estimate=1 kB
+[68b99787.1f022-1] user=[unknown],db=[unknown],app=[unknown],client=10.229.246.67,LOG:  connection received: host=10.229.246.67 port=45670
+[68b99787.1f023-1] user=[unknown],db=[unknown],app=[unknown],client=10.229.246.67,LOG:  connection received: host=10.229.246.67 port=45682
+[68b99787.1f024-1] user=[unknown],db=[unknown],app=[unknown],client=10.229.246.67,LOG:  connection received: host=10.229.246.67 port=45688
+[68b99787.1f024-2] user=postgres,db=aitaxmd_prod,app=[unknown],client=10.229.246.67,LOG:  connection authenticated: identity="postgres" method=md5 (/pgdata/dpg-d2s29kmr433s738fu070-a/pg_hba.conf:88)
+[68b99787.1f024-3] user=postgres,db=aitaxmd_prod,app=[unknown],client=10.229.246.67,LOG:  connection authorized: user=postgres database=aitaxmd_prod SSL enabled (protocol=TLSv1.2, cipher=ECDHE-RSA-AES256-GCM-SHA384, bits=256)
+[68b99787.1f024-4] user=postgres,db=aitaxmd_prod,app=[unknown],client=10.229.246.67,LOG:  disconnection: session time: 0:00:03.111 user=postgres database=aitaxmd_prod host=10.229.246.67 port=45688
+[68b99797.1f03d-1] user=[unknown],db=[unknown],app=[unknown],client=10.229.246.67,LOG:  connection received: host=10.229.246.67 port=48960
+[68b99797.1f03e-1] user=[unknown],db=[unknown],app=[unknown],client=10.229.246.67,LOG:  connection received: host=10.229.246.67 port=48968
+[68b99798.1f03f-1] user=[unknown],db=[unknown],app=[unknown],client=10.229.246.67,LOG:  connection received: host=10.229.246.67 port=48982
+[68b99798.1f03f-2] user=postgres,db=aitaxmd_prod,app=[unknown],client=10.229.246.67,LOG:  connection authenticated: identity="postgres" method=md5 (/pgdata/dpg-d2s29kmr433s738fu070-a/pg_hba.conf:88)
+[68b99798.1f03f-3] user=postgres,db=aitaxmd_prod,app=[unknown],client=10.229.246.67,LOG:  connection authorized: user=postgres database=aitaxmd_prod SSL enabled (protocol=TLSv1.2, cipher=ECDHE-RSA-AES256-GCM-SHA384, bits=256)
+[68b99798.1f03f-4] user=postgres,db=aitaxmd_prod,app=[unknown],client=10.229.246.67,LOG:  disconnection: session time: 0:00:03.027 user=postgres database=aitaxmd_prod host=10.229.246.67 port=48982
+[68b997c3.1f073-1] user=[unknown],db=[unknown],app=[unknown],client=10.229.246.67,LOG:  connection received: host=10.229.246.67 port=34384
+[68b997c3.1f074-1] user=[unknown],db=[unknown],app=[unknown],client=10.229.246.67,LOG:  connection received: host=10.229.246.67 port=34396
+[68b997c3.1f075-1] user=[unknown],db=[unknown],app=[unknown],client=10.229.246.67,LOG:  connection received: host=10.229.246.67 port=34400
+[68b997c3.1f075-2] user=postgres,db=aitaxmd_prod,app=[unknown],client=10.229.246.67,LOG:  connection authenticated: identity="postgres" method=md5 (/pgdata/dpg-d2s29kmr433s738fu070-a/pg_hba.conf:88)
+[68b997c3.1f075-3] user=postgres,db=aitaxmd_prod,app=[unknown],client=10.229.246.67,LOG:  connection authorized: user=postgres database=aitaxmd_prod SSL enabled (protocol=TLSv1.2, cipher=ECDHE-RSA-AES256-GCM-SHA384, bits=256)
+[68b997c3.1f075-4] user=postgres,db=aitaxmd_prod,app=[unknown],client=10.229.246.67,LOG:  disconnection: session time: 0:00:03.104 user=postgres database=aitaxmd_prod host=10.229.246.67 port=34400
+[68b997d3.1f08e-1] user=[unknown],db=[unknown],app=[unknown],client=10.229.246.67,LOG:  connection received: host=10.229.246.67 port=46868
+[68b997d3.1f08f-1] user=[unknown],db=[unknown],app=[unknown],client=10.229.246.67,LOG:  connection received: host=10.229.246.67 port=46882
+[68b997d4.1f090-1] user=[unknown],db=[unknown],app=[unknown],client=10.229.246.67,LOG:  connection received: host=10.229.246.67 port=46890
+[68b997d4.1f090-2] user=postgres,db=aitaxmd_prod,app=[unknown],client=10.229.246.67,LOG:  connection authenticated: identity="postgres" method=md5 (/pgdata/dpg-d2s29kmr433s738fu070-a/pg_hba.conf:88)
+[68b997d4.1f090-3] user=postgres,db=aitaxmd_prod,app=[unknown],client=10.229.246.67,LOG:  connection authorized: user=postgres database=aitaxmd_prod SSL enabled (protocol=TLSv1.2, cipher=ECDHE-RSA-AES256-GCM-SHA384, bits=256)
+[68b997d4.1f090-4] user=postgres,db=aitaxmd_prod,app=[unknown],client=10.229.246.67,LOG:  disconnection: session time: 0:00:03.070 user=postgres database=aitaxmd_prod host=10.229.246.67 port=46890
+[68b997ff.1f0c3-1] user=[unknown],db=[unknown],app=[unknown],client=10.229.246.67,LOG:  connection received: host=10.229.246.67 port=38492
+[68b997ff.1f0c4-1] user=[unknown],db=[unknown],app=[unknown],client=10.229.246.67,LOG:  connection received: host=10.229.246.67 port=38500
+[68b997ff.1f0c5-1] user=[unknown],db=[unknown],app=[unknown],client=10.229.246.67,LOG:  connection received: host=10.229.246.67 port=38516
+[68b997ff.1f0c5-2] user=postgres,db=aitaxmd_prod,app=[unknown],client=10.229.246.67,LOG:  connection authenticated: identity="postgres" method=md5 (/pgdata/dpg-d2s29kmr433s738fu070-a/pg_hba.conf:88)
+[68b997ff.1f0c5-3] user=postgres,db=aitaxmd_prod,app=[unknown],client=10.229.246.67,LOG:  connection authorized: user=postgres database=aitaxmd_prod SSL enabled (protocol=TLSv1.2, cipher=ECDHE-RSA-AES256-GCM-SHA384, bits=256)
+[68b997ff.1f0c5-4] user=postgres,db=aitaxmd_prod,app=[unknown],client=10.229.246.67,LOG:  disconnection: session time: 0:00:03.056 user=postgres database=aitaxmd_prod host=10.229.246.67 port=38516
+[68b9980f.1f0de-1] user=[unknown],db=[unknown],app=[unknown],client=10.229.246.67,LOG:  connection received: host=10.229.246.67 port=59176
+[68b9980f.1f0df-1] user=[unknown],db=[unknown],app=[unknown],client=10.229.246.67,LOG:  connection received: host=10.229.246.67 port=59180
+[68b99810.1f0e0-1] user=[unknown],db=[unknown],app=[unknown],client=10.229.246.67,LOG:  connection received: host=10.229.246.67 port=59192
+[68b99810.1f0e0-2] user=postgres,db=aitaxmd_prod,app=[unknown],client=10.229.246.67,LOG:  connection authenticated: identity="postgres" method=md5 (/pgdata/dpg-d2s29kmr433s738fu070-a/pg_hba.conf:88)
+[68b99810.1f0e0-3] user=postgres,db=aitaxmd_prod,app=[unknown],client=10.229.246.67,LOG:  connection authorized: user=postgres database=aitaxmd_prod SSL enabled (protocol=TLSv1.2, cipher=ECDHE-RSA-AES256-GCM-SHA384, bits=256)
+[68b99810.1f0e0-4] user=postgres,db=aitaxmd_prod,app=[unknown],client=10.229.246.67,LOG:  disconnection: session time: 0:00:03.085 user=postgres database=aitaxmd_prod host=10.229.246.67 port=59192
+[68b9983b.1f113-1] user=[unknown],db=[unknown],app=[unknown],client=10.229.246.67,LOG:  connection received: host=10.229.246.67 port=58244
+[68b9983b.1f114-1] user=[unknown],db=[unknown],app=[unknown],client=10.229.246.67,LOG:  connection received: host=10.229.246.67 port=58256
+[68b9983b.1f115-1] user=[unknown],db=[unknown],app=[unknown],client=10.229.246.67,LOG:  connection received: host=10.229.246.67 port=58268
+[68b9983b.1f115-2] user=postgres,db=aitaxmd_prod,app=[unknown],client=10.229.246.67,LOG:  connection authenticated: identity="postgres" method=md5 (/pgdata/dpg-d2s29kmr433s738fu070-a/pg_hba.conf:88)
+[68b9983b.1f115-3] user=postgres,db=aitaxmd_prod,app=[unknown],client=10.229.246.67,LOG:  connection authorized: user=postgres database=aitaxmd_prod SSL enabled (protocol=TLSv1.2, cipher=ECDHE-RSA-AES256-GCM-SHA384, bits=256)
+[68b9983b.1f115-4] user=postgres,db=aitaxmd_prod,app=[unknown],client=10.229.246.67,LOG:  disconnection: session time: 0:00:03.096 user=postgres database=aitaxmd_prod host=10.229.246.67 port=58268
+[68b9984b.1f12e-1] user=[unknown],db=[unknown],app=[unknown],client=10.229.246.67,LOG:  connection received: host=10.229.246.67 port=52638
+[68b9984b.1f12f-1] user=[unknown],db=[unknown],app=[unknown],client=10.229.246.67,LOG:  connection received: host=10.229.246.67 port=52654
+[68b9984c.1f130-1] user=[unknown],db=[unknown],app=[unknown],client=10.229.246.67,LOG:  connection received: host=10.229.246.67 port=52656
+[68b9984c.1f130-2] user=postgres,db=aitaxmd_prod,app=[unknown],client=10.229.246.67,LOG:  connection authenticated: identity="postgres" method=md5 (/pgdata/dpg-d2s29kmr433s738fu070-a/pg_hba.conf:88)
+[68b9984c.1f130-3] user=postgres,db=aitaxmd_prod,app=[unknown],client=10.229.246.67,LOG:  connection authorized: user=postgres database=aitaxmd_prod SSL enabled (protocol=TLSv1.2, cipher=ECDHE-RSA-AES256-GCM-SHA384, bits=256)
+[68b9984c.1f130-4] user=postgres,db=aitaxmd_prod,app=[unknown],client=10.229.246.67,LOG:  disconnection: session time: 0:00:03.079 user=postgres database=aitaxmd_prod host=10.229.246.67 port=52656
+[68b99877.1f164-1] user=[unknown],db=[unknown],app=[unknown],client=10.229.246.67,LOG:  connection received: host=10.229.246.67 port=49434
+[68b99877.1f165-1] user=[unknown],db=[unknown],app=[unknown],client=10.229.246.67,LOG:  connection received: host=10.229.246.67 port=49442
+[68b99877.1f166-1] user=[unknown],db=[unknown],app=[unknown],client=10.229.246.67,LOG:  connection received: host=10.229.246.67 port=49446
+[68b99877.1f166-2] user=postgres,db=aitaxmd_prod,app=[unknown],client=10.229.246.67,LOG:  connection authenticated: identity="postgres" method=md5 (/pgdata/dpg-d2s29kmr433s738fu070-a/pg_hba.conf:88)
+[68b99877.1f166-3] user=postgres,db=aitaxmd_prod,app=[unknown],client=10.229.246.67,LOG:  connection authorized: user=postgres database=aitaxmd_prod SSL enabled (protocol=TLSv1.2, cipher=ECDHE-RSA-AES256-GCM-SHA384, bits=256)
+[68b99877.1f166-4] user=postgres,db=aitaxmd_prod,app=[unknown],client=10.229.246.67,LOG:  disconnection: session time: 0:00:03.085 user=postgres database=aitaxmd_prod host=10.229.246.67 port=49446
+[68b99887.1f17f-1] user=[unknown],db=[unknown],app=[unknown],client=10.229.246.67,LOG:  connection received: host=10.229.246.67 port=45590
+[68b99887.1f180-1] user=[unknown],db=[unknown],app=[unknown],client=10.229.246.67,LOG:  connection received: host=10.229.246.67 port=45594
+[68b99888.1f181-1] user=[unknown],db=[unknown],app=[unknown],client=10.229.246.67,LOG:  connection received: host=10.229.246.67 port=45596
+[68b99888.1f181-2] user=postgres,db=aitaxmd_prod,app=[unknown],client=10.229.246.67,LOG:  connection authenticated: identity="postgres" method=md5 (/pgdata/dpg-d2s29kmr433s738fu070-a/pg_hba.conf:88)
+[68b99888.1f181-3] user=postgres,db=aitaxmd_prod,app=[unknown],client=10.229.246.67,LOG:  connection authorized: user=postgres database=aitaxmd_prod SSL enabled (protocol=TLSv1.2, cipher=ECDHE-RSA-AES256-GCM-SHA384, bits=256)
+[68b99888.1f181-4] user=postgres,db=aitaxmd_prod,app=[unknown],client=10.229.246.67,LOG:  disconnection: session time: 0:00:03.102 user=postgres database=aitaxmd_prod host=10.229.246.67 port=45596
+[68b824ef.8c-633] user=,db=,app=,client=,LOG:  checkpoint starting: time
+[68b824ef.8c-634] user=,db=,app=,client=,LOG:  checkpoint complete: wrote 1 buffers (0.0%); 0 WAL file(s) added, 0 removed, 0 recycled; write=0.002 s, sync=0.001 s, total=0.014 s; sync files=1, longest=0.001 s, average=0.001 s; distance=1 kB, estimate=1 kB
+[68b998b3.1f1b5-1] user=[unknown],db=[unknown],app=[unknown],client=10.229.246.67,LOG:  connection received: host=10.229.246.67 port=55002
+[68b998b3.1f1b6-1] user=[unknown],db=[unknown],app=[unknown],client=10.229.246.67,LOG:  connection received: host=10.229.246.67 port=55014
+[68b998b3.1f1b7-1] user=[unknown],db=[unknown],app=[unknown],client=10.229.246.67,LOG:  connection received: host=10.229.246.67 port=55018
+[68b998b3.1f1b7-2] user=postgres,db=aitaxmd_prod,app=[unknown],client=10.229.246.67,LOG:  connection authenticated: identity="postgres" method=md5 (/pgdata/dpg-d2s29kmr433s738fu070-a/pg_hba.conf:88)
+[68b998b3.1f1b7-3] user=postgres,db=aitaxmd_prod,app=[unknown],client=10.229.246.67,LOG:  connection authorized: user=postgres database=aitaxmd_prod SSL enabled (protocol=TLSv1.2, cipher=ECDHE-RSA-AES256-GCM-SHA384, bits=256)
+[68b998b3.1f1b7-4] user=postgres,db=aitaxmd_prod,app=[unknown],client=10.229.246.67,LOG:  disconnection: session time: 0:00:03.013 user=postgres database=aitaxmd_prod host=10.229.246.67 port=55018
+[68b998c3.1f1cf-1] user=[unknown],db=[unknown],app=[unknown],client=10.229.246.67,LOG:  connection received: host=10.229.246.67 port=52700
+[68b998c3.1f1d0-1] user=[unknown],db=[unknown],app=[unknown],client=10.229.246.67,LOG:  connection received: host=10.229.246.67 port=52716
+[68b998c3.1f1d1-1] user=[unknown],db=[unknown],app=[unknown],client=10.229.246.67,LOG:  connection received: host=10.229.246.67 port=52728
+[68b998c3.1f1d1-2] user=postgres,db=aitaxmd_prod,app=[unknown],client=10.229.246.67,LOG:  connection authenticated: identity="postgres" method=md5 (/pgdata/dpg-d2s29kmr433s738fu070-a/pg_hba.conf:88)
+[68b998c3.1f1d1-3] user=postgres,db=aitaxmd_prod,app=[unknown],client=10.229.246.67,LOG:  connection authorized: user=postgres database=aitaxmd_prod SSL enabled (protocol=TLSv1.2, cipher=ECDHE-RSA-AES256-GCM-SHA384, bits=256)
+[68b998c3.1f1d1-4] user=postgres,db=aitaxmd_prod,app=[unknown],client=10.229.246.67,LOG:  disconnection: session time: 0:00:03.101 user=postgres database=aitaxmd_prod host=10.229.246.67 port=52728
+[68b998ef.1f204-1] user=[unknown],db=[unknown],app=[unknown],client=10.229.246.67,LOG:  connection received: host=10.229.246.67 port=47274
+[68b998ef.1f205-1] user=[unknown],db=[unknown],app=[unknown],client=10.229.246.67,LOG:  connection received: host=10.229.246.67 port=47288
+[68b998ef.1f206-1] user=[unknown],db=[unknown],app=[unknown],client=10.229.246.67,LOG:  connection received: host=10.229.246.67 port=47294
+[68b998ef.1f206-2] user=postgres,db=aitaxmd_prod,app=[unknown],client=10.229.246.67,LOG:  connection authenticated: identity="postgres" method=md5 (/pgdata/dpg-d2s29kmr433s738fu070-a/pg_hba.conf:88)
+[68b998ef.1f206-3] user=postgres,db=aitaxmd_prod,app=[unknown],client=10.229.246.67,LOG:  connection authorized: user=postgres database=aitaxmd_prod SSL enabled (protocol=TLSv1.2, cipher=ECDHE-RSA-AES256-GCM-SHA384, bits=256)
+[68b998ef.1f206-4] user=postgres,db=aitaxmd_prod,app=[unknown],client=10.229.246.67,LOG:  disconnection: session time: 0:00:03.091 user=postgres database=aitaxmd_prod host=10.229.246.67 port=47294
+[68b998ff.1f21f-1] user=[unknown],db=[unknown],app=[unknown],client=10.229.246.67,LOG:  connection received: host=10.229.246.67 port=55136
+[68b998ff.1f220-1] user=[unknown],db=[unknown],app=[unknown],client=10.229.246.67,LOG:  connection received: host=10.229.246.67 port=55150
+[68b99900.1f221-1] user=[unknown],db=[unknown],app=[unknown],client=10.229.246.67,LOG:  connection received: host=10.229.246.67 port=55160
+[68b99900.1f221-2] user=postgres,db=aitaxmd_prod,app=[unknown],client=10.229.246.67,LOG:  connection authenticated: identity="postgres" method=md5 (/pgdata/dpg-d2s29kmr433s738fu070-a/pg_hba.conf:88)
+[68b99900.1f221-3] user=postgres,db=aitaxmd_prod,app=[unknown],client=10.229.246.67,LOG:  connection authorized: user=postgres database=aitaxmd_prod SSL enabled (protocol=TLSv1.2, cipher=ECDHE-RSA-AES256-GCM-SHA384, bits=256)
+[68b99900.1f221-4] user=postgres,db=aitaxmd_prod,app=[unknown],client=10.229.246.67,LOG:  disconnection: session time: 0:00:03.071 user=postgres database=aitaxmd_prod host=10.229.246.67 port=55160
+[68b9992b.1f255-1] user=[unknown],db=[unknown],app=[unknown],client=10.229.246.67,LOG:  connection received: host=10.229.246.67 port=32862
+[68b9992b.1f256-1] user=[unknown],db=[unknown],app=[unknown],client=10.229.246.67,LOG:  connection received: host=10.229.246.67 port=32864
+[68b9992b.1f257-1] user=[unknown],db=[unknown],app=[unknown],client=10.229.246.67,LOG:  connection received: host=10.229.246.67 port=32868
+[68b9992b.1f257-2] user=postgres,db=aitaxmd_prod,app=[unknown],client=10.229.246.67,LOG:  connection authenticated: identity="postgres" method=md5 (/pgdata/dpg-d2s29kmr433s738fu070-a/pg_hba.conf:88)
+[68b9992b.1f257-3] user=postgres,db=aitaxmd_prod,app=[unknown],client=10.229.246.67,LOG:  connection authorized: user=postgres database=aitaxmd_prod SSL enabled (protocol=TLSv1.2, cipher=ECDHE-RSA-AES256-GCM-SHA384, bits=256)
+[68b9992b.1f257-4] user=postgres,db=aitaxmd_prod,app=[unknown],client=10.229.246.67,LOG:  disconnection: session time: 0:00:03.081 user=postgres database=aitaxmd_prod host=10.229.246.67 port=32868
+[68b9993b.1f270-1] user=[unknown],db=[unknown],app=[unknown],client=10.229.246.67,LOG:  connection received: host=10.229.246.67 port=54634
+[68b9993b.1f271-1] user=[unknown],db=[unknown],app=[unknown],client=10.229.246.67,LOG:  connection received: host=10.229.246.67 port=54636
+[68b9993c.1f272-1] user=[unknown],db=[unknown],app=[unknown],client=10.229.246.67,LOG:  connection received: host=10.229.246.67 port=54648
+[68b9993c.1f272-2] user=postgres,db=aitaxmd_prod,app=[unknown],client=10.229.246.67,LOG:  connection authenticated: identity="postgres" method=md5 (/pgdata/dpg-d2s29kmr433s738fu070-a/pg_hba.conf:88)
+[68b9993c.1f272-3] user=postgres,db=aitaxmd_prod,app=[unknown],client=10.229.246.67,LOG:  connection authorized: user=postgres database=aitaxmd_prod SSL enabled (protocol=TLSv1.2, cipher=ECDHE-RSA-AES256-GCM-SHA384, bits=256)
+[68b9993c.1f272-4] user=postgres,db=aitaxmd_prod,app=[unknown],client=10.229.246.67,LOG:  disconnection: session time: 0:00:03.081 user=postgres database=aitaxmd_prod host=10.229.246.67 port=54648
+[68b99967.1f2a6-1] user=[unknown],db=[unknown],app=[unknown],client=10.229.246.67,LOG:  connection received: host=10.229.246.67 port=58042
+[68b99967.1f2a7-1] user=[unknown],db=[unknown],app=[unknown],client=10.229.246.67,LOG:  connection received: host=10.229.246.67 port=58048
+[68b99967.1f2a8-1] user=[unknown],db=[unknown],app=[unknown],client=10.229.246.67,LOG:  connection received: host=10.229.246.67 port=58064
+[68b99967.1f2a8-2] user=postgres,db=aitaxmd_prod,app=[unknown],client=10.229.246.67,LOG:  connection authenticated: identity="postgres" method=md5 (/pgdata/dpg-d2s29kmr433s738fu070-a/pg_hba.conf:88)
+[68b99967.1f2a8-3] user=postgres,db=aitaxmd_prod,app=[unknown],client=10.229.246.67,LOG:  connection authorized: user=postgres database=aitaxmd_prod SSL enabled (protocol=TLSv1.2, cipher=ECDHE-RSA-AES256-GCM-SHA384, bits=256)
+[68b99967.1f2a8-4] user=postgres,db=aitaxmd_prod,app=[unknown],client=10.229.246.67,LOG:  disconnection: session time: 0:00:03.132 user=postgres database=aitaxmd_prod host=10.229.246.67 port=58064
+[68b99977.1f2c1-1] user=[unknown],db=[unknown],app=[unknown],client=10.229.246.67,LOG:  connection received: host=10.229.246.67 port=54804
+[68b99977.1f2c2-1] user=[unknown],db=[unknown],app=[unknown],client=10.229.246.67,LOG:  connection received: host=10.229.246.67 port=54814
+[68b99978.1f2c3-1] user=[unknown],db=[unknown],app=[unknown],client=10.229.246.67,LOG:  connection received: host=10.229.246.67 port=54822
+[68b99978.1f2c3-2] user=postgres,db=aitaxmd_prod,app=[unknown],client=10.229.246.67,LOG:  connection authenticated: identity="postgres" method=md5 (/pgdata/dpg-d2s29kmr433s738fu070-a/pg_hba.conf:88)
+[68b99978.1f2c3-3] user=postgres,db=aitaxmd_prod,app=[unknown],client=10.229.246.67,LOG:  connection authorized: user=postgres database=aitaxmd_prod SSL enabled (protocol=TLSv1.2, cipher=ECDHE-RSA-AES256-GCM-SHA384, bits=256)
+[68b99978.1f2c3-4] user=postgres,db=aitaxmd_prod,app=[unknown],client=10.229.246.67,LOG:  disconnection: session time: 0:00:03.101 user=postgres database=aitaxmd_prod host=10.229.246.67 port=54822
+[68b999a3.1f2f5-1] user=[unknown],db=[unknown],app=[unknown],client=10.229.246.67,LOG:  connection received: host=10.229.246.67 port=43890
+[68b999a3.1f2f6-1] user=[unknown],db=[unknown],app=[unknown],client=10.229.246.67,LOG:  connection received: host=10.229.246.67 port=43894
+[68b999a3.1f2f7-1] user=[unknown],db=[unknown],app=[unknown],client=10.229.246.67,LOG:  connection received: host=10.229.246.67 port=43906
+[68b999a3.1f2f7-2] user=postgres,db=aitaxmd_prod,app=[unknown],client=10.229.246.67,LOG:  connection authenticated: identity="postgres" method=md5 (/pgdata/dpg-d2s29kmr433s738fu070-a/pg_hba.conf:88)
+[68b999a3.1f2f7-3] user=postgres,db=aitaxmd_prod,app=[unknown],client=10.229.246.67,LOG:  connection authorized: user=postgres database=aitaxmd_prod SSL enabled (protocol=TLSv1.2, cipher=ECDHE-RSA-AES256-GCM-SHA384, bits=256)
+[68b999a3.1f2f7-4] user=postgres,db=aitaxmd_prod,app=[unknown],client=10.229.246.67,LOG:  disconnection: session time: 0:00:03.011 user=postgres database=aitaxmd_prod host=10.229.246.67 port=43906
+[68b999b3.1f310-1] user=[unknown],db=[unknown],app=[unknown],client=10.229.246.67,LOG:  connection received: host=10.229.246.67 port=58038
+[68b999b3.1f311-1] user=[unknown],db=[unknown],app=[unknown],client=10.229.246.67,LOG:  connection received: host=10.229.246.67 port=58046
+[68b999b4.1f312-1] user=[unknown],db=[unknown],app=[unknown],client=10.229.246.67,LOG:  connection received: host=10.229.246.67 port=58058
+[68b999b4.1f312-2] user=postgres,db=aitaxmd_prod,app=[unknown],client=10.229.246.67,LOG:  connection authenticated: identity="postgres" method=md5 (/pgdata/dpg-d2s29kmr433s738fu070-a/pg_hba.conf:88)
+[68b999b4.1f312-3] user=postgres,db=aitaxmd_prod,app=[unknown],client=10.229.246.67,LOG:  connection authorized: user=postgres database=aitaxmd_prod SSL enabled (protocol=TLSv1.2, cipher=ECDHE-RSA-AES256-GCM-SHA384, bits=256)
+[68b999b4.1f312-4] user=postgres,db=aitaxmd_prod,app=[unknown],client=10.229.246.67,LOG:  disconnection: session time: 0:00:03.062 user=postgres database=aitaxmd_prod host=10.229.246.67 port=58058
+[68b824ef.8c-635] user=,db=,app=,client=,LOG:  checkpoint starting: time
+[68b824ef.8c-636] user=,db=,app=,client=,LOG:  checkpoint complete: wrote 1 buffers (0.0%); 0 WAL file(s) added, 0 removed, 0 recycled; write=0.003 s, sync=0.001 s, total=0.015 s; sync files=1, longest=0.001 s, average=0.001 s; distance=1 kB, estimate=1 kB
+[68b999df.1f346-1] user=[unknown],db=[unknown],app=[unknown],client=10.229.246.67,LOG:  connection received: host=10.229.246.67 port=47990
+[68b999df.1f347-1] user=[unknown],db=[unknown],app=[unknown],client=10.229.246.67,LOG:  connection received: host=10.229.246.67 port=48006
+[68b999df.1f348-1] user=[unknown],db=[unknown],app=[unknown],client=10.229.246.67,LOG:  connection received: host=10.229.246.67 port=48020
+[68b999df.1f348-2] user=postgres,db=aitaxmd_prod,app=[unknown],client=10.229.246.67,LOG:  connection authenticated: identity="postgres" method=md5 (/pgdata/dpg-d2s29kmr433s738fu070-a/pg_hba.conf:88)
+[68b999df.1f348-3] user=postgres,db=aitaxmd_prod,app=[unknown],client=10.229.246.67,LOG:  connection authorized: user=postgres database=aitaxmd_prod SSL enabled (protocol=TLSv1.2, cipher=ECDHE-RSA-AES256-GCM-SHA384, bits=256)
+[68b999df.1f348-4] user=postgres,db=aitaxmd_prod,app=[unknown],client=10.229.246.67,LOG:  disconnection: session time: 0:00:03.012 user=postgres database=aitaxmd_prod host=10.229.246.67 port=48020
+[68b999ef.1f361-1] user=[unknown],db=[unknown],app=[unknown],client=10.229.246.67,LOG:  connection received: host=10.229.246.67 port=51360
+[68b999ef.1f362-1] user=[unknown],db=[unknown],app=[unknown],client=10.229.246.67,LOG:  connection received: host=10.229.246.67 port=51370
+[68b999ef.1f363-1] user=[unknown],db=[unknown],app=[unknown],client=10.229.246.67,LOG:  connection received: host=10.229.246.67 port=51378
+[68b999ef.1f363-2] user=postgres,db=aitaxmd_prod,app=[unknown],client=10.229.246.67,LOG:  connection authenticated: identity="postgres" method=md5 (/pgdata/dpg-d2s29kmr433s738fu070-a/pg_hba.conf:88)
+[68b999ef.1f363-3] user=postgres,db=aitaxmd_prod,app=[unknown],client=10.229.246.67,LOG:  connection authorized: user=postgres database=aitaxmd_prod SSL enabled (protocol=TLSv1.2, cipher=ECDHE-RSA-AES256-GCM-SHA384, bits=256)
+[68b999ef.1f363-4] user=postgres,db=aitaxmd_prod,app=[unknown],client=10.229.246.67,LOG:  disconnection: session time: 0:00:03.197 user=postgres database=aitaxmd_prod host=10.229.246.67 port=51378
+[68b99a1b.1f398-1] user=[unknown],db=[unknown],app=[unknown],client=10.229.246.67,LOG:  connection received: host=10.229.246.67 port=48352
+[68b99a1b.1f399-1] user=[unknown],db=[unknown],app=[unknown],client=10.229.246.67,LOG:  connection received: host=10.229.246.67 port=48362
+[68b99a1b.1f39a-1] user=[unknown],db=[unknown],app=[unknown],client=10.229.246.67,LOG:  connection received: host=10.229.246.67 port=48376
+[68b99a1b.1f39a-2] user=postgres,db=aitaxmd_prod,app=[unknown],client=10.229.246.67,LOG:  connection authenticated: identity="postgres" method=md5 (/pgdata/dpg-d2s29kmr433s738fu070-a/pg_hba.conf:88)
+[68b99a1b.1f39a-3] user=postgres,db=aitaxmd_prod,app=[unknown],client=10.229.246.67,LOG:  connection authorized: user=postgres database=aitaxmd_prod SSL enabled (protocol=TLSv1.2, cipher=ECDHE-RSA-AES256-GCM-SHA384, bits=256)
+[68b99a1b.1f39a-4] user=postgres,db=aitaxmd_prod,app=[unknown],client=10.229.246.67,LOG:  disconnection: session time: 0:00:03.089 user=postgres database=aitaxmd_prod host=10.229.246.67 port=48376
+[68b99a2b.1f3b3-1] user=[unknown],db=[unknown],app=[unknown],client=10.229.246.67,LOG:  connection received: host=10.229.246.67 port=39078
+[68b99a2b.1f3b4-1] user=[unknown],db=[unknown],app=[unknown],client=10.229.246.67,LOG:  connection received: host=10.229.246.67 port=39082
+[68b99a2c.1f3b5-1] user=[unknown],db=[unknown],app=[unknown],client=10.229.246.67,LOG:  connection received: host=10.229.246.67 port=39098
+[68b99a2c.1f3b5-2] user=postgres,db=aitaxmd_prod,app=[unknown],client=10.229.246.67,LOG:  connection authenticated: identity="postgres" method=md5 (/pgdata/dpg-d2s29kmr433s738fu070-a/pg_hba.conf:88)
+[68b99a2c.1f3b5-3] user=postgres,db=aitaxmd_prod,app=[unknown],client=10.229.246.67,LOG:  connection authorized: user=postgres database=aitaxmd_prod SSL enabled (protocol=TLSv1.2, cipher=ECDHE-RSA-AES256-GCM-SHA384, bits=256)
+[68b99a2c.1f3b5-4] user=postgres,db=aitaxmd_prod,app=[unknown],client=10.229.246.67,LOG:  disconnection: session time: 0:00:03.010 user=postgres database=aitaxmd_prod host=10.229.246.67 port=39098
+[68b99a57.1f3e8-1] user=[unknown],db=[unknown],app=[unknown],client=10.229.246.67,LOG:  connection received: host=10.229.246.67 port=46134
+[68b99a57.1f3e9-1] user=[unknown],db=[unknown],app=[unknown],client=10.229.246.67,LOG:  connection received: host=10.229.246.67 port=46146
+[68b99a57.1f3ea-1] user=[unknown],db=[unknown],app=[unknown],client=10.229.246.67,LOG:  connection received: host=10.229.246.67 port=46154
+[68b99a57.1f3ea-2] user=postgres,db=aitaxmd_prod,app=[unknown],client=10.229.246.67,LOG:  connection authenticated: identity="postgres" method=md5 (/pgdata/dpg-d2s29kmr433s738fu070-a/pg_hba.conf:88)
+[68b99a57.1f3ea-3] user=postgres,db=aitaxmd_prod,app=[unknown],client=10.229.246.67,LOG:  connection authorized: user=postgres database=aitaxmd_prod SSL enabled (protocol=TLSv1.2, cipher=ECDHE-RSA-AES256-GCM-SHA384, bits=256)
+[68b99a57.1f3ea-4] user=postgres,db=aitaxmd_prod,app=[unknown],client=10.229.246.67,LOG:  disconnection: session time: 0:00:03.104 user=postgres database=aitaxmd_prod host=10.229.246.67 port=46154
+[68b99a67.1f403-1] user=[unknown],db=[unknown],app=[unknown],client=10.229.246.67,LOG:  connection received: host=10.229.246.67 port=58894
+[68b99a67.1f404-1] user=[unknown],db=[unknown],app=[unknown],client=10.229.246.67,LOG:  connection received: host=10.229.246.67 port=58902
+[68b99a68.1f405-1] user=[unknown],db=[unknown],app=[unknown],client=10.229.246.67,LOG:  connection received: host=10.229.246.67 port=58906
+[68b99a68.1f405-2] user=postgres,db=aitaxmd_prod,app=[unknown],client=10.229.246.67,LOG:  connection authenticated: identity="postgres" method=md5 (/pgdata/dpg-d2s29kmr433s738fu070-a/pg_hba.conf:88)
+[68b99a68.1f405-3] user=postgres,db=aitaxmd_prod,app=[unknown],client=10.229.246.67,LOG:  connection authorized: user=postgres database=aitaxmd_prod SSL enabled (protocol=TLSv1.2, cipher=ECDHE-RSA-AES256-GCM-SHA384, bits=256)
+[68b99a68.1f405-4] user=postgres,db=aitaxmd_prod,app=[unknown],client=10.229.246.67,LOG:  disconnection: session time: 0:00:03.006 user=postgres database=aitaxmd_prod host=10.229.246.67 port=58906
+[68b99a93.1f43a-1] user=[unknown],db=[unknown],app=[unknown],client=10.229.246.67,LOG:  connection received: host=10.229.246.67 port=46754
+[68b99a93.1f43b-1] user=[unknown],db=[unknown],app=[unknown],client=10.229.246.67,LOG:  connection received: host=10.229.246.67 port=46766
+[68b99a93.1f43c-1] user=[unknown],db=[unknown],app=[unknown],client=10.229.246.67,LOG:  connection received: host=10.229.246.67 port=46772
+[68b99a93.1f43c-2] user=postgres,db=aitaxmd_prod,app=[unknown],client=10.229.246.67,LOG:  connection authenticated: identity="postgres" method=md5 (/pgdata/dpg-d2s29kmr433s738fu070-a/pg_hba.conf:88)
+[68b99a93.1f43c-3] user=postgres,db=aitaxmd_prod,app=[unknown],client=10.229.246.67,LOG:  connection authorized: user=postgres database=aitaxmd_prod SSL enabled (protocol=TLSv1.2, cipher=ECDHE-RSA-AES256-GCM-SHA384, bits=256)
+[68b99a93.1f43c-4] user=postgres,db=aitaxmd_prod,app=[unknown],client=10.229.246.67,LOG:  disconnection: session time: 0:00:03.009 user=postgres database=aitaxmd_prod host=10.229.246.67 port=46772
+[68b99aa3.1f455-1] user=[unknown],db=[unknown],app=[unknown],client=10.229.246.67,LOG:  connection received: host=10.229.246.67 port=46676
+[68b99aa3.1f456-1] user=[unknown],db=[unknown],app=[unknown],client=10.229.246.67,LOG:  connection received: host=10.229.246.67 port=46680
+[68b99aa4.1f457-1] user=[unknown],db=[unknown],app=[unknown],client=10.229.246.67,LOG:  connection received: host=10.229.246.67 port=46686
+[68b99aa4.1f457-2] user=postgres,db=aitaxmd_prod,app=[unknown],client=10.229.246.67,LOG:  connection authenticated: identity="postgres" method=md5 (/pgdata/dpg-d2s29kmr433s738fu070-a/pg_hba.conf:88)
+[68b99aa4.1f457-3] user=postgres,db=aitaxmd_prod,app=[unknown],client=10.229.246.67,LOG:  connection authorized: user=postgres database=aitaxmd_prod SSL enabled (protocol=TLSv1.2, cipher=ECDHE-RSA-AES256-GCM-SHA384, bits=256)
+[68b99aa4.1f457-4] user=postgres,db=aitaxmd_prod,app=[unknown],client=10.229.246.67,LOG:  disconnection: session time: 0:00:03.099 user=postgres database=aitaxmd_prod host=10.229.246.67 port=46686
+[68b99acf.1f48b-1] user=[unknown],db=[unknown],app=[unknown],client=10.229.246.67,LOG:  connection received: host=10.229.246.67 port=56072
+[68b99acf.1f48a-1] user=[unknown],db=[unknown],app=[unknown],client=10.229.246.67,LOG:  connection received: host=10.229.246.67 port=56064
+[68b99acf.1f48c-1] user=[unknown],db=[unknown],app=[unknown],client=10.229.246.67,LOG:  connection received: host=10.229.246.67 port=56080
+[68b99acf.1f48c-2] user=postgres,db=aitaxmd_prod,app=[unknown],client=10.229.246.67,LOG:  connection authenticated: identity="postgres" method=md5 (/pgdata/dpg-d2s29kmr433s738fu070-a/pg_hba.conf:88)
+[68b99acf.1f48c-3] user=postgres,db=aitaxmd_prod,app=[unknown],client=10.229.246.67,LOG:  connection authorized: user=postgres database=aitaxmd_prod SSL enabled (protocol=TLSv1.2, cipher=ECDHE-RSA-AES256-GCM-SHA384, bits=256)
+[68b99acf.1f48c-4] user=postgres,db=aitaxmd_prod,app=[unknown],client=10.229.246.67,LOG:  disconnection: session time: 0:00:03.013 user=postgres database=aitaxmd_prod host=10.229.246.67 port=56080
+[68b99adf.1f4a4-1] user=[unknown],db=[unknown],app=[unknown],client=10.229.246.67,LOG:  connection received: host=10.229.246.67 port=54132
+[68b99adf.1f4a5-1] user=[unknown],db=[unknown],app=[unknown],client=10.229.246.67,LOG:  connection received: host=10.229.246.67 port=54140
+[68b99ae0.1f4a6-1] user=[unknown],db=[unknown],app=[unknown],client=10.229.246.67,LOG:  connection received: host=10.229.246.67 port=54154
+[68b99ae0.1f4a6-2] user=postgres,db=aitaxmd_prod,app=[unknown],client=10.229.246.67,LOG:  connection authenticated: identity="postgres" method=md5 (/pgdata/dpg-d2s29kmr433s738fu070-a/pg_hba.conf:88)
+[68b99ae0.1f4a6-3] user=postgres,db=aitaxmd_prod,app=[unknown],client=10.229.246.67,LOG:  connection authorized: user=postgres database=aitaxmd_prod SSL enabled (protocol=TLSv1.2, cipher=ECDHE-RSA-AES256-GCM-SHA384, bits=256)
+[68b99ae0.1f4a6-4] user=postgres,db=aitaxmd_prod,app=[unknown],client=10.229.246.67,LOG:  disconnection: session time: 0:00:03.099 user=postgres database=aitaxmd_prod host=10.229.246.67 port=54154
+[68b824ef.8c-637] user=,db=,app=,client=,LOG:  checkpoint starting: time
+[68b824ef.8c-638] user=,db=,app=,client=,LOG:  checkpoint complete: wrote 1 buffers (0.0%); 0 WAL file(s) added, 0 removed, 0 recycled; write=0.002 s, sync=0.002 s, total=0.014 s; sync files=1, longest=0.002 s, average=0.002 s; distance=1 kB, estimate=1 kB
+[68b99af5.1f4c0-1] user=[unknown],db=[unknown],app=[unknown],client=10.229.163.6,LOG:  connection received: host=10.229.163.6 port=33492
+[68b99af5.1f4c0-2] user=aitaxmd_user,db=aitaxmd_prod,app=[unknown],client=10.229.163.6,FATAL:  password authentication failed for user "aitaxmd_user"
+[68b99af5.1f4c0-3] user=aitaxmd_user,db=aitaxmd_prod,app=[unknown],client=10.229.163.6,DETAIL:  Password does not match for user "aitaxmd_user".
+	Connection matched pg_hba.conf line 88: "host    all             all              0.0.0.0/0              md5"
+[68b99b0b.1f4db-1] user=[unknown],db=[unknown],app=[unknown],client=10.229.246.67,LOG:  connection received: host=10.229.246.67 port=53258
+[68b99b0b.1f4dc-1] user=[unknown],db=[unknown],app=[unknown],client=10.229.246.67,LOG:  connection received: host=10.229.246.67 port=53262
+[68b99b0b.1f4dd-1] user=[unknown],db=[unknown],app=[unknown],client=10.229.246.67,LOG:  connection received: host=10.229.246.67 port=53266
+[68b99b0b.1f4dd-2] user=postgres,db=aitaxmd_prod,app=[unknown],client=10.229.246.67,LOG:  connection authenticated: identity="postgres" method=md5 (/pgdata/dpg-d2s29kmr433s738fu070-a/pg_hba.conf:88)
+[68b99b0b.1f4dd-3] user=postgres,db=aitaxmd_prod,app=[unknown],client=10.229.246.67,LOG:  connection authorized: user=postgres database=aitaxmd_prod SSL enabled (protocol=TLSv1.2, cipher=ECDHE-RSA-AES256-GCM-SHA384, bits=256)
+[68b99b0b.1f4dd-4] user=postgres,db=aitaxmd_prod,app=[unknown],client=10.229.246.67,LOG:  disconnection: session time: 0:00:03.014 user=postgres database=aitaxmd_prod host=10.229.246.67 port=53266
+[68b99b1b.1f4f6-1] user=[unknown],db=[unknown],app=[unknown],client=10.229.246.67,LOG:  connection received: host=10.229.246.67 port=52130
+[68b99b1b.1f4f7-1] user=[unknown],db=[unknown],app=[unknown],client=10.229.246.67,LOG:  connection received: host=10.229.246.67 port=52138
+[68b99b1c.1f4f8-1] user=[unknown],db=[unknown],app=[unknown],client=10.229.246.67,LOG:  connection received: host=10.229.246.67 port=52144
+[68b99b1c.1f4f8-2] user=postgres,db=aitaxmd_prod,app=[unknown],client=10.229.246.67,LOG:  connection authenticated: identity="postgres" method=md5 (/pgdata/dpg-d2s29kmr433s738fu070-a/pg_hba.conf:88)
+[68b99b1c.1f4f8-3] user=postgres,db=aitaxmd_prod,app=[unknown],client=10.229.246.67,LOG:  connection authorized: user=postgres database=aitaxmd_prod SSL enabled (protocol=TLSv1.2, cipher=ECDHE-RSA-AES256-GCM-SHA384, bits=256)
+[68b99b1c.1f4f8-4] user=postgres,db=aitaxmd_prod,app=[unknown],client=10.229.246.67,LOG:  disconnection: session time: 0:00:03.082 user=postgres database=aitaxmd_prod host=10.229.246.67 port=52144
+[68b99b47.1f52b-1] user=[unknown],db=[unknown],app=[unknown],client=10.229.246.67,LOG:  connection received: host=10.229.246.67 port=54016
+[68b99b47.1f52c-1] user=[unknown],db=[unknown],app=[unknown],client=10.229.246.67,LOG:  connection received: host=10.229.246.67 port=54022
+[68b99b47.1f52d-1] user=[unknown],db=[unknown],app=[unknown],client=10.229.246.67,LOG:  connection received: host=10.229.246.67 port=54028
+[68b99b47.1f52d-2] user=postgres,db=aitaxmd_prod,app=[unknown],client=10.229.246.67,LOG:  connection authenticated: identity="postgres" method=md5 (/pgdata/dpg-d2s29kmr433s738fu070-a/pg_hba.conf:88)
+[68b99b47.1f52d-3] user=postgres,db=aitaxmd_prod,app=[unknown],client=10.229.246.67,LOG:  connection authorized: user=postgres database=aitaxmd_prod SSL enabled (protocol=TLSv1.2, cipher=ECDHE-RSA-AES256-GCM-SHA384, bits=256)
+[68b99b47.1f52d-4] user=postgres,db=aitaxmd_prod,app=[unknown],client=10.229.246.67,LOG:  disconnection: session time: 0:00:03.037 user=postgres database=aitaxmd_prod host=10.229.246.67 port=54028
+[68b99b57.1f546-1] user=[unknown],db=[unknown],app=[unknown],client=10.229.246.67,LOG:  connection received: host=10.229.246.67 port=46908
+[68b99b57.1f547-1] user=[unknown],db=[unknown],app=[unknown],client=10.229.246.67,LOG:  connection received: host=10.229.246.67 port=46916
+[68b99b58.1f548-1] user=[unknown],db=[unknown],app=[unknown],client=10.229.246.67,LOG:  connection received: host=10.229.246.67 port=46926
+[68b99b58.1f548-2] user=postgres,db=aitaxmd_prod,app=[unknown],client=10.229.246.67,LOG:  connection authenticated: identity="postgres" method=md5 (/pgdata/dpg-d2s29kmr433s738fu070-a/pg_hba.conf:88)
+[68b99b58.1f548-3] user=postgres,db=aitaxmd_prod,app=[unknown],client=10.229.246.67,LOG:  connection authorized: user=postgres database=aitaxmd_prod SSL enabled (protocol=TLSv1.2, cipher=ECDHE-RSA-AES256-GCM-SHA384, bits=256)
+[68b99b58.1f548-4] user=postgres,db=aitaxmd_prod,app=[unknown],client=10.229.246.67,LOG:  disconnection: session time: 0:00:03.086 user=postgres database=aitaxmd_prod host=10.229.246.67 port=46926
+[68b99b83.1f57b-1] user=[unknown],db=[unknown],app=[unknown],client=10.229.246.67,LOG:  connection received: host=10.229.246.67 port=59168
+[68b99b83.1f57c-1] user=[unknown],db=[unknown],app=[unknown],client=10.229.246.67,LOG:  connection received: host=10.229.246.67 port=59174
+[68b99b83.1f57d-1] user=[unknown],db=[unknown],app=[unknown],client=10.229.246.67,LOG:  connection received: host=10.229.246.67 port=59176
+[68b99b83.1f57d-2] user=postgres,db=aitaxmd_prod,app=[unknown],client=10.229.246.67,LOG:  connection authenticated: identity="postgres" method=md5 (/pgdata/dpg-d2s29kmr433s738fu070-a/pg_hba.conf:88)
+[68b99b83.1f57d-3] user=postgres,db=aitaxmd_prod,app=[unknown],client=10.229.246.67,LOG:  connection authorized: user=postgres database=aitaxmd_prod SSL enabled (protocol=TLSv1.2, cipher=ECDHE-RSA-AES256-GCM-SHA384, bits=256)
+[68b99b83.1f57d-4] user=postgres,db=aitaxmd_prod,app=[unknown],client=10.229.246.67,LOG:  disconnection: session time: 0:00:03.088 user=postgres database=aitaxmd_prod host=10.229.246.67 port=59176
+[68b99b93.1f596-1] user=[unknown],db=[unknown],app=[unknown],client=10.229.246.67,LOG:  connection received: host=10.229.246.67 port=59438
+[68b99b93.1f597-1] user=[unknown],db=[unknown],app=[unknown],client=10.229.246.67,LOG:  connection received: host=10.229.246.67 port=59442
+[68b99b93.1f598-1] user=[unknown],db=[unknown],app=[unknown],client=10.229.246.67,LOG:  connection received: host=10.229.246.67 port=59458
+[68b99b93.1f598-2] user=postgres,db=aitaxmd_prod,app=[unknown],client=10.229.246.67,LOG:  connection authenticated: identity="postgres" method=md5 (/pgdata/dpg-d2s29kmr433s738fu070-a/pg_hba.conf:88)
+[68b99b93.1f598-3] user=postgres,db=aitaxmd_prod,app=[unknown],client=10.229.246.67,LOG:  connection authorized: user=postgres database=aitaxmd_prod SSL enabled (protocol=TLSv1.2, cipher=ECDHE-RSA-AES256-GCM-SHA384, bits=256)
+[68b99b93.1f598-4] user=postgres,db=aitaxmd_prod,app=[unknown],client=10.229.246.67,LOG:  disconnection: session time: 0:00:03.108 user=postgres database=aitaxmd_prod host=10.229.246.67 port=59458
+[68b99bbf.1f5cc-1] user=[unknown],db=[unknown],app=[unknown],client=10.229.246.67,LOG:  connection received: host=10.229.246.67 port=48258
+[68b99bbf.1f5cd-1] user=[unknown],db=[unknown],app=[unknown],client=10.229.246.67,LOG:  connection received: host=10.229.246.67 port=48268
+[68b99bbf.1f5ce-1] user=[unknown],db=[unknown],app=[unknown],client=10.229.246.67,LOG:  connection received: host=10.229.246.67 port=48278
+[68b99bbf.1f5ce-2] user=postgres,db=aitaxmd_prod,app=[unknown],client=10.229.246.67,LOG:  connection authenticated: identity="postgres" method=md5 (/pgdata/dpg-d2s29kmr433s738fu070-a/pg_hba.conf:88)
+[68b99bbf.1f5ce-3] user=postgres,db=aitaxmd_prod,app=[unknown],client=10.229.246.67,LOG:  connection authorized: user=postgres database=aitaxmd_prod SSL enabled (protocol=TLSv1.2, cipher=ECDHE-RSA-AES256-GCM-SHA384, bits=256)
+[68b99bbf.1f5ce-4] user=postgres,db=aitaxmd_prod,app=[unknown],client=10.229.246.67,LOG:  disconnection: session time: 0:00:03.209 user=postgres database=aitaxmd_prod host=10.229.246.67 port=48278
+[68b99bcf.1f5e7-1] user=[unknown],db=[unknown],app=[unknown],client=10.229.246.67,LOG:  connection received: host=10.229.246.67 port=55764
+[68b99bcf.1f5e8-1] user=[unknown],db=[unknown],app=[unknown],client=10.229.246.67,LOG:  connection received: host=10.229.246.67 port=55772
+[68b99bd0.1f5e9-1] user=[unknown],db=[unknown],app=[unknown],client=10.229.246.67,LOG:  connection received: host=10.229.246.67 port=55786
+[68b99bd0.1f5e9-2] user=postgres,db=aitaxmd_prod,app=[unknown],client=10.229.246.67,LOG:  connection authenticated: identity="postgres" method=md5 (/pgdata/dpg-d2s29kmr433s738fu070-a/pg_hba.conf:88)
+[68b99bd0.1f5e9-3] user=postgres,db=aitaxmd_prod,app=[unknown],client=10.229.246.67,LOG:  connection authorized: user=postgres database=aitaxmd_prod SSL enabled (protocol=TLSv1.2, cipher=ECDHE-RSA-AES256-GCM-SHA384, bits=256)
+[68b99bd0.1f5e9-4] user=postgres,db=aitaxmd_prod,app=[unknown],client=10.229.246.67,LOG:  disconnection: session time: 0:00:03.093 user=postgres database=aitaxmd_prod host=10.229.246.67 port=55786
+[68b99bfb.1f61d-1] user=[unknown],db=[unknown],app=[unknown],client=10.229.246.67,LOG:  connection received: host=10.229.246.67 port=60246
+[68b99bfb.1f61e-1] user=[unknown],db=[unknown],app=[unknown],client=10.229.246.67,LOG:  connection received: host=10.229.246.67 port=60256
+[68b99bfb.1f61f-1] user=[unknown],db=[unknown],app=[unknown],client=10.229.246.67,LOG:  connection received: host=10.229.246.67 port=60270
+[68b99bfb.1f61f-2] user=postgres,db=aitaxmd_prod,app=[unknown],client=10.229.246.67,LOG:  connection authenticated: identity="postgres" method=md5 (/pgdata/dpg-d2s29kmr433s738fu070-a/pg_hba.conf:88)
+[68b99bfb.1f61f-3] user=postgres,db=aitaxmd_prod,app=[unknown],client=10.229.246.67,LOG:  connection authorized: user=postgres database=aitaxmd_prod SSL enabled (protocol=TLSv1.2, cipher=ECDHE-RSA-AES256-GCM-SHA384, bits=256)
+[68b99bfb.1f61f-4] user=postgres,db=aitaxmd_prod,app=[unknown],client=10.229.246.67,LOG:  disconnection: session time: 0:00:03.028 user=postgres database=aitaxmd_prod host=10.229.246.67 port=60270
+[68b99c0b.1f637-1] user=[unknown],db=[unknown],app=[unknown],client=10.229.246.67,LOG:  connection received: host=10.229.246.67 port=50638
+[68b99c0b.1f638-1] user=[unknown],db=[unknown],app=[unknown],client=10.229.246.67,LOG:  connection received: host=10.229.246.67 port=50652
+[68b99c0c.1f639-1] user=[unknown],db=[unknown],app=[unknown],client=10.229.246.67,LOG:  connection received: host=10.229.246.67 port=50662
+[68b99c0c.1f639-2] user=postgres,db=aitaxmd_prod,app=[unknown],client=10.229.246.67,LOG:  connection authenticated: identity="postgres" method=md5 (/pgdata/dpg-d2s29kmr433s738fu070-a/pg_hba.conf:88)
+[68b99c0c.1f639-3] user=postgres,db=aitaxmd_prod,app=[unknown],client=10.229.246.67,LOG:  connection authorized: user=postgres database=aitaxmd_prod SSL enabled (protocol=TLSv1.2, cipher=ECDHE-RSA-AES256-GCM-SHA384, bits=256)
+[68b99c0c.1f639-4] user=postgres,db=aitaxmd_prod,app=[unknown],client=10.229.246.67,LOG:  disconnection: session time: 0:00:03.062 user=postgres database=aitaxmd_prod host=10.229.246.67 port=50662
+[68b824ef.8c-639] user=,db=,app=,client=,LOG:  checkpoint starting: time
+[68b824ef.8c-640] user=,db=,app=,client=,LOG:  checkpoint complete: wrote 1 buffers (0.0%); 0 WAL file(s) added, 0 removed, 0 recycled; write=0.002 s, sync=0.002 s, total=0.017 s; sync files=1, longest=0.002 s, average=0.002 s; distance=1 kB, estimate=1 kB
+[68b99c37.1f66d-1] user=[unknown],db=[unknown],app=[unknown],client=10.229.246.67,LOG:  connection received: host=10.229.246.67 port=38578
+[68b99c37.1f66e-1] user=[unknown],db=[unknown],app=[unknown],client=10.229.246.67,LOG:  connection received: host=10.229.246.67 port=38586
+[68b99c37.1f66f-1] user=[unknown],db=[unknown],app=[unknown],client=10.229.246.67,LOG:  connection received: host=10.229.246.67 port=38594
+[68b99c37.1f66f-2] user=postgres,db=aitaxmd_prod,app=[unknown],client=10.229.246.67,LOG:  connection authenticated: identity="postgres" method=md5 (/pgdata/dpg-d2s29kmr433s738fu070-a/pg_hba.conf:88)
+[68b99c37.1f66f-3] user=postgres,db=aitaxmd_prod,app=[unknown],client=10.229.246.67,LOG:  connection authorized: user=postgres database=aitaxmd_prod SSL enabled (protocol=TLSv1.2, cipher=ECDHE-RSA-AES256-GCM-SHA384, bits=256)
+[68b99c37.1f66f-4] user=postgres,db=aitaxmd_prod,app=[unknown],client=10.229.246.67,LOG:  disconnection: session time: 0:00:03.045 user=postgres database=aitaxmd_prod host=10.229.246.67 port=38594
+[68b99c47.1f688-1] user=[unknown],db=[unknown],app=[unknown],client=10.229.246.67,LOG:  connection received: host=10.229.246.67 port=35090
+[68b99c47.1f689-1] user=[unknown],db=[unknown],app=[unknown],client=10.229.246.67,LOG:  connection received: host=10.229.246.67 port=35094
+[68b99c47.1f68a-1] user=[unknown],db=[unknown],app=[unknown],client=10.229.246.67,LOG:  connection received: host=10.229.246.67 port=35100
+[68b99c47.1f68a-2] user=postgres,db=aitaxmd_prod,app=[unknown],client=10.229.246.67,LOG:  connection authenticated: identity="postgres" method=md5 (/pgdata/dpg-d2s29kmr433s738fu070-a/pg_hba.conf:88)
+[68b99c47.1f68a-3] user=postgres,db=aitaxmd_prod,app=[unknown],client=10.229.246.67,LOG:  connection authorized: user=postgres database=aitaxmd_prod SSL enabled (protocol=TLSv1.2, cipher=ECDHE-RSA-AES256-GCM-SHA384, bits=256)
+[68b99c47.1f68a-4] user=postgres,db=aitaxmd_prod,app=[unknown],client=10.229.246.67,LOG:  disconnection: session time: 0:00:03.101 user=postgres database=aitaxmd_prod host=10.229.246.67 port=35100
