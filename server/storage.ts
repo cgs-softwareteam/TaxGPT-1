@@ -25,6 +25,7 @@ export interface IStorage {
   createUser(user: InsertUser): Promise<User>;
   updateUser(id: number, updates: Partial<User>): Promise<User>;
   updateUserRole(id: number, role: string): Promise<User | undefined>;
+  deleteUser(id: number): Promise<boolean>;
   
   // Usage tracking
   createUsageLog(log: InsertUsageLog): Promise<UsageLog>;
@@ -213,6 +214,40 @@ export class MemStorage implements IStorage {
     return updatedUser;
   }
 
+  async deleteUser(id: number): Promise<boolean> {
+    const user = this.users.get(id);
+    if (!user) {
+      return false;
+    }
+
+    // Delete related data in order to handle dependencies
+    // 1. Delete saved plans
+    const userSavedPlans = Array.from(this.savedPlans.values()).filter(plan => plan.userId === id);
+    userSavedPlans.forEach(plan => this.savedPlans.delete(plan.id));
+
+    // 2. Delete share logs
+    const userShareLogs = Array.from(this.shareLogs.values()).filter(log => log.userId === id);
+    userShareLogs.forEach(log => this.shareLogs.delete(log.id));
+
+    // 3. Delete messages from user's conversations
+    const userConversations = Array.from(this.conversations.values()).filter(conv => conv.userId === id);
+    userConversations.forEach(conv => {
+      const conversationMessages = Array.from(this.messages.values()).filter(msg => msg.conversationId === conv.id);
+      conversationMessages.forEach(msg => this.messages.delete(msg.id));
+    });
+
+    // 4. Delete conversations
+    userConversations.forEach(conv => this.conversations.delete(conv.id));
+
+    // 5. Delete usage logs
+    const userUsageLogs = Array.from(this.usageLogs.values()).filter(log => log.userId === id);
+    userUsageLogs.forEach(log => this.usageLogs.delete(log.id));
+
+    // 6. Finally delete the user
+    this.users.delete(id);
+    return true;
+  }
+
   // CONVERSATION OPERATIONS
   async createConversation(userId: number, title?: string, initialMessage?: string): Promise<Conversation> {
     const id = this.conversationIdCounter++;
@@ -352,7 +387,7 @@ export class MemStorage implements IStorage {
     const id = this.savedPlanIdCounter++;
     const savedPlan: SavedPlan = {
       id,
-      userId: data.userId,
+      userId: data.userId!,
       messageId: data.messageId || 0,
       title: data.title || 'Untitled Plan',
       tags: data.tags || [],
@@ -393,7 +428,7 @@ export class MemStorage implements IStorage {
     const id = this.shareLogIdCounter++;
     const shareLog: ShareLog = {
       id,
-      userId: data.userId,
+      userId: data.userId!,
       messageId: data.messageId || 0,
       recipientEmail: data.recipientEmail || null,
       sharedAt: new Date(),
@@ -575,6 +610,42 @@ export class DrizzleStorage implements IStorage {
     return user || undefined;
   }
 
+  async deleteUser(id: number): Promise<boolean> {
+    try {
+      await this.db!.transaction(async (tx) => {
+        // Delete in order to handle foreign key constraints
+        // 1. Delete saved plans
+        await tx.delete(savedPlans).where(eq(savedPlans.userId, id));
+        
+        // 2. Delete share logs
+        await tx.delete(shareLog).where(eq(shareLog.userId, id));
+        
+        // 3. Delete messages from user's conversations
+        const userConversations = await tx
+          .select({ id: conversations.id })
+          .from(conversations)
+          .where(eq(conversations.userId, id));
+        
+        for (const conv of userConversations) {
+          await tx.delete(messages).where(eq(messages.conversationId, conv.id));
+        }
+        
+        // 4. Delete conversations
+        await tx.delete(conversations).where(eq(conversations.userId, id));
+        
+        // 5. Delete usage logs
+        await tx.delete(usageLogs).where(eq(usageLogs.userId, id));
+        
+        // 6. Finally delete the user
+        await tx.delete(users).where(eq(users.id, id));
+      });
+      return true;
+    } catch (error) {
+      console.error('Error deleting user:', error);
+      return false;
+    }
+  }
+
   // CONVERSATION OPERATIONS
   async createConversation(userId: number, title?: string, initialMessage?: string): Promise<Conversation> {
     const [conversation] = await this.db!.transaction(async (tx) => {
@@ -624,21 +695,31 @@ export class DrizzleStorage implements IStorage {
     const limit = 50;
     const offset = (page - 1) * limit;
 
-    const conversation = await this.db!.query.conversations.findFirst({
-      where: and(
+    const conversation = await this.db!
+      .select()
+      .from(conversations)
+      .where(and(
         eq(conversations.id, conversationId),
         eq(conversations.userId, userId)
-      ),
-      with: {
-        messages: {
-          orderBy: [asc(messages.timestamp)],
-          limit,
-          offset,
-        }
-      }
-    }) as (Conversation & { messages: Message[] }) | undefined;
+      ))
+      .limit(1);
 
-    return conversation;
+    if (!conversation.length) {
+      return undefined;
+    }
+
+    const conversationMessages = await this.db!
+      .select()
+      .from(messages)
+      .where(eq(messages.conversationId, conversationId))
+      .orderBy(asc(messages.timestamp))
+      .limit(limit)
+      .offset(offset);
+
+    return {
+      ...conversation[0],
+      messages: conversationMessages
+    } as Conversation & { messages: Message[] };
   }
 
   async updateConversationTitle(conversationId: number, userId: number, title: string): Promise<Conversation | undefined> {
@@ -691,24 +772,29 @@ export class DrizzleStorage implements IStorage {
   }
 
   async getMessageById(messageId: number, userId: number): Promise<Message & { conversation: { userId: number; user: User } } | undefined> {
-    const message = await this.db!.query.messages.findFirst({
-      where: eq(messages.id, messageId),
-      with: { 
-        conversation: { 
-          with: { user: true } 
-        } 
-      }
-    });
+    const message = await this.db!.select().from(messages).where(eq(messages.id, messageId)).limit(1);
+    
+    if (!message || message.length === 0) {
+      return undefined;
+    }
 
-    if (!message || message.conversation?.userId !== userId) {
+    const conversation = await this.db!.select().from(conversations).where(eq(conversations.id, message[0].conversationId!)).limit(1);
+    
+    if (!conversation || conversation.length === 0 || conversation[0].userId !== userId) {
+      return undefined;
+    }
+
+    const user = await this.db!.select().from(users).where(eq(users.id, conversation[0].userId)).limit(1);
+    
+    if (!user || user.length === 0) {
       return undefined;
     }
 
     return {
-      ...message,
+      ...message[0],
       conversation: {
-        userId: message.conversation.userId,
-        user: message.conversation.user
+        userId: conversation[0].userId,
+        user: user[0]
       }
     };
   }
@@ -727,19 +813,26 @@ export class DrizzleStorage implements IStorage {
   }
 
   async getSavedPlansByUser(userId: number): Promise<Array<SavedPlan & { message: { conversation: Conversation } }>> {
-    const userSavedPlans = await this.db!.query.savedPlans.findMany({
-      where: eq(savedPlans.userId, userId),
-      with: {
-        message: {
-          with: {
-            conversation: true
-          }
+    const plans = await this.db!.select().from(savedPlans).where(eq(savedPlans.userId, userId)).orderBy(desc(savedPlans.savedAt));
+    
+    const result = [];
+    for (const plan of plans) {
+      const message = await this.db!.select().from(messages).where(eq(messages.id, plan.messageId!)).limit(1);
+      if (message && message.length > 0) {
+        const conversation = await this.db!.select().from(conversations).where(eq(conversations.id, message[0].conversationId!)).limit(1);
+        if (conversation && conversation.length > 0) {
+          result.push({
+            ...plan,
+            message: {
+              ...message[0],
+              conversation: conversation[0]
+            }
+          });
         }
-      },
-      orderBy: [desc(savedPlans.savedAt)]
-    });
-
-    return userSavedPlans;
+      }
+    }
+    
+    return result;
   }
 
   async deleteSavedPlan(planId: number, userId: number): Promise<boolean> {

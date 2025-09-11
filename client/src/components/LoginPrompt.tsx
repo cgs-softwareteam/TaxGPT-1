@@ -1,5 +1,6 @@
 import { Button } from "./ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
+import { Link } from "wouter";
 
 export function LoginPrompt() {
   const handleGoogleLogin = () => {
@@ -64,7 +65,15 @@ export function LoginPrompt() {
 
           <div className="text-center mt-6">
             <p className="text-xs text-gray-500 dark:text-gray-400" data-testid="text-privacy">
-              By signing in, you agree to our terms of service and privacy policy.
+              By signing in, you agree to our{' '}
+              <Link href="/terms-of-service" className="text-blue-600 hover:text-blue-800 underline">
+                terms of service
+              </Link>
+              {' '}and{' '}
+              <Link href="/privacy-policy" className="text-blue-600 hover:text-blue-800 underline">
+                privacy policy
+              </Link>
+              .
             </p>
           </div>
         </CardContent>

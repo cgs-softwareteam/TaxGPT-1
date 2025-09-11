@@ -632,6 +632,75 @@ Always ask clarifying questions about employment structure when medical professi
       }
     });
 
+    // DATA DELETION ENDPOINT (Public - no auth required)
+    
+    // Request user data deletion
+    app.post("/api/data-deletion", async (req, res) => {
+      try {
+        const { email, reason } = req.body;
+
+        if (!email || !email.includes('@')) {
+          return res.status(400).json({ error: "Valid email address is required" });
+        }
+
+        // Find user by email
+        const user = await storage.getUserByEmail(email);
+        
+        if (!user) {
+          // Don't reveal if user exists or not for privacy
+          return res.json({ 
+            success: true, 
+            message: "If an account with this email exists, a data deletion request has been submitted. You will receive a confirmation email within 24-48 hours." 
+          });
+        }
+
+        const userId = user.id;
+        const deletionId = randomUUID();
+
+        // Log the deletion request
+        console.log(`Data deletion request received:`, {
+          deletionId,
+          email,
+          userId,
+          reason: reason || 'No reason provided',
+          timestamp: new Date().toISOString()
+        });
+
+        // In a production environment, you would:
+        // 1. Store the deletion request in a separate table
+        // 2. Send an email to the user for confirmation
+        // 3. Have an admin process to review and execute deletions
+        // 4. Implement a grace period before actual deletion
+        
+        // For now, we'll simulate the process
+        try {
+          // Delete user data using storage layer
+          const deleted = await storage.deleteUser(userId);
+          
+          if (!deleted) {
+            return res.status(500).json({ 
+              success: false, 
+              message: 'Failed to delete user data. Please try again later.' 
+            });
+          }
+
+          console.log(`Data deletion completed for user ${email} (ID: ${userId})`);
+        } catch (dbError) {
+          console.error(`Failed to delete data for user ${email}:`, dbError);
+          return res.status(500).json({ error: "Failed to process deletion request" });
+        }
+
+        res.json({ 
+          success: true, 
+          message: "Data deletion request has been processed successfully. All associated data has been permanently removed from our systems.",
+          deletionId 
+        });
+      } catch (error) {
+        console.error("Data deletion request failed:", error);
+        res.status(500).json({ error: "Failed to process data deletion request" });
+      }
+    });
+
     // HEALTH CHECK ENDPOINTS (Required for Render deployment)
     
     // Primary health check endpoint

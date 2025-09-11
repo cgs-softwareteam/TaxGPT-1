@@ -5,6 +5,9 @@ import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import NotFound from "@/pages/not-found";
 import Home from "@/pages/home";
+import TermsOfService from "@/pages/terms-of-service";
+import PrivacyPolicy from "@/pages/privacy-policy";
+import DataDeletion from "@/pages/data-deletion";
 
 import AdminDashboard from "@/pages/admin-dashboard";
 import UserUsage from "@/pages/user-usage";
@@ -14,6 +17,22 @@ import { LoginPrompt } from "@/components/LoginPrompt";
 
 function Router() {
   const { isAuthenticated, isLoading, authEnabled } = useAuth();
+
+  // Legal pages are always accessible, regardless of authentication status
+  const isLegalPage = window.location.pathname.startsWith('/terms-of-service') || 
+                     window.location.pathname.startsWith('/privacy-policy') || 
+                     window.location.pathname.startsWith('/data-deletion');
+
+  if (isLegalPage) {
+    return (
+      <Switch>
+        <Route path="/terms-of-service" component={TermsOfService} />
+        <Route path="/privacy-policy" component={PrivacyPolicy} />
+        <Route path="/data-deletion" component={DataDeletion} />
+        <Route component={NotFound} />
+      </Switch>
+    );
+  }
 
   // Show loading state while checking authentication
   if (authEnabled && isLoading) {
@@ -32,6 +51,11 @@ function Router() {
   return (
     <Switch>
       <Route path="/" component={Home} />
+      
+      {/* Legal Pages - Publicly accessible */}
+      <Route path="/terms-of-service" component={TermsOfService} />
+      <Route path="/privacy-policy" component={PrivacyPolicy} />
+      <Route path="/data-deletion" component={DataDeletion} />
 
       <Route path="/admin" component={AdminDashboard} />
       <Route path="/admin-dashboard" component={AdminDashboard} />

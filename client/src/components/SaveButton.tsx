@@ -18,10 +18,7 @@ export function SaveButton({ messageId, content, className }: SaveButtonProps) {
 
   const savePlanMutation = useMutation({
     mutationFn: async (data: { messageId: number; title: string; tags?: string[] }) => {
-      return apiRequest("/api/saved-plans", {
-        method: "POST",
-        body: data,
-      });
+      return apiRequest("POST", "/api/saved-plans", data);
     },
     onSuccess: () => {
       setIsSaved(true);
@@ -77,7 +74,7 @@ export function SaveButton({ messageId, content, className }: SaveButtonProps) {
     if (content.toLowerCase().includes('business')) tags.push('Business');
     if (content.toLowerCase().includes('investment')) tags.push('Investment');
     
-    return [...new Set(tags)]; // Remove duplicates
+    return Array.from(new Set(tags)); // Remove duplicates
   };
 
   const handleSave = () => {

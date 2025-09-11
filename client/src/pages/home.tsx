@@ -293,6 +293,25 @@ export default function Home() {
             onSubmit={handleSubmit} 
             isLoading={isLoading}
           />
+          
+          {/* Footer with Legal Links */}
+          <div className="px-4 py-2 bg-gray-50 border-t border-gray-100">
+            <div className="flex flex-wrap justify-center items-center space-x-4 text-xs text-gray-500">
+              <Link href="/terms-of-service" className="hover:text-gray-700 underline">
+                Terms of Service
+              </Link>
+              <span className="text-gray-300">•</span>
+              <Link href="/privacy-policy" className="hover:text-gray-700 underline">
+                Privacy Policy
+              </Link>
+              <span className="text-gray-300">•</span>
+              <Link href="/data-deletion" className="hover:text-gray-700 underline">
+                Delete My Data
+              </Link>
+              <span className="text-gray-300">•</span>
+              <span className="text-gray-400">© 2024 AITaxMD</span>
+            </div>
+          </div>
         </div>
       </div>
     </div>
