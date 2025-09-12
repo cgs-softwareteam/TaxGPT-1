@@ -146,34 +146,7 @@ export default function ChatInterface({ conversation, isLoading, onRequestExpert
             <div className="text-primary text-4xl mb-4">
               <Bot className="w-12 h-12 mx-auto" />
             </div>
-            <h2 className="text-xl font-medium text-gray-900 mb-3">Welcome to AITaxMD</h2>
-            <p className="text-gray-600 text-sm mb-4">Your AI-powered tax planning assistant. I'll help you discover personalized tax strategies and savings opportunities.</p>
-            
-            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
-              <h3 className="text-sm font-medium text-blue-900 mb-2">How it works:</h3>
-              <div className="text-xs text-blue-800 space-y-1">
-                <div className="flex items-center">
-                  <span className="w-4 h-4 bg-blue-500 text-white rounded-full text-xs flex items-center justify-center mr-2 font-bold">1</span>
-                  Tell me about your financial situation
-                </div>
-                <div className="flex items-center">
-                  <span className="w-4 h-4 bg-blue-500 text-white rounded-full text-xs flex items-center justify-center mr-2 font-bold">2</span>
-                  I'll ask follow-up questions to understand your needs
-                </div>
-                <div className="flex items-center">
-                  <span className="w-4 h-4 bg-blue-500 text-white rounded-full text-xs flex items-center justify-center mr-2 font-bold">3</span>
-                  Receive a personalized tax planning report
-                </div>
-              </div>
-            </div>
-            
-            <div className="text-xs text-gray-500 mb-4">
-              <strong>Example starter:</strong> "I need help with tax planning. I make $75,000 per year in Texas."
-            </div>
-            
-            <p className="text-xs text-gray-500">
-              💡 <strong>Tip:</strong> The more details you share, the better I can help optimize your tax strategy.
-            </p>
+            <h2 className="text-2xl font-medium text-gray-900" data-testid="text-welcome-tagline">How can I help with your taxes today?</h2>
           </div>
         </div>
       )}

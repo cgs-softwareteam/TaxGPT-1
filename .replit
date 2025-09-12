@@ -37,5 +37,10 @@ waitForPort = 5000
 [[ports]]
 localPort = 5000
 externalPort = 80
+exposeLocalhost = true
+
+[[ports]]
+localPort = 38151
+externalPort = 3000
 
 [agent]
