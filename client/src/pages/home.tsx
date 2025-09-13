@@ -103,21 +103,22 @@ export default function Home() {
           }
 
           const data = await response.json();
+          // Save AI response to database (user message already saved during conversation creation)
+          const savedAiMessage = await addMessageMutation.mutateAsync({
+            conversationId: newConv.id,
+            role: 'assistant',
+            content: data.content,
+            responseTimeMs: Date.now() - startTime,
+          });
+
           const aiMessage: Message = {
+            id: savedAiMessage.id,
             role: 'assistant',
             content: data.content,
             timestamp: new Date()
           };
 
           setConversation([userMessage, aiMessage]);
-
-          // Save AI response to database (user message already saved during conversation creation)
-          await addMessageMutation.mutateAsync({
-            conversationId: newConv.id,
-            role: 'assistant',
-            content: data.content,
-            responseTimeMs: Date.now() - startTime,
-          });
 
           return; // Early exit for new conversation flow
         } catch (error) {
@@ -148,15 +149,9 @@ export default function Home() {
       const data = await response.json();
       const responseTimeMs = Date.now() - startTime;
       
-      const aiMessage: Message = {
-        role: 'assistant',
-        content: data.content,
-        timestamp: new Date()
-      };
-
-      setConversation(prev => [...prev, aiMessage]);
-
       // Save messages to database for existing conversations
+      let aiMessage: Message;
+      
       if (authEnabled && isAuthenticated && currentConversationId) {
         await addMessageMutation.mutateAsync({
           conversationId: currentConversationId,
@@ -164,13 +159,29 @@ export default function Home() {
           content: message,
         });
         
-        await addMessageMutation.mutateAsync({
+        const savedAiMessage = await addMessageMutation.mutateAsync({
           conversationId: currentConversationId,
           role: 'assistant',
           content: data.content,
           responseTimeMs,
         });
+
+        aiMessage = {
+          id: savedAiMessage.id,
+          role: 'assistant',
+          content: data.content,
+          timestamp: new Date()
+        };
+      } else {
+        // Unauthenticated users - no database ID
+        aiMessage = {
+          role: 'assistant',
+          content: data.content,
+          timestamp: new Date()
+        };
       }
+
+      setConversation(prev => [...prev, aiMessage]);
 
     } catch (error) {
       const errorMessage: Message = {
