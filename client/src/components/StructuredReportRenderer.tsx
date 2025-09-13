@@ -1,17 +1,64 @@
 import ReactMarkdown from "react-markdown";
 import { useState } from "react";
-import { DollarSign, Target, Lightbulb, CheckCircle, Shield, AlertTriangle, PiggyBank, Building2, Receipt, TrendingUp, Clock, Zap, Calendar, ChevronDown, ChevronRight, Info, Sparkles, MessageCircle, HelpCircle, RefreshCw, Download } from "lucide-react";
+import { useMutation } from "@tanstack/react-query";
+import { DollarSign, Target, Lightbulb, CheckCircle, Shield, AlertTriangle, PiggyBank, Building2, Receipt, TrendingUp, Clock, Zap, Calendar, ChevronDown, ChevronRight, Info, Sparkles, MessageCircle, HelpCircle, RefreshCw, Download, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useToast } from "@/hooks/use-toast";
 
 interface StructuredReportRendererProps {
   content: string;
   timestamp: Date;
+  messageId?: number;
   onRequestExpertAnalysis?: (strategyName: string) => void;
   isLoading?: boolean;
 }
 
-export default function StructuredReportRenderer({ content, timestamp, onRequestExpertAnalysis, isLoading = false }: StructuredReportRendererProps) {
+export default function StructuredReportRenderer({ content, timestamp, messageId, onRequestExpertAnalysis, isLoading = false }: StructuredReportRendererProps) {
   const [expandedStrategy, setExpandedStrategy] = useState<number | null>(null);
+  const { toast } = useToast();
+
+  // PDF Export functionality
+  const exportPdfMutation = useMutation({
+    mutationFn: async () => {
+      if (!messageId) {
+        throw new Error("Message ID required for PDF export");
+      }
+      
+      const response = await fetch(`/api/export/pdf/message/${messageId}`, {
+        method: "POST",
+        credentials: "include",
+      });
+      
+      if (!response.ok) {
+        throw new Error("Failed to export PDF");
+      }
+      
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `tax-plan-${messageId}.pdf`;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+      
+      return blob;
+    },
+    onSuccess: () => {
+      toast({
+        title: "PDF Downloaded",
+        description: "Your tax plan has been exported as PDF.",
+      });
+    },
+    onError: (error) => {
+      toast({
+        title: "Export Failed",
+        description: error instanceof Error ? error.message : "Could not export PDF. Please try again.",
+        variant: "destructive",
+      });
+    },
+  });
 
   const formatTime = (date: Date) => {
     return date.toLocaleTimeString('en-US', {
@@ -468,18 +515,19 @@ export default function StructuredReportRenderer({ content, timestamp, onRequest
             <Button
               variant="outline"
               size="sm"
-              className="bg-white hover:bg-blue-50 border-blue-300 text-blue-700"
-              disabled={isLoading}
+              className="bg-white hover:bg-blue-50 border-blue-300 text-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+              disabled={isLoading || exportPdfMutation.isPending || !messageId}
               onClick={() => {
-                if (isLoading) return;
-                const message = "Please provide a downloadable PDF version of this tax planning report.";
-                // This will trigger the chat input with the PDF request message
-                const event = new CustomEvent('requestFollowup', { detail: { message } });
-                window.dispatchEvent(event);
+                if (isLoading || exportPdfMutation.isPending || !messageId) return;
+                exportPdfMutation.mutate();
               }}
               data-testid="followup-pdf"
             >
-              <Download className="w-4 h-4 mr-2" />
+              {exportPdfMutation.isPending ? (
+                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+              ) : (
+                <Download className="w-4 h-4 mr-2" />
+              )}
               Download PDF Report
             </Button>
             

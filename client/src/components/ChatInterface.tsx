@@ -63,6 +63,7 @@ export default function ChatInterface({ conversation, isLoading, onRequestExpert
             <StructuredReportRenderer 
               content={message.content} 
               timestamp={message.timestamp}
+              messageId={message.id}
               onRequestExpertAnalysis={onRequestExpertAnalysis}
               isLoading={isLoading}
             />
