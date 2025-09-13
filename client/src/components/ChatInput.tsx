@@ -2,6 +2,8 @@ import { useState } from "react";
 import { Send, Paperclip, Shield, Clock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 interface ChatInputProps {
   onSubmit: (message: string) => void;
@@ -10,6 +12,7 @@ interface ChatInputProps {
 
 export default function ChatInput({ onSubmit, isLoading }: ChatInputProps) {
   const [message, setMessage] = useState("");
+  const isMobile = useIsMobile();
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -63,45 +66,103 @@ export default function ChatInput({ onSubmit, isLoading }: ChatInputProps) {
       {/* Quick Start Suggestions */}
       {message.trim() === '' && (
         <div className="mt-3 mb-2" data-testid="quick-start-suggestions">
-          <div className="text-xs text-gray-500 mb-2">Quick start options:</div>
-          <div className="flex flex-wrap gap-1 md:gap-2">
-            <button
-              type="button"
-              onClick={() => setMessage("I need help with tax planning. I make $75,000 per year and live in California.")}
-              className="text-xs bg-gray-100 hover:bg-gray-200 text-gray-700 px-2 md:px-3 py-2 rounded-lg transition-colors duration-200"
-              data-testid="quick-start-california"
-            >
-              <span className="hidden sm:inline">💼 California resident, $75k income</span>
-              <span className="sm:hidden">💼 CA, $75k</span>
-            </button>
-            <button
-              type="button"
-              onClick={() => setMessage("I'm self-employed and need tax strategies for my small business.")}
-              className="text-xs bg-gray-100 hover:bg-gray-200 text-gray-700 px-2 md:px-3 py-2 rounded-lg transition-colors duration-200"
-              data-testid="quick-start-selfemployed"
-            >
-              <span className="hidden sm:inline">🏢 Self-employed tax help</span>
-              <span className="sm:hidden">🏢 Self-employed</span>
-            </button>
-            <button
-              type="button"
-              onClick={() => setMessage("I want to maximize my retirement savings and reduce taxes.")}
-              className="text-xs bg-gray-100 hover:bg-gray-200 text-gray-700 px-2 md:px-3 py-2 rounded-lg transition-colors duration-200"
-              data-testid="quick-start-retirement"
-            >
-              <span className="hidden sm:inline">💰 Retirement tax strategies</span>
-              <span className="sm:hidden">💰 Retirement</span>
-            </button>
-            <button
-              type="button"
-              onClick={() => setMessage("I recently got married and need to understand how this affects my taxes.")}
-              className="text-xs bg-gray-100 hover:bg-gray-200 text-gray-700 px-2 md:px-3 py-2 rounded-lg transition-colors duration-200"
-              data-testid="quick-start-married"
-            >
-              <span className="hidden sm:inline">💒 Marriage tax planning</span>
-              <span className="sm:hidden">💒 Marriage</span>
-            </button>
-          </div>
+          {isMobile ? (
+            /* Mobile: Collapsible Accordion */
+            <Accordion type="single" collapsible className="w-full" data-testid="quick-start-accordion">
+              <AccordionItem value="quick-start">
+                <AccordionTrigger 
+                  className="text-xs text-gray-500 hover:text-gray-700 py-2 px-0"
+                  data-testid="quick-start-toggle"
+                  disabled={isLoading}
+                >
+                  Quick start options
+                </AccordionTrigger>
+                <AccordionContent className="pb-2">
+                  <div className="flex flex-wrap gap-1">
+                    <button
+                      type="button"
+                      onClick={() => setMessage("I need help with tax planning. I make $75,000 per year and live in California.")}
+                      className="text-xs bg-gray-100 hover:bg-gray-200 text-gray-700 px-2 py-2 rounded-lg transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                      data-testid="quick-start-california"
+                      disabled={isLoading}
+                    >
+                      💼 CA, $75k
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setMessage("I'm self-employed and need tax strategies for my small business.")}
+                      className="text-xs bg-gray-100 hover:bg-gray-200 text-gray-700 px-2 py-2 rounded-lg transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                      data-testid="quick-start-selfemployed"
+                      disabled={isLoading}
+                    >
+                      🏢 Self-employed
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setMessage("I want to maximize my retirement savings and reduce taxes.")}
+                      className="text-xs bg-gray-100 hover:bg-gray-200 text-gray-700 px-2 py-2 rounded-lg transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                      data-testid="quick-start-retirement"
+                      disabled={isLoading}
+                    >
+                      💰 Retirement
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setMessage("I recently got married and need to understand how this affects my taxes.")}
+                      className="text-xs bg-gray-100 hover:bg-gray-200 text-gray-700 px-2 py-2 rounded-lg transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                      data-testid="quick-start-married"
+                      disabled={isLoading}
+                    >
+                      💒 Marriage
+                    </button>
+                  </div>
+                </AccordionContent>
+              </AccordionItem>
+            </Accordion>
+          ) : (
+            /* Desktop: Original Layout */
+            <>
+              <div className="text-xs text-gray-500 mb-2">Quick start options:</div>
+              <div className="flex flex-wrap gap-2">
+                <button
+                  type="button"
+                  onClick={() => setMessage("I need help with tax planning. I make $75,000 per year and live in California.")}
+                  className="text-xs bg-gray-100 hover:bg-gray-200 text-gray-700 px-3 py-2 rounded-lg transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                  data-testid="quick-start-california"
+                  disabled={isLoading}
+                >
+                  💼 California resident, $75k income
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setMessage("I'm self-employed and need tax strategies for my small business.")}
+                  className="text-xs bg-gray-100 hover:bg-gray-200 text-gray-700 px-3 py-2 rounded-lg transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                  data-testid="quick-start-selfemployed"
+                  disabled={isLoading}
+                >
+                  🏢 Self-employed tax help
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setMessage("I want to maximize my retirement savings and reduce taxes.")}
+                  className="text-xs bg-gray-100 hover:bg-gray-200 text-gray-700 px-3 py-2 rounded-lg transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                  data-testid="quick-start-retirement"
+                  disabled={isLoading}
+                >
+                  💰 Retirement tax strategies
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setMessage("I recently got married and need to understand how this affects my taxes.")}
+                  className="text-xs bg-gray-100 hover:bg-gray-200 text-gray-700 px-3 py-2 rounded-lg transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                  data-testid="quick-start-married"
+                  disabled={isLoading}
+                >
+                  💒 Marriage tax planning
+                </button>
+              </div>
+            </>
+          )}
         </div>
       )}
 
