@@ -20,10 +20,6 @@ export default function StructuredReportRenderer({ content, timestamp, messageId
   // PDF Export functionality
   const exportPdfMutation = useMutation({
     mutationFn: async () => {
-      if (!messageId) {
-        throw new Error("Message ID required for PDF export");
-      }
-      
       const response = await fetch(`/api/export/pdf/message/${messageId}`, {
         method: "POST",
         credentials: "include",
@@ -518,7 +514,17 @@ export default function StructuredReportRenderer({ content, timestamp, messageId
               className="bg-white hover:bg-blue-50 border-blue-300 text-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
               disabled={isLoading || exportPdfMutation.isPending || !messageId}
               onClick={() => {
-                if (isLoading || exportPdfMutation.isPending || !messageId) return;
+                if (isLoading || exportPdfMutation.isPending) return;
+                
+                if (!messageId) {
+                  toast({
+                    title: "Save Required",
+                    description: "Please save the conversation to enable PDF export.",
+                    variant: "destructive",
+                  });
+                  return;
+                }
+                
                 exportPdfMutation.mutate();
               }}
               data-testid="followup-pdf"

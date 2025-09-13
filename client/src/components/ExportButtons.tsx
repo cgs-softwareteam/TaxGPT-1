@@ -39,6 +39,10 @@ export function ExportButtons({ messageId, content, className }: ExportButtonsPr
 
   const exportPdfMutation = useMutation({
     mutationFn: async () => {
+      if (!messageId) {
+        throw new Error("Message ID is required for PDF export");
+      }
+      
       const response = await fetch(`/api/export/pdf/message/${messageId}`, {
         method: "POST",
         credentials: "include",
@@ -160,8 +164,18 @@ export function ExportButtons({ messageId, content, className }: ExportButtonsPr
       <Button
         variant="outline"
         size="sm"
-        onClick={() => exportPdfMutation.mutate()}
-        disabled={exportPdfMutation.isPending}
+        onClick={() => {
+          if (!messageId) {
+            toast({
+              title: "Save Required", 
+              description: "Please save the conversation to enable PDF export.",
+              variant: "destructive",
+            });
+            return;
+          }
+          exportPdfMutation.mutate();
+        }}
+        disabled={exportPdfMutation.isPending || !messageId}
         data-testid={`pdf-button-${messageId}`}
       >
         {exportPdfMutation.isPending ? (
