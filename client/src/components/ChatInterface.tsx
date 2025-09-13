@@ -64,6 +64,7 @@ export default function ChatInterface({ conversation, isLoading, onRequestExpert
               content={message.content} 
               timestamp={message.timestamp}
               onRequestExpertAnalysis={onRequestExpertAnalysis}
+              isLoading={isLoading}
             />
           </div>
         );

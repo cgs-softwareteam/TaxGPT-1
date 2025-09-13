@@ -1,14 +1,16 @@
 import ReactMarkdown from "react-markdown";
 import { useState } from "react";
-import { DollarSign, Target, Lightbulb, CheckCircle, Shield, AlertTriangle, PiggyBank, Building2, Receipt, TrendingUp, Clock, Zap, Calendar, ChevronDown, ChevronRight, Info, Sparkles } from "lucide-react";
+import { DollarSign, Target, Lightbulb, CheckCircle, Shield, AlertTriangle, PiggyBank, Building2, Receipt, TrendingUp, Clock, Zap, Calendar, ChevronDown, ChevronRight, Info, Sparkles, MessageCircle, HelpCircle, RefreshCw, Download } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 interface StructuredReportRendererProps {
   content: string;
   timestamp: Date;
   onRequestExpertAnalysis?: (strategyName: string) => void;
+  isLoading?: boolean;
 }
 
-export default function StructuredReportRenderer({ content, timestamp, onRequestExpertAnalysis }: StructuredReportRendererProps) {
+export default function StructuredReportRenderer({ content, timestamp, onRequestExpertAnalysis, isLoading = false }: StructuredReportRendererProps) {
   const [expandedStrategy, setExpandedStrategy] = useState<number | null>(null);
 
   const formatTime = (date: Date) => {
@@ -333,8 +335,12 @@ export default function StructuredReportRenderer({ content, timestamp, onRequest
                               </div>
                             </div>
                             <button
-                              onClick={() => onRequestExpertAnalysis?.(strategy.name)}
-                              className="ml-3 flex items-center space-x-1 bg-blue-600 hover:bg-blue-700 text-white text-xs px-3 py-1.5 rounded-lg transition-colors"
+                              onClick={() => {
+                                if (isLoading) return;
+                                onRequestExpertAnalysis?.(strategy.name);
+                              }}
+                              disabled={isLoading}
+                              className="ml-3 flex items-center space-x-1 bg-blue-600 hover:bg-blue-700 text-white text-xs px-3 py-1.5 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                               data-testid={`detailed-explanation-${index}`}
                             >
                               <Sparkles className="w-3 h-3" />
@@ -447,6 +453,88 @@ export default function StructuredReportRenderer({ content, timestamp, onRequest
             </div>
           </div>
         )}
+
+        {/* Follow-up Actions */}
+        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mt-6">
+          <div className="flex items-start space-x-2 mb-4">
+            <MessageCircle className="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" />
+            <div>
+              <h4 className="font-medium text-blue-800 mb-1">What would you like to do next?</h4>
+              <p className="text-sm text-blue-700">Choose from the options below to continue optimizing your tax strategy.</p>
+            </div>
+          </div>
+          
+          <div className="flex flex-wrap gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              className="bg-white hover:bg-blue-50 border-blue-300 text-blue-700"
+              disabled={isLoading}
+              onClick={() => {
+                if (isLoading) return;
+                const message = "Please provide a downloadable PDF version of this tax planning report.";
+                // This will trigger the chat input with the PDF request message
+                const event = new CustomEvent('requestFollowup', { detail: { message } });
+                window.dispatchEvent(event);
+              }}
+              data-testid="followup-pdf"
+            >
+              <Download className="w-4 h-4 mr-2" />
+              Download PDF Report
+            </Button>
+            
+            <Button
+              variant="outline"
+              size="sm"
+              className="bg-white hover:bg-blue-50 border-blue-300 text-blue-700"
+              disabled={isLoading}
+              onClick={() => {
+                if (isLoading) return;
+                const message = "I need clarification on one of the tax strategies mentioned in my report. Can you explain in more detail?";
+                const event = new CustomEvent('requestFollowup', { detail: { message } });
+                window.dispatchEvent(event);
+              }}
+              data-testid="followup-clarify"
+            >
+              <HelpCircle className="w-4 h-4 mr-2" />
+              Ask for Clarification
+            </Button>
+            
+            <Button
+              variant="outline"
+              size="sm"
+              className="bg-white hover:bg-blue-50 border-blue-300 text-blue-700"
+              disabled={isLoading}
+              onClick={() => {
+                if (isLoading) return;
+                const message = "Can you create additional tax planning scenarios based on different income levels or life changes?";
+                const event = new CustomEvent('requestFollowup', { detail: { message } });
+                window.dispatchEvent(event);
+              }}
+              data-testid="followup-scenarios"
+            >
+              <RefreshCw className="w-4 h-4 mr-2" />
+              Explore More Scenarios
+            </Button>
+            
+            <Button
+              variant="outline"
+              size="sm"
+              className="bg-white hover:bg-blue-50 border-blue-300 text-blue-700"
+              disabled={isLoading}
+              onClick={() => {
+                if (isLoading) return;
+                const message = "What are the specific implementation steps and timeline for the highest-impact tax strategies in my report?";
+                const event = new CustomEvent('requestFollowup', { detail: { message } });
+                window.dispatchEvent(event);
+              }}
+              data-testid="followup-implementation"
+            >
+              <Calendar className="w-4 h-4 mr-2" />
+              Implementation Guide
+            </Button>
+          </div>
+        </div>
       </div>
 
       {/* Timestamp */}

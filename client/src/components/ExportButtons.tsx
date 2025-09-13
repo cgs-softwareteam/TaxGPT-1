@@ -157,7 +157,6 @@ export function ExportButtons({ messageId, content, className }: ExportButtonsPr
         )}
       </Button>
 
-      {/* DISABLED: Out-of-scope PDF Export feature
       <Button
         variant="outline"
         size="sm"
@@ -177,7 +176,6 @@ export function ExportButtons({ messageId, content, className }: ExportButtonsPr
           </>
         )}
       </Button>
-      */}
 
       {/* DISABLED: Out-of-scope Email Share feature
       <Dialog open={isEmailDialogOpen} onOpenChange={setIsEmailDialogOpen}>

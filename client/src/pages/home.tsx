@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import ChatInterface from "@/components/ChatInterface";
@@ -29,6 +29,14 @@ export default function Home() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const isMobile = useIsMobile();
+  
+  // Use ref to track latest conversation to avoid stale closures
+  const conversationRef = useRef<Message[]>([]);
+  
+  // Keep conversationRef updated with latest conversation state
+  useEffect(() => {
+    conversationRef.current = conversation;
+  }, [conversation]);
 
   const createConversationMutation = useMutation({
     mutationFn: async (data: { title?: string; initialMessage?: string }) => {
@@ -55,8 +63,8 @@ export default function Home() {
     },
   });
 
-  const handleSubmit = async (message: string) => {
-    if (!message.trim()) return;
+  const handleSubmit = useCallback(async (message: string) => {
+    if (!message.trim() || isLoading) return; // Prevent overlapping requests
 
     const userMessage: Message = {
       role: 'user',
@@ -119,13 +127,14 @@ export default function Home() {
       }
 
       // Handle existing conversation or unauthenticated users
+      // Use conversationRef to get latest conversation state and avoid stale closures
       const startTime = Date.now();
       const response = await fetch('/api/generate', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
         body: JSON.stringify({
-          messages: [...conversation, userMessage].map(msg => ({
+          messages: [...conversationRef.current, userMessage].map(msg => ({
             role: msg.role,
             content: msg.content
           }))
@@ -179,7 +188,24 @@ export default function Home() {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [authEnabled, isAuthenticated, currentConversationId, createConversationMutation.mutateAsync, addMessageMutation.mutateAsync, toast, isLoading]);
+
+  // Handle followup requests from StructuredReportRenderer
+  useEffect(() => {
+    const handleFollowupRequest = (e: Event) => {
+      const event = e as CustomEvent<{ message?: string }>;
+      const message = event.detail?.message;
+      if (message) {
+        handleSubmit(message);
+      }
+    };
+
+    window.addEventListener('requestFollowup', handleFollowupRequest);
+    
+    return () => {
+      window.removeEventListener('requestFollowup', handleFollowupRequest);
+    };
+  }, [handleSubmit]);
 
   const handleExpertAnalysisRequest = async (strategyName: string) => {
     const expertAnalysisMessage = `Please provide a comprehensive, expert-level explanation of the "${strategyName}" tax strategy. Include specific examples, advanced techniques, potential pitfalls, and detailed implementation guidance. Make this a thorough analysis that a tax professional would provide.`;
