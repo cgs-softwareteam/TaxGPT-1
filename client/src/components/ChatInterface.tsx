@@ -112,6 +112,11 @@ export default function ChatInterface({ conversation, isLoading, onRequestExpert
               <div className="flex items-center justify-between mt-3 pt-2 border-t border-gray-100">
                 <div className="text-xs text-gray-500">{formatTime(message.timestamp)}</div>
                 <div className="flex items-center space-x-2">
+                  {/* Show ExportButtons for all AI messages - the component handles authentication and tax report detection internally */}
+                  <ExportButtons 
+                    messageId={message.id}
+                    content={message.content}
+                  />
                   {authEnabled && isAuthenticated && (
                     <>
                       {/* DISABLED: Out-of-scope Save feature
@@ -121,10 +126,6 @@ export default function ChatInterface({ conversation, isLoading, onRequestExpert
                         size="sm"
                       />
                       */}
-                      <ExportButtons 
-                        messageId={message.id}
-                        content={message.content}
-                      />
                     </>
                   )}
                   <div className="flex items-center space-x-1 text-xs text-gray-400">
