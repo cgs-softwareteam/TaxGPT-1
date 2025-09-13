@@ -348,7 +348,7 @@ const exportToPrint = (content: string) => {
           text-align: center;
           border-bottom: 3px solid #2563eb;
           padding-bottom: 20px;
-          margin-bottom: 30px;
+          margin-bottom: 20px;
         }
         .content {
           white-space: pre-line;
@@ -357,9 +357,9 @@ const exportToPrint = (content: string) => {
         /* Enhanced styles for tax reports */
         .report-header {
           background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
-          padding: 20px;
+          padding: 15px;
           border-radius: 10px;
-          margin-bottom: 25px;
+          margin-bottom: 15px;
           border-left: 4px solid #2563eb;
         }
         .report-header h2 {
@@ -369,15 +369,15 @@ const exportToPrint = (content: string) => {
         
         .financial-highlights {
           display: flex;
-          gap: 20px;
-          margin-bottom: 30px;
+          gap: 15px;
+          margin-bottom: 18px;
         }
         .highlight-box {
           flex: 1;
           background: #f0f9ff;
           border: 2px solid #0ea5e9;
           border-radius: 10px;
-          padding: 15px;
+          padding: 12px;
           text-align: center;
         }
         .highlight-box h3 {
@@ -392,14 +392,14 @@ const exportToPrint = (content: string) => {
         }
         
         .strategies-section {
-          margin-bottom: 30px;
+          margin-bottom: 20px;
         }
         .strategy-card {
           background: #fff;
           border: 1px solid #e5e7eb;
           border-radius: 12px;
-          padding: 20px;
-          margin-bottom: 20px;
+          padding: 15px;
+          margin-bottom: 12px;
           box-shadow: 0 1px 3px rgba(0,0,0,0.1);
           page-break-inside: avoid;
         }
@@ -407,9 +407,9 @@ const exportToPrint = (content: string) => {
           display: flex;
           justify-content: space-between;
           align-items: center;
-          margin-bottom: 15px;
+          margin-bottom: 10px;
           border-bottom: 1px solid #f3f4f6;
-          padding-bottom: 10px;
+          padding-bottom: 8px;
         }
         .strategy-header h4 {
           margin: 0;
@@ -440,26 +440,26 @@ const exportToPrint = (content: string) => {
         }
         .strategy-description {
           color: #6b7280;
-          margin-bottom: 15px;
+          margin-bottom: 8px;
           font-style: italic;
         }
         .strategy-details {
           background: #f9fafb;
-          padding: 15px;
+          padding: 12px;
           border-radius: 8px;
         }
         .overview {
-          margin-bottom: 15px;
-          padding: 10px;
+          margin-bottom: 10px;
+          padding: 8px;
           background: #eff6ff;
           border-radius: 6px;
           border-left: 3px solid #3b82f6;
         }
         .detail-section {
-          margin-bottom: 15px;
+          margin-bottom: 10px;
         }
         .detail-section h5 {
-          margin: 0 0 8px 0;
+          margin: 0 0 5px 0;
           color: #374151;
           font-size: 0.95em;
         }
@@ -468,7 +468,7 @@ const exportToPrint = (content: string) => {
           padding-left: 20px;
         }
         .detail-section li {
-          margin-bottom: 5px;
+          margin-bottom: 3px;
           color: #4b5563;
         }
         
@@ -476,8 +476,8 @@ const exportToPrint = (content: string) => {
           background: #f0f9ff;
           border: 1px solid #0ea5e9;
           border-radius: 10px;
-          padding: 20px;
-          margin-bottom: 20px;
+          padding: 15px;
+          margin-bottom: 12px;
         }
         .action-steps h3 {
           margin-top: 0;
@@ -488,7 +488,7 @@ const exportToPrint = (content: string) => {
           padding-left: 20px;
         }
         .action-steps li {
-          margin-bottom: 8px;
+          margin-bottom: 5px;
           color: #374151;
         }
         
@@ -496,8 +496,8 @@ const exportToPrint = (content: string) => {
           background: #fef2f2;
           border: 1px solid #f87171;
           border-radius: 8px;
-          padding: 15px;
-          margin-bottom: 15px;
+          padding: 12px;
+          margin-bottom: 10px;
         }
         .special-consideration h4, .final-reminder h4 {
           margin-top: 0;
