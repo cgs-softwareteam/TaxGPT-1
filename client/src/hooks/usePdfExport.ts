@@ -11,6 +11,16 @@ export const isTaxReport = (content: string): boolean => {
          content.includes('💰 **Estimated Potential Tax Savings:**');
 };
 
+// Safely escape HTML to prevent XSS
+const escapeHtml = (unsafe: string): string => {
+  return unsafe
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+};
+
 // Client-side PDF export using browser's print functionality
 const exportToPrint = (content: string) => {
   const printWindow = window.open('', '_blank');
@@ -18,8 +28,9 @@ const exportToPrint = (content: string) => {
     throw new Error('Popup blocked - please allow popups for PDF export');
   }
 
-  // Convert markdown-style content to basic HTML
-  const htmlContent = content
+  // First, escape the content to prevent XSS, then convert markdown-style content to basic HTML
+  const escapedContent = escapeHtml(content);
+  const htmlContent = escapedContent
     .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
     .replace(/\*(.*?)\*/g, '<em>$1</em>')
     .replace(/^- (.*)/gm, '• $1')
