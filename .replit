@@ -43,8 +43,4 @@ exposeLocalhost = true
 localPort = 33285
 externalPort = 3000
 
-[[ports]]
-localPort = 44349
-externalPort = 3001
-
 [agent]

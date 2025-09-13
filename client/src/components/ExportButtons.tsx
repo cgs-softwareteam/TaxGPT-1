@@ -39,10 +39,6 @@ export function ExportButtons({ messageId, content, className }: ExportButtonsPr
 
   const exportPdfMutation = useMutation({
     mutationFn: async () => {
-      if (!messageId) {
-        throw new Error("Message ID is required for PDF export");
-      }
-      
       const response = await fetch(`/api/export/pdf/message/${messageId}`, {
         method: "POST",
         credentials: "include",

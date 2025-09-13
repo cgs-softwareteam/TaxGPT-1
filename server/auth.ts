@@ -57,12 +57,9 @@ export function setupPassport() {
 
   // Google OAuth Strategy
   if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
-    // Use Render domain for production, fallback to Replit domain, then localhost
-    const callbackURL = process.env.RENDER_EXTERNAL_URL
-      ? `${process.env.RENDER_EXTERNAL_URL}/auth/google/callback`
-      : process.env.REPLIT_DOMAINS 
-        ? `https://${process.env.REPLIT_DOMAINS}/auth/google/callback`
-        : "http://localhost:5000/auth/google/callback";
+    const callbackURL = process.env.REPLIT_DOMAINS 
+      ? `https://${process.env.REPLIT_DOMAINS}/auth/google/callback`
+      : "http://localhost:5000/auth/google/callback";
     
     passport.use(new GoogleStrategy({
       clientID: process.env.GOOGLE_CLIENT_ID,
@@ -107,12 +104,9 @@ export function setupPassport() {
 
   // Facebook OAuth Strategy
   if (process.env.FACEBOOK_APP_ID && process.env.FACEBOOK_APP_SECRET) {
-    // Use Render domain for production, fallback to Replit domain, then localhost
-    const callbackURL = process.env.RENDER_EXTERNAL_URL
-      ? `${process.env.RENDER_EXTERNAL_URL}/auth/facebook/callback`
-      : process.env.REPLIT_DOMAINS 
-        ? `https://${process.env.REPLIT_DOMAINS}/auth/facebook/callback`
-        : "http://localhost:5000/auth/facebook/callback";
+    const callbackURL = process.env.REPLIT_DOMAINS 
+      ? `https://${process.env.REPLIT_DOMAINS}/auth/facebook/callback`
+      : "http://localhost:5000/auth/facebook/callback";
     
     passport.use(new FacebookStrategy({
       clientID: process.env.FACEBOOK_APP_ID,
