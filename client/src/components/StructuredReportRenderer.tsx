@@ -1,9 +1,8 @@
 import ReactMarkdown from "react-markdown";
 import { useState } from "react";
-import { useMutation } from "@tanstack/react-query";
 import { DollarSign, Target, Lightbulb, CheckCircle, Shield, AlertTriangle, PiggyBank, Building2, Receipt, TrendingUp, Clock, Zap, Calendar, ChevronDown, ChevronRight, Info, Sparkles, MessageCircle, HelpCircle, RefreshCw, Download, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useToast } from "@/hooks/use-toast";
+import { usePdfExport } from "@/hooks/usePdfExport";
 
 interface StructuredReportRendererProps {
   content: string;
@@ -15,49 +14,12 @@ interface StructuredReportRendererProps {
 
 export default function StructuredReportRenderer({ content, timestamp, messageId, onRequestExpertAnalysis, isLoading = false }: StructuredReportRendererProps) {
   const [expandedStrategy, setExpandedStrategy] = useState<number | null>(null);
-  const { toast } = useToast();
 
-  // PDF Export functionality
-  const exportPdfMutation = useMutation({
-    mutationFn: async () => {
-      if (!messageId) {
-        throw new Error("Message ID required for PDF export");
-      }
-      
-      const response = await fetch(`/api/export/pdf/message/${messageId}`, {
-        method: "POST",
-        credentials: "include",
-      });
-      
-      if (!response.ok) {
-        throw new Error("Failed to export PDF");
-      }
-      
-      const blob = await response.blob();
-      const url = window.URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = `tax-plan-${messageId}.pdf`;
-      document.body.appendChild(a);
-      a.click();
-      window.URL.revokeObjectURL(url);
-      document.body.removeChild(a);
-      
-      return blob;
-    },
-    onSuccess: () => {
-      toast({
-        title: "PDF Downloaded",
-        description: "Your tax plan has been exported as PDF.",
-      });
-    },
-    onError: (error) => {
-      toast({
-        title: "Export Failed",
-        description: error instanceof Error ? error.message : "Could not export PDF. Please try again.",
-        variant: "destructive",
-      });
-    },
+  // Use shared PDF export hook
+  const { exportPdf, isExporting } = usePdfExport({ 
+    messageId, 
+    content, 
+    showToast: true 
   });
 
   const formatTime = (date: Date) => {
@@ -516,19 +478,19 @@ export default function StructuredReportRenderer({ content, timestamp, messageId
               variant="outline"
               size="sm"
               className="bg-white hover:bg-blue-50 border-blue-300 text-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
-              disabled={isLoading || exportPdfMutation.isPending || !messageId}
+              disabled={isLoading || isExporting}
               onClick={() => {
-                if (isLoading || exportPdfMutation.isPending || !messageId) return;
-                exportPdfMutation.mutate();
+                if (isLoading || isExporting) return;
+                exportPdf();
               }}
               data-testid="followup-pdf"
             >
-              {exportPdfMutation.isPending ? (
+              {isExporting ? (
                 <Loader2 className="w-4 h-4 mr-2 animate-spin" />
               ) : (
                 <Download className="w-4 h-4 mr-2" />
               )}
-              Download PDF Report
+              {messageId ? 'Download PDF Report' : 'Print PDF Report'}
             </Button>
             
             <Button
