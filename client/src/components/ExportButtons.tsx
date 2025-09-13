@@ -160,18 +160,8 @@ export function ExportButtons({ messageId, content, className }: ExportButtonsPr
       <Button
         variant="outline"
         size="sm"
-        onClick={() => {
-          if (!messageId) {
-            toast({
-              title: "Save Required", 
-              description: "Please save the conversation to enable PDF export.",
-              variant: "destructive",
-            });
-            return;
-          }
-          exportPdfMutation.mutate();
-        }}
-        disabled={exportPdfMutation.isPending || !messageId}
+        onClick={() => exportPdfMutation.mutate()}
+        disabled={exportPdfMutation.isPending}
         data-testid={`pdf-button-${messageId}`}
       >
         {exportPdfMutation.isPending ? (
