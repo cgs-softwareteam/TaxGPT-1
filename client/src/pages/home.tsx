@@ -11,6 +11,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { Link } from "wouter";
 import { useToast } from "@/hooks/use-toast";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { cn } from "@/lib/utils";
 
 interface Message {
   role: 'user' | 'assistant';
@@ -268,7 +269,11 @@ export default function Home() {
       )}
 
       {/* Main Content */}
-      <div className="flex-1 flex flex-col">
+      <div className={cn(
+        "flex-1 flex flex-col transition-[margin] duration-300 ease-in-out",
+        // Add left margin on desktop when sidebar is open and user is authenticated
+        authEnabled && isAuthenticated && !sidebarCollapsed && !isMobile ? "ml-80" : ""
+      )}>
         {/* Header */}
         <header className="sticky top-0 z-30 bg-white/95 dark:bg-gray-900/95 border-b border-gray-200 dark:border-gray-700 shadow-sm backdrop-blur-sm" data-testid="header">
           <div className="max-w-4xl mx-auto px-2 md:px-4 py-4">

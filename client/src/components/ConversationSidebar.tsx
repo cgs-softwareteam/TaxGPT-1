@@ -136,11 +136,11 @@ export function ConversationSidebar({
       )}
       <div className={cn(
         "w-80 bg-gray-50 border-r border-gray-200 flex flex-col transition-transform duration-300 ease-in-out",
-        // Logic for mobile view
+        // Fixed positioning for both mobile and desktop to prevent scroll interference
         "fixed inset-y-0 left-0 z-50",
         isMobileOpen ? "translate-x-0" : "-translate-x-full",
-        // Logic for desktop view
-        "md:relative md:translate-x-0"
+        // Desktop view - keep fixed positioning, just show it
+        "md:translate-x-0"
       )}>
       {/* Header */}
       <div className="p-4 border-b border-gray-200">
