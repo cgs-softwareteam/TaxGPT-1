@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Users, MessageSquare, DollarSign, TrendingUp, ArrowLeft } from "lucide-react";
+import { Users, MessageSquare, DollarSign, TrendingUp, ArrowLeft, UserPlus, Activity, Percent, AlertCircle, Hash } from "lucide-react";
 import { Link } from "wouter";
 import { useAuth } from "@/hooks/useAuth";
 import { apiRequest } from "@/lib/queryClient";
@@ -45,6 +45,27 @@ interface AuthUser {
   role: string;
 }
 
+interface GuestStatsResponse {
+  stats: {
+    totalGuests: number;
+    activeLast24h: number;
+    activeLast7d: number;
+    convertedGuests: number;
+    conversionRate: number;
+    avgPromptsPerGuest: number;
+    guestsAtLimit: number;
+  };
+  recentConversions: Array<{
+    sessionId: string;
+    convertedAt: string;
+    convertedToUserId: number;
+    promptsBeforeConversion: number;
+    userName: string;
+    userEmail: string;
+  }>;
+  promptLimit: number;
+}
+
 export default function AdminDashboard() {
   const { user, isAuthenticated } = useAuth() as { user: AuthUser | undefined; isAuthenticated: boolean };
   const [currentPage, setCurrentPage] = useState(1);
@@ -58,7 +79,7 @@ export default function AdminDashboard() {
 
   const { data: usersData, isLoading: usersLoading } = useQuery<UsersResponse>({
     queryKey: ["/api/admin/users", currentPage],
-    queryFn: () => 
+    queryFn: () =>
       fetch(`/api/admin/users?page=${currentPage}`, {
         credentials: 'include'
       })
@@ -66,6 +87,11 @@ export default function AdminDashboard() {
           if (!res.ok) throw new Error(`HTTP ${res.status}`);
           return res.json();
         }),
+    enabled: isAuthenticated && user?.role === 'admin',
+  });
+
+  const { data: guestData, isLoading: guestLoading } = useQuery<GuestStatsResponse>({
+    queryKey: ["/api/admin/guest-stats"],
     enabled: isAuthenticated && user?.role === 'admin',
   });
 
@@ -135,6 +161,7 @@ export default function AdminDashboard() {
         <TabsList>
           <TabsTrigger value="overview" data-testid="tab-overview">Overview</TabsTrigger>
           <TabsTrigger value="users" data-testid="tab-users">Users</TabsTrigger>
+          <TabsTrigger value="guests" data-testid="tab-guests">Guests</TabsTrigger>
         </TabsList>
 
         <TabsContent value="overview" className="space-y-6">
@@ -320,6 +347,146 @@ export default function AdminDashboard() {
             <Card>
               <CardContent className="text-center py-8">
                 <p className="text-muted-foreground">No users found</p>
+              </CardContent>
+            </Card>
+          )}
+        </TabsContent>
+
+        {/* Guest Activity tab: surfaces the new guest_sessions tracking added with the
+            guest-login feature. Six stat cards + a recent-conversions table. */}
+        <TabsContent value="guests" className="space-y-6">
+          {guestLoading ? (
+            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
+              {[...Array(6)].map((_, i) => (
+                <Card key={i}>
+                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                    <div className="h-4 bg-gray-200 rounded w-20 animate-pulse"></div>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="h-8 bg-gray-200 rounded w-16 animate-pulse mb-2"></div>
+                    <div className="h-3 bg-gray-200 rounded w-24 animate-pulse"></div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          ) : guestData ? (
+            <>
+              <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
+                <Card data-testid="card-total-guests">
+                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                    <CardTitle className="text-sm font-medium">Total Guests</CardTitle>
+                    <Users className="h-4 w-4 text-muted-foreground" />
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-2xl font-bold" data-testid="text-total-guests">{guestData.stats.totalGuests}</div>
+                    <p className="text-xs text-muted-foreground">All-time guest sessions</p>
+                  </CardContent>
+                </Card>
+
+                <Card data-testid="card-guests-active-24h">
+                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                    <CardTitle className="text-sm font-medium">Active (24h)</CardTitle>
+                    <Activity className="h-4 w-4 text-muted-foreground" />
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-2xl font-bold" data-testid="text-guests-active-24h">{guestData.stats.activeLast24h}</div>
+                    <p className="text-xs text-muted-foreground">
+                      {guestData.stats.activeLast7d} active in the last 7 days
+                    </p>
+                  </CardContent>
+                </Card>
+
+                <Card data-testid="card-conversions">
+                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                    <CardTitle className="text-sm font-medium">Conversions</CardTitle>
+                    <UserPlus className="h-4 w-4 text-muted-foreground" />
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-2xl font-bold" data-testid="text-conversions">{guestData.stats.convertedGuests}</div>
+                    <p className="text-xs text-muted-foreground">Guests who signed up</p>
+                  </CardContent>
+                </Card>
+
+                <Card data-testid="card-conversion-rate">
+                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                    <CardTitle className="text-sm font-medium">Conversion Rate</CardTitle>
+                    <Percent className="h-4 w-4 text-muted-foreground" />
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-2xl font-bold" data-testid="text-conversion-rate">{guestData.stats.conversionRate}%</div>
+                    <p className="text-xs text-muted-foreground">Signups / total guests</p>
+                  </CardContent>
+                </Card>
+
+                <Card data-testid="card-avg-prompts">
+                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                    <CardTitle className="text-sm font-medium">Avg. Prompts</CardTitle>
+                    <Hash className="h-4 w-4 text-muted-foreground" />
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-2xl font-bold" data-testid="text-avg-prompts">{guestData.stats.avgPromptsPerGuest}</div>
+                    <p className="text-xs text-muted-foreground">Per guest session</p>
+                  </CardContent>
+                </Card>
+
+                <Card data-testid="card-guests-at-limit">
+                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                    <CardTitle className="text-sm font-medium">At Limit</CardTitle>
+                    <AlertCircle className="h-4 w-4 text-muted-foreground" />
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-2xl font-bold" data-testid="text-guests-at-limit">{guestData.stats.guestsAtLimit}</div>
+                    <p className="text-xs text-muted-foreground">
+                      Hit the {guestData.promptLimit}-prompt cap
+                    </p>
+                  </CardContent>
+                </Card>
+              </div>
+
+              <Card data-testid="card-recent-conversions">
+                <CardHeader>
+                  <CardTitle>
+                    Recent Conversions ({guestData.recentConversions.length})
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  {guestData.recentConversions.length === 0 ? (
+                    <p className="text-muted-foreground text-sm" data-testid="text-no-conversions">
+                      No conversions yet — guests who sign up will appear here.
+                    </p>
+                  ) : (
+                    <div className="space-y-3">
+                      {guestData.recentConversions.map((conv) => (
+                        <div
+                          key={conv.sessionId}
+                          className="flex items-center justify-between p-3 border rounded"
+                          data-testid={`row-conversion-${conv.convertedToUserId}`}
+                        >
+                          <div className="space-y-1">
+                            <div className="font-medium" data-testid={`text-conv-name-${conv.convertedToUserId}`}>
+                              {conv.userName}
+                            </div>
+                            <div className="text-sm text-muted-foreground" data-testid={`text-conv-email-${conv.convertedToUserId}`}>
+                              {conv.userEmail}
+                            </div>
+                            <div className="text-xs text-muted-foreground">
+                              Converted {new Date(conv.convertedAt).toLocaleString()}
+                            </div>
+                          </div>
+                          <Badge variant="secondary" data-testid={`badge-conv-prompts-${conv.convertedToUserId}`}>
+                            {conv.promptsBeforeConversion} prompt{conv.promptsBeforeConversion === 1 ? '' : 's'} before signup
+                          </Badge>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            </>
+          ) : (
+            <Card>
+              <CardContent className="text-center py-8">
+                <p className="text-muted-foreground">No guest data available</p>
               </CardContent>
             </Card>
           )}

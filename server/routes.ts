@@ -710,6 +710,27 @@ Always ask clarifying questions about employment structure when medical professi
       }
     });
 
+    // Guest activity + recent conversions for the admin dashboard.
+    // Returns aggregate guest metrics and the most recent guest-to-signup conversions
+    // joined to the resulting user's name and email.
+    app.get("/api/admin/guest-stats", requireAdmin, async (req, res) => {
+      try {
+        const recentLimit = Math.min(parseInt(req.query.recentLimit as string) || 25, 100);
+        const [stats, recentConversions] = await Promise.all([
+          storage.getGuestStatistics(GUEST_PROMPT_LIMIT),
+          storage.getRecentConversions(recentLimit),
+        ]);
+        res.json({
+          stats,
+          recentConversions,
+          promptLimit: GUEST_PROMPT_LIMIT,
+        });
+      } catch (error) {
+        console.error("Failed to get guest stats:", error);
+        res.status(500).json({ error: "Failed to get guest stats" });
+      }
+    });
+
     // DATA DELETION ENDPOINT (Public - no auth required)
     
     // Request user data deletion

@@ -207,3 +207,24 @@ export type UsageStatistics = {
   averageTokensPerUser: number;
   dailyActiveUsers: number;
 };
+
+// Aggregate guest statistics for the admin dashboard.
+export type GuestStatistics = {
+  totalGuests: number;
+  activeLast24h: number;
+  activeLast7d: number;
+  convertedGuests: number;
+  conversionRate: number; // percentage 0-100 with one decimal place
+  avgPromptsPerGuest: number;
+  guestsAtLimit: number;
+};
+
+// A single guest-to-signup conversion row joined to the new user.
+export type ConvertedGuest = {
+  sessionId: string;
+  convertedAt: Date;
+  convertedToUserId: number;
+  promptsBeforeConversion: number;
+  userName: string;
+  userEmail: string;
+};

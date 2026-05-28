@@ -13,7 +13,9 @@ import {
   type ShareLog,
   type InsertShareLog,
   type GuestSession,
-  type InsertGuestSession
+  type InsertGuestSession,
+  type GuestStatistics,
+  type ConvertedGuest
 } from "@shared/schema";
 import { randomUUID } from "crypto";
 
@@ -62,6 +64,8 @@ export interface IStorage {
   getGuestSession(sessionId: string): Promise<GuestSession | undefined>;
   incrementGuestConversationCount(sessionId: string, tokensUsed?: number): Promise<GuestSession | undefined>;
   markGuestConverted(sessionId: string, userId: number): Promise<GuestSession | undefined>;
+  getGuestStatistics(promptLimit: number): Promise<GuestStatistics>;
+  getRecentConversions(limit?: number): Promise<ConvertedGuest[]>;
 
   // ADMIN ANALYTICS
   getTopPrompts(limit?: number): Promise<Array<{
@@ -501,6 +505,49 @@ export class MemStorage implements IStorage {
     };
     this.guestSessions.set(sessionId, updated);
     return updated;
+  }
+
+  async getGuestStatistics(promptLimit: number): Promise<GuestStatistics> {
+    const all = Array.from(this.guestSessions.values());
+    const totalGuests = all.length;
+    const now = Date.now();
+    const oneDay = 24 * 60 * 60 * 1000;
+    const activeLast24h = all.filter(g => g.lastActiveAt.getTime() > now - oneDay).length;
+    const activeLast7d = all.filter(g => g.lastActiveAt.getTime() > now - 7 * oneDay).length;
+    const convertedGuests = all.filter(g => g.convertedToUserId !== null).length;
+    const totalPrompts = all.reduce((sum, g) => sum + g.conversationCount, 0);
+    const avgPromptsPerGuest = totalGuests > 0 ? Math.round(totalPrompts / totalGuests) : 0;
+    const guestsAtLimit = all.filter(g => g.conversationCount >= promptLimit).length;
+    const conversionRate = totalGuests > 0
+      ? Math.round((convertedGuests / totalGuests) * 1000) / 10
+      : 0;
+    return {
+      totalGuests,
+      activeLast24h,
+      activeLast7d,
+      convertedGuests,
+      conversionRate,
+      avgPromptsPerGuest,
+      guestsAtLimit,
+    };
+  }
+
+  async getRecentConversions(limit = 25): Promise<ConvertedGuest[]> {
+    return Array.from(this.guestSessions.values())
+      .filter(g => g.convertedToUserId !== null && g.convertedAt !== null)
+      .sort((a, b) => (b.convertedAt!.getTime()) - (a.convertedAt!.getTime()))
+      .slice(0, limit)
+      .map(g => {
+        const user = this.users.get(g.convertedToUserId!);
+        return {
+          sessionId: g.id,
+          convertedAt: g.convertedAt!,
+          convertedToUserId: g.convertedToUserId!,
+          promptsBeforeConversion: g.conversationCount,
+          userName: user?.name || 'Unknown',
+          userEmail: user?.email || 'unknown@example.com',
+        };
+      });
   }
 
   // ADMIN ANALYTICS
@@ -977,6 +1024,64 @@ export class DrizzleStorage implements IStorage {
       ))
       .returning();
     return updated || undefined;
+  }
+
+  async getGuestStatistics(promptLimit: number): Promise<GuestStatistics> {
+    const oneDayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
+    const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
+
+    const [row] = await this.db!
+      .select({
+        totalGuests: count(),
+        activeLast24h: sql<number>`COUNT(*) FILTER (WHERE ${guestSessions.lastActiveAt} > ${oneDayAgo})`.mapWith(Number),
+        activeLast7d: sql<number>`COUNT(*) FILTER (WHERE ${guestSessions.lastActiveAt} > ${sevenDaysAgo})`.mapWith(Number),
+        convertedGuests: sql<number>`COUNT(*) FILTER (WHERE ${guestSessions.convertedToUserId} IS NOT NULL)`.mapWith(Number),
+        avgPromptsPerGuest: sql<number>`COALESCE(AVG(${guestSessions.conversationCount}), 0)`.mapWith(Number),
+        guestsAtLimit: sql<number>`COUNT(*) FILTER (WHERE ${guestSessions.conversationCount} >= ${promptLimit})`.mapWith(Number),
+      })
+      .from(guestSessions);
+
+    const totalGuests = Number(row?.totalGuests) || 0;
+    const convertedGuests = Number(row?.convertedGuests) || 0;
+    const conversionRate = totalGuests > 0
+      ? Math.round((convertedGuests / totalGuests) * 1000) / 10
+      : 0;
+
+    return {
+      totalGuests,
+      activeLast24h: Number(row?.activeLast24h) || 0,
+      activeLast7d: Number(row?.activeLast7d) || 0,
+      convertedGuests,
+      conversionRate,
+      avgPromptsPerGuest: Math.round(Number(row?.avgPromptsPerGuest) || 0),
+      guestsAtLimit: Number(row?.guestsAtLimit) || 0,
+    };
+  }
+
+  async getRecentConversions(limit = 25): Promise<ConvertedGuest[]> {
+    const rows = await this.db!
+      .select({
+        sessionId: guestSessions.id,
+        convertedAt: guestSessions.convertedAt,
+        convertedToUserId: guestSessions.convertedToUserId,
+        promptsBeforeConversion: guestSessions.conversationCount,
+        userName: users.name,
+        userEmail: users.email,
+      })
+      .from(guestSessions)
+      .innerJoin(users, eq(users.id, guestSessions.convertedToUserId))
+      .where(sql`${guestSessions.convertedToUserId} IS NOT NULL`)
+      .orderBy(desc(guestSessions.convertedAt))
+      .limit(limit);
+
+    return rows.map(r => ({
+      sessionId: r.sessionId,
+      convertedAt: r.convertedAt!,
+      convertedToUserId: r.convertedToUserId!,
+      promptsBeforeConversion: r.promptsBeforeConversion,
+      userName: r.userName,
+      userEmail: r.userEmail,
+    }));
   }
 
   // ADMIN ANALYTICS
