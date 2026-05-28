@@ -13,7 +13,6 @@ import DataDeletion from "@/pages/data-deletion";
 import AdminDashboard from "@/pages/admin-dashboard";
 import UserUsage from "@/pages/user-usage";
 import SavedPlans from "@/pages/SavedPlans";
-import { useAuth } from "@/hooks/useAuth";
 
 // Track SPA route changes in Google Analytics 4 (G-DZG17VYGRB).
 // The initial pageview is sent automatically by the gtag snippet in index.html;
@@ -40,24 +39,14 @@ function RouteTracker() {
 }
 
 function Router() {
-  const { isAuthenticated, isLoading, authEnabled } = useAuth();
-
-  // While auth state is loading, briefly show a spinner so the header doesn't
-  // flicker between "guest" (Sign In / Sign Up) and "authenticated" (UserMenu).
-  if (authEnabled && isLoading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-      </div>
-    );
-  }
-
-  // NOTE: Guest access is now allowed. The home page renders for everyone,
-  // and Home decides whether to show Sign In/Sign Up buttons (guests) or
-  // the UserMenu (authenticated). Per-prompt limits are enforced server-side
-  // via GUEST_PROMPT_LIMIT. The `isAuthenticated` value is consumed by Home.
-  void isAuthenticated;
-
+  // Render the routes unconditionally. Auth state is consumed inside each
+  // page via useAuth(); while the /auth/user request is in flight, guests
+  // see the guest UI (Sign In / Sign Up). Once it resolves, the header
+  // swaps to UserMenu for authenticated users.
+  //
+  // We deliberately do NOT block the whole app on the auth query: a network
+  // hiccup, a 401, or any other transient issue must not strand visitors on
+  // a loading spinner.
   return (
     <Switch>
       <Route path="/" component={Home} />
