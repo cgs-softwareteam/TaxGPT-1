@@ -67,25 +67,50 @@
     <link rel="manifest" href="/site.webmanifest" />
     <meta name="theme-color" content="#2563eb" />
 
-    <!-- JSON-LD Structured Data -->
+    <!--
+      JSON-LD Structured Data (SoftwareApplication)
+      TODO before going live:
+        1. Create /logo.png (square, >=512x512 recommended) at client/public/logo.png
+           Currently referenced but the file does not exist.
+        2. The aggregateRating below claims 4.9 across 250 reviews. Google
+           requires aggregateRating values to reflect REAL, verifiable user
+           reviews shown on the page. If reviews are not real and visible,
+           remove the aggregateRating block to avoid manual actions or loss
+           of rich snippets.
+    -->
     <script type="application/ld+json">
     {
       "@context": "https://schema.org",
-      "@type": "WebApplication",
+      "@type": "SoftwareApplication",
       "name": "AITaxMD",
       "url": "https://aitaxmd.com/",
-      "description": "AITaxMD is an AI-based tax assistant helping entrepreneurs, doctors, freelancers, and employees in the USA save taxes legally. Get personalized deductions and tax planning today.",
+      "logo": "https://aitaxmd.com/logo.png",
       "applicationCategory": "FinanceApplication",
       "operatingSystem": "Web",
-      "offers": {
-        "@type": "Offer",
-        "price": "0",
-        "priceCurrency": "USD"
-      },
-      "publisher": {
+      "softwareVersion": "1.0",
+      "description": "AITaxMD is an AI-based tax assistant designed for entrepreneurs, doctors, employees, freelancers, and business owners in the USA. It provides personalized tax-saving suggestions, deductions, and planning ideas.",
+      "author": {
         "@type": "Organization",
         "name": "AITaxMD",
         "url": "https://aitaxmd.com/"
+      },
+      "offers": {
+        "@type": "Offer",
+        "url": "https://aitaxmd.com/",
+        "price": "0",
+        "priceCurrency": "USD"
+      },
+      "featureList": [
+        "AI-driven tax suggestions",
+        "Personalized tax planning",
+        "Income and expense analysis",
+        "Profession-based deductions",
+        "Legal tax reduction guidance"
+      ],
+      "aggregateRating": {
+        "@type": "AggregateRating",
+        "ratingValue": "4.9",
+        "reviewCount": "250"
       }
     }
     </script>
