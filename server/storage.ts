@@ -1,8 +1,8 @@
-import { 
-  type User, 
-  type InsertUser, 
-  type UsageLog, 
-  type InsertUsageLog, 
+import {
+  type User,
+  type InsertUser,
+  type UsageLog,
+  type InsertUsageLog,
   type UsageStatistics,
   type Conversation,
   type InsertConversation,
@@ -11,7 +11,9 @@ import {
   type SavedPlan,
   type InsertSavedPlan,
   type ShareLog,
-  type InsertShareLog
+  type InsertShareLog,
+  type GuestSession,
+  type InsertGuestSession
 } from "@shared/schema";
 import { randomUUID } from "crypto";
 
@@ -54,7 +56,13 @@ export interface IStorage {
   
   // SHARE LOG OPERATIONS
   logShare(data: Omit<InsertShareLog, 'id' | 'sharedAt'>): Promise<ShareLog>;
-  
+
+  // GUEST SESSION OPERATIONS
+  getOrCreateGuestSession(sessionId: string, ipAddress: string, userAgent: string): Promise<GuestSession>;
+  getGuestSession(sessionId: string): Promise<GuestSession | undefined>;
+  incrementGuestConversationCount(sessionId: string, tokensUsed?: number): Promise<GuestSession | undefined>;
+  markGuestConverted(sessionId: string, userId: number): Promise<GuestSession | undefined>;
+
   // ADMIN ANALYTICS
   getTopPrompts(limit?: number): Promise<Array<{
     prompt: string;
@@ -76,6 +84,7 @@ export class MemStorage implements IStorage {
   private messages: Map<number, Message>;
   private savedPlans: Map<number, SavedPlan>;
   private shareLogs: Map<number, ShareLog>;
+  private guestSessions: Map<string, GuestSession>;
   private userIdCounter: number;
   private logIdCounter: number;
   private conversationIdCounter: number;
@@ -90,6 +99,7 @@ export class MemStorage implements IStorage {
     this.messages = new Map();
     this.savedPlans = new Map();
     this.shareLogs = new Map();
+    this.guestSessions = new Map();
     this.userIdCounter = 1;
     this.logIdCounter = 1;
     this.conversationIdCounter = 1;
@@ -437,6 +447,62 @@ export class MemStorage implements IStorage {
     return shareLog;
   }
 
+  // GUEST SESSION OPERATIONS
+  async getOrCreateGuestSession(sessionId: string, ipAddress: string, userAgent: string): Promise<GuestSession> {
+    const existing = this.guestSessions.get(sessionId);
+    if (existing) {
+      // Touch lastActiveAt
+      const updated: GuestSession = { ...existing, lastActiveAt: new Date() };
+      this.guestSessions.set(sessionId, updated);
+      return updated;
+    }
+    const now = new Date();
+    const session: GuestSession = {
+      id: sessionId,
+      ipAddress,
+      userAgent,
+      conversationCount: 0,
+      tokensUsed: 0,
+      createdAt: now,
+      lastActiveAt: now,
+      convertedToUserId: null,
+      convertedAt: null,
+    };
+    this.guestSessions.set(sessionId, session);
+    return session;
+  }
+
+  async getGuestSession(sessionId: string): Promise<GuestSession | undefined> {
+    return this.guestSessions.get(sessionId);
+  }
+
+  async incrementGuestConversationCount(sessionId: string, tokensUsed = 0): Promise<GuestSession | undefined> {
+    const existing = this.guestSessions.get(sessionId);
+    if (!existing) return undefined;
+    const updated: GuestSession = {
+      ...existing,
+      conversationCount: existing.conversationCount + 1,
+      tokensUsed: existing.tokensUsed + tokensUsed,
+      lastActiveAt: new Date(),
+    };
+    this.guestSessions.set(sessionId, updated);
+    return updated;
+  }
+
+  async markGuestConverted(sessionId: string, userId: number): Promise<GuestSession | undefined> {
+    const existing = this.guestSessions.get(sessionId);
+    if (!existing) return undefined;
+    // Don't overwrite if already converted (preserve first-conversion timestamp)
+    if (existing.convertedToUserId) return existing;
+    const updated: GuestSession = {
+      ...existing,
+      convertedToUserId: userId,
+      convertedAt: new Date(),
+    };
+    this.guestSessions.set(sessionId, updated);
+    return updated;
+  }
+
   // ADMIN ANALYTICS
   async getTopPrompts(limit = 20): Promise<Array<{prompt: string; count: number; avgTokens: number; avgResponseTime: number}>> {
     const promptStats = new Map<string, {count: number; totalTokens: number; totalResponseTime: number}>();
@@ -473,7 +539,7 @@ export class MemStorage implements IStorage {
 }
 
 import { getDatabase } from "./db";
-import { users, usageLogs, conversations, messages, savedPlans, shareLog } from "@shared/schema";
+import { users, usageLogs, conversations, messages, savedPlans, shareLog, guestSessions } from "@shared/schema";
 import { eq, desc, count, sum, gte, and, sql, asc } from "drizzle-orm";
 
 // Drizzle-based database storage
@@ -855,6 +921,62 @@ export class DrizzleStorage implements IStorage {
     }).returning();
 
     return log;
+  }
+
+  // GUEST SESSION OPERATIONS
+  async getOrCreateGuestSession(sessionId: string, ipAddress: string, userAgent: string): Promise<GuestSession> {
+    // Try INSERT; on conflict (already exists), touch lastActiveAt and return.
+    const [inserted] = await this.db!
+      .insert(guestSessions)
+      .values({
+        id: sessionId,
+        ipAddress,
+        userAgent,
+      })
+      .onConflictDoUpdate({
+        target: guestSessions.id,
+        set: { lastActiveAt: new Date() },
+      })
+      .returning();
+    return inserted;
+  }
+
+  async getGuestSession(sessionId: string): Promise<GuestSession | undefined> {
+    const [session] = await this.db!
+      .select()
+      .from(guestSessions)
+      .where(eq(guestSessions.id, sessionId))
+      .limit(1);
+    return session || undefined;
+  }
+
+  async incrementGuestConversationCount(sessionId: string, tokensUsed = 0): Promise<GuestSession | undefined> {
+    const [updated] = await this.db!
+      .update(guestSessions)
+      .set({
+        conversationCount: sql`${guestSessions.conversationCount} + 1`,
+        tokensUsed: sql`${guestSessions.tokensUsed} + ${tokensUsed}`,
+        lastActiveAt: new Date(),
+      })
+      .where(eq(guestSessions.id, sessionId))
+      .returning();
+    return updated || undefined;
+  }
+
+  async markGuestConverted(sessionId: string, userId: number): Promise<GuestSession | undefined> {
+    // Only set if not already converted, to preserve the first conversion timestamp.
+    const [updated] = await this.db!
+      .update(guestSessions)
+      .set({
+        convertedToUserId: userId,
+        convertedAt: new Date(),
+      })
+      .where(and(
+        eq(guestSessions.id, sessionId),
+        sql`${guestSessions.convertedToUserId} IS NULL`
+      ))
+      .returning();
+    return updated || undefined;
   }
 
   // ADMIN ANALYTICS

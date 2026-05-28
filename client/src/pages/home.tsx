@@ -7,7 +7,9 @@ import { ConversationSidebar } from "@/components/ConversationSidebar";
 import { Calculator, Star, Menu, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { UserMenu } from "@/components/UserMenu";
+import { AuthDialog, type AuthDialogMode } from "@/components/AuthDialog";
 import { useAuth } from "@/hooks/useAuth";
+import { useGuestStatus } from "@/hooks/useGuestStatus";
 import { Link } from "wouter";
 import { useToast } from "@/hooks/use-toast";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -26,10 +28,16 @@ export default function Home() {
   const [currentConversationId, setCurrentConversationId] = useState<number | null>(null);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [isMobileSidebarOpen, setMobileSidebarOpen] = useState(false);
+  const [authDialogOpen, setAuthDialogOpen] = useState(false);
+  const [authDialogMode, setAuthDialogMode] = useState<AuthDialogMode>("sign-in");
   const { isAuthenticated, authEnabled } = useAuth();
+  const { status: guestStatus } = useGuestStatus();
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const isMobile = useIsMobile();
+
+  // Convenience flag: should we treat the current visitor as a guest?
+  const isGuest = authEnabled && !isAuthenticated;
   
   // Use ref to track latest conversation to avoid stale closures
   const conversationRef = useRef<Message[]>([]);
@@ -66,6 +74,14 @@ export default function Home() {
 
   const handleSubmit = useCallback(async (message: string) => {
     if (!message.trim() || isLoading) return; // Prevent overlapping requests
+
+    // Proactive guest limit check: if we already know this guest has used all
+    // of their free prompts, open the auth modal without spending a network call.
+    if (isGuest && guestStatus && guestStatus.remaining <= 0) {
+      setAuthDialogMode("limit-reached");
+      setAuthDialogOpen(true);
+      return;
+    }
 
     const userMessage: Message = {
       role: 'user',
@@ -143,12 +159,35 @@ export default function Home() {
         }),
       });
 
+      // Special-case the guest prompt-limit response: roll back the user bubble
+      // and open the locked auth dialog instead of throwing a generic error.
+      if (response.status === 429) {
+        try {
+          const errBody = await response.json();
+          if (errBody?.error === "GUEST_LIMIT_REACHED") {
+            setConversation((prev) => prev.slice(0, -1));
+            setAuthDialogMode("limit-reached");
+            setAuthDialogOpen(true);
+            queryClient.invalidateQueries({ queryKey: ["/api/guest/status"] });
+            return;
+          }
+        } catch {
+          // Fall through to the generic error path below if JSON parsing fails.
+        }
+      }
+
       if (!response.ok) {
         throw new Error('Failed to get AI response');
       }
 
       const data = await response.json();
       const responseTimeMs = Date.now() - startTime;
+
+      // Refresh the guest counter after a successful generation so the
+      // "X of N free prompts remaining" indicator stays accurate.
+      if (isGuest) {
+        queryClient.invalidateQueries({ queryKey: ["/api/guest/status"] });
+      }
       
       // Save messages to database for existing conversations
       let aiMessage: Message;
@@ -200,7 +239,7 @@ export default function Home() {
     } finally {
       setIsLoading(false);
     }
-  }, [authEnabled, isAuthenticated, currentConversationId, createConversationMutation.mutateAsync, addMessageMutation.mutateAsync, toast, isLoading]);
+  }, [authEnabled, isAuthenticated, currentConversationId, createConversationMutation.mutateAsync, addMessageMutation.mutateAsync, toast, isLoading, isGuest, guestStatus, queryClient]);
 
   // Handle followup requests from StructuredReportRenderer
   useEffect(() => {
@@ -310,7 +349,34 @@ export default function Home() {
                 )}
                 */}
 
-                <UserMenu />
+                {isGuest ? (
+                  <>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => {
+                        setAuthDialogMode("sign-in");
+                        setAuthDialogOpen(true);
+                      }}
+                      data-testid="header-sign-in"
+                    >
+                      Sign In
+                    </Button>
+                    <Button
+                      variant="default"
+                      size="sm"
+                      onClick={() => {
+                        setAuthDialogMode("sign-up");
+                        setAuthDialogOpen(true);
+                      }}
+                      data-testid="header-sign-up"
+                    >
+                      Sign Up
+                    </Button>
+                  </>
+                ) : (
+                  <UserMenu />
+                )}
               </div>
             </div>
           </div>
@@ -326,16 +392,59 @@ export default function Home() {
         </main>
 
         {/* Chat Input */}
-        <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 shadow-lg" 
-             style={{ 
+        <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 shadow-lg"
+             style={{
                marginLeft: isMobile ? '0' : (authEnabled && isAuthenticated && !sidebarCollapsed ? '20rem' : '0')
              }}
              data-testid="chat-input-container">
-          <ChatInput 
-            onSubmit={handleSubmit} 
+          {/* Guest free-prompt counter (shown above the input only for guests) */}
+          {isGuest && guestStatus && (
+            <div
+              className="px-4 pt-2 pb-1 text-xs text-center text-gray-600"
+              data-testid="guest-prompt-counter"
+            >
+              {guestStatus.remaining > 0 ? (
+                <>
+                  <span className="font-medium text-gray-900">
+                    {guestStatus.remaining}
+                  </span>{" "}
+                  of {guestStatus.limit} free prompts remaining ·{" "}
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setAuthDialogMode("sign-up");
+                      setAuthDialogOpen(true);
+                    }}
+                    className="text-blue-600 hover:underline"
+                    data-testid="guest-counter-signup-link"
+                  >
+                    Sign up for unlimited
+                  </button>
+                </>
+              ) : (
+                <>
+                  You've used all your free prompts ·{" "}
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setAuthDialogMode("limit-reached");
+                      setAuthDialogOpen(true);
+                    }}
+                    className="text-blue-600 hover:underline font-medium"
+                    data-testid="guest-counter-signin-link"
+                  >
+                    Sign in to continue
+                  </button>
+                </>
+              )}
+            </div>
+          )}
+
+          <ChatInput
+            onSubmit={handleSubmit}
             isLoading={isLoading}
           />
-          
+
           {/* Footer with Legal Links */}
           <div className="px-4 py-2 bg-gray-50 border-t border-gray-100">
             <div className="flex flex-wrap justify-center items-center space-x-4 text-xs text-gray-500">
@@ -356,6 +465,15 @@ export default function Home() {
           </div>
         </div>
       </div>
+
+      {/* Auth modal: shown for guests when they click Sign In/Sign Up,
+          or forced open (locked) when they hit the prompt limit. */}
+      <AuthDialog
+        open={authDialogOpen}
+        onOpenChange={setAuthDialogOpen}
+        mode={authDialogMode}
+        promptLimit={guestStatus?.limit ?? 15}
+      />
     </div>
   );
 }

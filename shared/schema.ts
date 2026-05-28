@@ -97,6 +97,28 @@ export const shareLog = pgTable("share_log", {
   index("share_log_shared_at_idx").on(table.sharedAt),
 ]);
 
+// Guest sessions table for tracking non-authenticated users and their prompt usage.
+// The primary key `id` is the Express session ID, so guests are tracked across
+// page reloads as long as they have the session cookie. When a guest signs up,
+// convertedToUserId / convertedAt are populated for conversion analytics.
+export const guestSessions = pgTable("guest_sessions", {
+  id: varchar("id", { length: 255 }).primaryKey(),
+  ipAddress: varchar("ip_address", { length: 45 }).notNull(),
+  userAgent: text("user_agent").notNull(),
+  conversationCount: integer("conversation_count").default(0).notNull(),
+  tokensUsed: integer("tokens_used").default(0).notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  lastActiveAt: timestamp("last_active_at").defaultNow().notNull(),
+  // Conversion tracking: when a guest signs up, link their guest session to the new user.
+  convertedToUserId: integer("converted_to_user_id").references(() => users.id),
+  convertedAt: timestamp("converted_at"),
+}, (table) => [
+  index("guest_sessions_ip_address_idx").on(table.ipAddress),
+  index("guest_sessions_created_at_idx").on(table.createdAt),
+  index("guest_sessions_last_active_at_idx").on(table.lastActiveAt),
+  index("guest_sessions_converted_to_user_id_idx").on(table.convertedToUserId),
+]);
+
 // Define relationships
 export const usersRelations = relations(users, ({ many }) => ({
   usageLogs: many(usageLogs),
@@ -155,6 +177,12 @@ export const insertUsageLogSchema = createInsertSchema(usageLogs).pick({
   aiResponse: true,
 });
 
+export const insertGuestSessionSchema = createInsertSchema(guestSessions).pick({
+  id: true,
+  ipAddress: true,
+  userAgent: true,
+});
+
 // TypeScript types
 export type User = typeof users.$inferSelect;
 export type InsertUser = z.infer<typeof insertUserSchema>;
@@ -168,6 +196,8 @@ export type SavedPlan = typeof savedPlans.$inferSelect;
 export type InsertSavedPlan = typeof savedPlans.$inferInsert;
 export type ShareLog = typeof shareLog.$inferSelect;
 export type InsertShareLog = typeof shareLog.$inferInsert;
+export type GuestSession = typeof guestSessions.$inferSelect;
+export type InsertGuestSession = z.infer<typeof insertGuestSessionSchema>;
 
 // Admin statistics type
 export type UsageStatistics = {

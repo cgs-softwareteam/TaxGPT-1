@@ -56,21 +56,47 @@ CRITICAL: When you have all required information (Income, State, Age, Tax Paid),
 
 const ENABLE_AUTHENTICATION = process.env.ENABLE_AUTHENTICATION === 'true';
 
+// Guest prompt limit (configurable via env, default 15 to match the spec).
+const GUEST_PROMPT_LIMIT = Math.max(0, parseInt(process.env.GUEST_PROMPT_LIMIT || '15', 10) || 15);
+
 export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/generate", async (req: any, res) => {
     try {
       const { messages } = req.body;
       const startTime = Date.now();
       const sessionId = req.sessionID || randomUUID();
-      const userId = req.user?.id || null;
-      
+      const isAuthenticated = typeof req.isAuthenticated === 'function' ? req.isAuthenticated() : false;
+      const userId = isAuthenticated ? (req.user?.id || null) : null;
+
       if (!messages || !Array.isArray(messages)) {
         return res.status(400).json({ error: "Messages array is required" });
       }
 
+      // Guest gate: when authentication is enabled and the user is not signed in,
+      // enforce the free-prompt limit using their guest_sessions row.
+      if (ENABLE_AUTHENTICATION && !isAuthenticated) {
+        try {
+          const ipAddress = (req.ip || req.socket?.remoteAddress || 'unknown').toString().slice(0, 45);
+          const userAgent = (req.get?.('user-agent') || 'unknown').toString();
+          const guest = await storage.getOrCreateGuestSession(sessionId, ipAddress, userAgent);
+          if (guest.conversationCount >= GUEST_PROMPT_LIMIT) {
+            return res.status(429).json({
+              error: 'GUEST_LIMIT_REACHED',
+              message: `You've used all ${GUEST_PROMPT_LIMIT} free prompts. Please sign in or sign up to continue.`,
+              used: guest.conversationCount,
+              limit: GUEST_PROMPT_LIMIT,
+            });
+          }
+        } catch (guestErr) {
+          // If the guest-tracking layer fails (e.g., DB hiccup), don't block the
+          // user — log and continue. The next request will retry the check.
+          console.error('Guest session check failed:', guestErr);
+        }
+      }
+
       // Check if OpenAI is configured
       if (!openai) {
-        return res.status(503).json({ 
+        return res.status(503).json({
           error: "AITaxMD AI service is currently unavailable. Please ensure the OpenAI API key is configured and try again.",
           content: "I apologize, but I'm currently unable to process your request. The AI service needs to be configured with an API key. Please contact support or try again later."
         });
@@ -165,13 +191,65 @@ Always ask clarifying questions about employment structure when medical professi
       } catch (logError) {
         // Silently continue if usage logging fails
       }
-      
+
+      // For guests, increment their prompt counter AFTER a successful generation.
+      // This way failed requests don't count against the user's free quota.
+      if (ENABLE_AUTHENTICATION && !isAuthenticated) {
+        try {
+          await storage.incrementGuestConversationCount(
+            sessionId,
+            response.usage?.total_tokens || 0,
+          );
+        } catch (incErr) {
+          console.error('Guest counter increment failed:', incErr);
+        }
+      }
+
       res.json({ content: aiResponse });
     } catch (error) {
       console.error("OpenAI API error:", error);
-      res.status(500).json({ 
+      res.status(500).json({
         error: "Failed to generate AI response. Please try again.",
         content: "I apologize, but I encountered an error processing your request. Please try again in a moment."
+      });
+    }
+  });
+
+  // Guest status: lets the frontend show "X of N free prompts remaining"
+  // and decide whether to render the auth prompt without trying /api/generate first.
+  app.get("/api/guest/status", async (req: any, res) => {
+    const isAuthenticated = typeof req.isAuthenticated === 'function' ? req.isAuthenticated() : false;
+
+    if (!ENABLE_AUTHENTICATION || isAuthenticated) {
+      return res.json({
+        authenticated: true,
+        used: 0,
+        limit: GUEST_PROMPT_LIMIT,
+        remaining: GUEST_PROMPT_LIMIT,
+      });
+    }
+
+    try {
+      const sessionId = req.sessionID || randomUUID();
+      const ipAddress = (req.ip || req.socket?.remoteAddress || 'unknown').toString().slice(0, 45);
+      const userAgent = (req.get?.('user-agent') || 'unknown').toString();
+      const guest = await storage.getOrCreateGuestSession(sessionId, ipAddress, userAgent);
+      const used = guest.conversationCount;
+      const remaining = Math.max(0, GUEST_PROMPT_LIMIT - used);
+      return res.json({
+        authenticated: false,
+        used,
+        limit: GUEST_PROMPT_LIMIT,
+        remaining,
+      });
+    } catch (err) {
+      console.error('Failed to fetch guest status:', err);
+      // Fail open: pretend they have a full quota rather than blocking the UI.
+      return res.json({
+        authenticated: false,
+        used: 0,
+        limit: GUEST_PROMPT_LIMIT,
+        remaining: GUEST_PROMPT_LIMIT,
       });
     }
   });

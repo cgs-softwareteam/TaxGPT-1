@@ -212,6 +212,9 @@ export function setupAuthRoutes(app: Express) {
         ? `https://${process.env.REPLIT_DOMAINS}`
         : `http://localhost:5000`;
 
+      // Capture sessionId BEFORE login so we can link the guest record to the new user.
+      const preLoginSessionId = (req as any).sessionID as string | undefined;
+
       passport.authenticate('google', (err: any, user: any, info: any) => {
         // Case 1: A system error occurred (e.g., database failure).
         if (err) {
@@ -225,12 +228,20 @@ export function setupAuthRoutes(app: Express) {
         }
 
         // Case 3: Success. Manually log the user in.
-        req.logIn(user, (loginErr) => {
+        (req as any).logIn(user, (loginErr: any) => {
           if (loginErr) {
             console.error("Session login error:", loginErr);
             return res.redirect(`${baseUrl}/?error=session_failure`);
           }
-          
+
+          // Best-effort: link any pre-login guest session to this new user for
+          // conversion analytics. Fire and forget so it doesn't block the redirect.
+          if (preLoginSessionId) {
+            storage.markGuestConverted(preLoginSessionId, user.id).catch((convErr) => {
+              console.error('Failed to mark guest conversion (Google):', convErr);
+            });
+          }
+
           return res.redirect(baseUrl);
         });
       })(req, res, next);
@@ -249,6 +260,9 @@ export function setupAuthRoutes(app: Express) {
         ? `https://${process.env.REPLIT_DOMAINS}`
         : `http://localhost:5000`;
 
+      // Capture sessionId BEFORE login so we can link the guest record to the new user.
+      const preLoginSessionId = (req as any).sessionID as string | undefined;
+
       passport.authenticate('facebook', (err: any, user: any, info: any) => {
         // Case 1: A system error occurred (e.g., database failure).
         if (err) {
@@ -262,12 +276,20 @@ export function setupAuthRoutes(app: Express) {
         }
 
         // Case 3: Success. Manually log the user in.
-        req.logIn(user, (loginErr) => {
+        (req as any).logIn(user, (loginErr: any) => {
           if (loginErr) {
             console.error("Facebook Session login error:", loginErr);
             return res.redirect(`${baseUrl}/?error=session_failure`);
           }
-          
+
+          // Best-effort: link any pre-login guest session to this new user for
+          // conversion analytics. Fire and forget so it doesn't block the redirect.
+          if (preLoginSessionId) {
+            storage.markGuestConverted(preLoginSessionId, user.id).catch((convErr) => {
+              console.error('Failed to mark guest conversion (Facebook):', convErr);
+            });
+          }
+
           // Redirect to the dynamic base URL, an improvement over the original hardcoded '/'.
           return res.redirect(baseUrl);
         });

@@ -14,7 +14,6 @@ import AdminDashboard from "@/pages/admin-dashboard";
 import UserUsage from "@/pages/user-usage";
 import SavedPlans from "@/pages/SavedPlans";
 import { useAuth } from "@/hooks/useAuth";
-import { LoginPrompt } from "@/components/LoginPrompt";
 
 // Track SPA route changes in Google Analytics 4 (G-DZG17VYGRB).
 // The initial pageview is sent automatically by the gtag snippet in index.html;
@@ -43,23 +42,8 @@ function RouteTracker() {
 function Router() {
   const { isAuthenticated, isLoading, authEnabled } = useAuth();
 
-  // Legal pages are always accessible, regardless of authentication status
-  const isLegalPage = window.location.pathname.startsWith('/terms-of-service') || 
-                     window.location.pathname.startsWith('/privacy-policy') || 
-                     window.location.pathname.startsWith('/data-deletion');
-
-  if (isLegalPage) {
-    return (
-      <Switch>
-        <Route path="/terms-of-service" component={TermsOfService} />
-        <Route path="/privacy-policy" component={PrivacyPolicy} />
-        <Route path="/data-deletion" component={DataDeletion} />
-        <Route component={NotFound} />
-      </Switch>
-    );
-  }
-
-  // Show loading state while checking authentication
+  // While auth state is loading, briefly show a spinner so the header doesn't
+  // flicker between "guest" (Sign In / Sign Up) and "authenticated" (UserMenu).
   if (authEnabled && isLoading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
@@ -68,15 +52,16 @@ function Router() {
     );
   }
 
-  // Show login prompt if authentication is enabled and user is not authenticated
-  if (authEnabled && !isAuthenticated) {
-    return <LoginPrompt />;
-  }
+  // NOTE: Guest access is now allowed. The home page renders for everyone,
+  // and Home decides whether to show Sign In/Sign Up buttons (guests) or
+  // the UserMenu (authenticated). Per-prompt limits are enforced server-side
+  // via GUEST_PROMPT_LIMIT. The `isAuthenticated` value is consumed by Home.
+  void isAuthenticated;
 
   return (
     <Switch>
       <Route path="/" component={Home} />
-      
+
       {/* Legal Pages - Publicly accessible */}
       <Route path="/terms-of-service" component={TermsOfService} />
       <Route path="/privacy-policy" component={PrivacyPolicy} />
