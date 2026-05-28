@@ -3,41 +3,100 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1" />
-    
+
+    <!--
+      ============================================================
+      Google Tag Manager (GTM-P87M9Q8F)
+      IMPORTANT: GA4 (G-DZG17VYGRB) is ALSO loaded directly via the
+      gtag.js snippet below. To avoid double-counting pageviews,
+      do NOT also configure a GA4 Configuration tag inside GTM
+      using the same Measurement ID. Use GTM only for OTHER tags
+      (Facebook Pixel, Microsoft Clarity, conversion tags, etc.).
+      ============================================================
+    -->
+    <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+    new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+    j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+    'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+    })(window,document,'script','dataLayer','GTM-P87M9Q8F');</script>
+    <!-- End Google Tag Manager -->
+
+    <!-- Google tag (gtag.js) - GA4 G-DZG17VYGRB -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-DZG17VYGRB"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-DZG17VYGRB');
+    </script>
+    <!-- End Google tag (gtag.js) -->
+
     <!-- SEO Meta Tags -->
     <title>AITaxMD - AI-Powered Tax Planning Assistant</title>
     <meta name="description" content="Get personalized tax strategies and savings opportunities with AITaxMD. Our AI-powered tax planning assistant provides expert advice, actionable recommendations, and comprehensive tax optimization reports tailored to your financial situation." />
     <meta name="keywords" content="tax planning, AI tax advisor, tax strategies, tax savings, tax optimization, personal finance, tax consultant, automated tax advice" />
     <meta name="author" content="AITaxMD" />
-    
+
+    <!-- Google Search Console verification -->
+    <!-- TODO: replace CONTENT with the token from Search Console once available -->
+    <!-- <meta name="google-site-verification" content="YOUR_VERIFICATION_TOKEN_HERE" /> -->
+
     <!-- Open Graph / Facebook -->
     <meta property="og:type" content="website" />
-    <meta property="og:url" content="https://taxgpt.replit.app/" />
+    <meta property="og:url" content="https://aitaxmd.com/" />
     <meta property="og:title" content="AITaxMD - AI-Powered Tax Planning Assistant" />
     <meta property="og:description" content="Get personalized tax strategies and savings opportunities with AITaxMD. Our AI-powered tax planning assistant provides expert advice, actionable recommendations, and comprehensive tax optimization reports." />
-    <meta property="og:image" content="https://taxgpt.replit.app/taxgpt-preview.svg" />
+    <meta property="og:image" content="https://aitaxmd.com/taxgpt-preview.svg" />
     <meta property="og:site_name" content="AITaxMD" />
-    
+
     <!-- Twitter -->
     <meta property="twitter:card" content="summary_large_image" />
-    <meta property="twitter:url" content="https://taxgpt.replit.app/" />
+    <meta property="twitter:url" content="https://aitaxmd.com/" />
     <meta property="twitter:title" content="AITaxMD - AI-Powered Tax Planning Assistant" />
     <meta property="twitter:description" content="Get personalized tax strategies and savings opportunities with AITaxMD. Our AI-powered tax planning assistant provides expert advice and actionable recommendations." />
-    <meta property="twitter:image" content="https://taxgpt.replit.app/taxgpt-preview.svg" />
-    
+    <meta property="twitter:image" content="https://aitaxmd.com/taxgpt-preview.svg" />
+
     <!-- Additional SEO -->
     <meta name="robots" content="index, follow" />
     <meta name="language" content="English" />
     <meta name="revisit-after" content="7 days" />
-    <link rel="canonical" href="https://taxgpt.replit.app/" />
-    
-    <!-- Favicon -->
+    <link rel="canonical" href="https://aitaxmd.com/" />
+
+    <!-- Favicon & PWA Manifest -->
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="manifest" href="/site.webmanifest" />
+    <meta name="theme-color" content="#2563eb" />
+
+    <!-- JSON-LD Structured Data -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebApplication",
+      "name": "AITaxMD",
+      "url": "https://aitaxmd.com/",
+      "description": "AI-powered tax planning assistant providing personalized tax strategies, savings opportunities, and comprehensive tax optimization reports.",
+      "applicationCategory": "FinanceApplication",
+      "operatingSystem": "Web",
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "USD"
+      },
+      "publisher": {
+        "@type": "Organization",
+        "name": "AITaxMD",
+        "url": "https://aitaxmd.com/"
+      }
+    }
+    </script>
   </head>
   <body>
+    <!-- Google Tag Manager (noscript) -->
+    <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-P87M9Q8F"
+    height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+    <!-- End Google Tag Manager (noscript) -->
+
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
-    <!-- This is a replit script which adds a banner on the top of the page when opened in development mode outside the replit environment -->
-    <script type="text/javascript" src="https://replit.com/public/js/replit-dev-banner.js"></script>
   </body>
 </html>

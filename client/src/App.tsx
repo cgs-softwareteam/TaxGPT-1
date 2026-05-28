@@ -1,4 +1,5 @@
-import { Switch, Route } from "wouter";
+import { useEffect } from "react";
+import { Switch, Route, useLocation } from "wouter";
 import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
@@ -14,6 +15,30 @@ import UserUsage from "@/pages/user-usage";
 import SavedPlans from "@/pages/SavedPlans";
 import { useAuth } from "@/hooks/useAuth";
 import { LoginPrompt } from "@/components/LoginPrompt";
+
+// Track SPA route changes in Google Analytics 4 (G-DZG17VYGRB).
+// The initial pageview is sent automatically by the gtag snippet in index.html;
+// this fires a `page_view` event on every subsequent Wouter navigation.
+function RouteTracker() {
+  const [location] = useLocation();
+
+  useEffect(() => {
+    const w = window as unknown as {
+      gtag?: (...args: unknown[]) => void;
+      dataLayer?: unknown[];
+    };
+
+    if (typeof w.gtag === "function") {
+      w.gtag("event", "page_view", {
+        page_path: location,
+        page_location: window.location.href,
+        page_title: document.title,
+      });
+    }
+  }, [location]);
+
+  return null;
+}
 
 function Router() {
   const { isAuthenticated, isLoading, authEnabled } = useAuth();
@@ -71,6 +96,7 @@ function App() {
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
         <Toaster />
+        <RouteTracker />
         <Router />
       </TooltipProvider>
     </QueryClientProvider>

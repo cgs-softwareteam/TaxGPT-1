@@ -1,0 +1,10 @@
+# robots.txt for AITaxMD (https://aitaxmd.com/)
+User-agent: *
+Allow: /
+Disallow: /admin
+Disallow: /admin-dashboard
+Disallow: /usage
+Disallow: /saved-plans
+Disallow: /api/
+
+Sitemap: https://aitaxmd.com/sitemap.xml
