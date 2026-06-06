@@ -20,15 +20,32 @@ export function initializeDatabase() {
   }
 
   try {
-    // Optimize connection pool for Render deployment
-    pool = new Pool({ 
+    // Connection pool tuned for Neon (serverless Postgres) on Render.
+    //
+    // CRITICAL: Neon auto-suspends idle compute after ~5 min, which kills any
+    // open connections. The pg driver then emits 'error' events on those
+    // Clients. We MUST attach a pool-level error handler — otherwise Node
+    // treats the unhandled 'error' as fatal and crashes the whole process.
+    //
+    // We also keep min=0: holding connections open across Neon's idle suspend
+    // is what causes the terminations in the first place. Spinning up fresh
+    // connections on demand (~50ms cold) is far cheaper than restarting the
+    // whole web service every few minutes.
+    pool = new Pool({
       connectionString: process.env.DATABASE_URL,
-      max: process.env.NODE_ENV === 'production' ? 20 : 10, // Render connection limits
-      min: 2, // Keep minimum connections open
-      idleTimeoutMillis: 30000, // Close idle connections after 30s
-      connectionTimeoutMillis: 5000, // Connection timeout for responsiveness
-      allowExitOnIdle: false // Keep pool alive
+      max: process.env.NODE_ENV === 'production' ? 20 : 10,
+      min: 0,
+      idleTimeoutMillis: 30_000,
+      connectionTimeoutMillis: 5_000,
+      allowExitOnIdle: false,
+      keepAlive: true,
     });
+
+    // Without this listener, an idle-client connection drop crashes Node.
+    pool.on('error', (err) => {
+      console.error('[pg pool] idle client error (likely Neon auto-suspend):', err.message);
+    });
+
     db = drizzle(pool, { schema });
     return db;
   } catch (error) {
