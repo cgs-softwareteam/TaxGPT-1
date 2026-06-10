@@ -338,6 +338,75 @@ export default function Home() {
     }
   }, [authEnabled, isAuthenticated, currentConversationId, createConversationMutation.mutateAsync, addMessageMutation.mutateAsync, toast, isLoading, isGuest, guestStatus, queryClient]);
 
+  // Read auth-related URL params on first mount: after OAuth callbacks or
+  // a magic-link click, the server redirects to / with ?welcome=1 or
+  // ?error=<code>. Show the appropriate toast and clean the URL so the
+  // toast doesn't re-fire on navigation.
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const params = new URLSearchParams(window.location.search);
+    const welcome = params.get("welcome");
+    const error = params.get("error");
+    if (!welcome && !error) return;
+
+    if (welcome === "1") {
+      toast({
+        title: "You're signed in",
+        description: "Welcome to AITaxMD. Your plans are now saved to your account.",
+      });
+      trackEvent("signup_completed_redirect", { source: "magic_link_or_oauth" });
+    }
+
+    if (error) {
+      const errorCopy: Record<string, { title: string; description: string }> = {
+        magic_invalid: {
+          title: "Invalid sign-in link",
+          description: "That link isn't valid. Request a new one from the Sign In modal.",
+        },
+        magic_expired: {
+          title: "Sign-in link expired",
+          description: "Magic links expire after 15 minutes. Request a fresh one.",
+        },
+        magic_consumed: {
+          title: "Link already used",
+          description: "That sign-in link has already been used. Request a new one if you need to sign in again.",
+        },
+        magic_error: {
+          title: "Sign-in failed",
+          description: "Something went wrong on our end. Please try again.",
+        },
+        auth_failed: {
+          title: "Sign-in cancelled",
+          description: "Sign-in was cancelled or denied. Try again.",
+        },
+        internal_failure: {
+          title: "Sign-in error",
+          description: "Our authentication service hit an error. Please try again in a moment.",
+        },
+        session_failure: {
+          title: "Session error",
+          description: "We couldn't establish your session. Try signing in again.",
+        },
+        auth_disabled: {
+          title: "Authentication unavailable",
+          description: "Sign-in isn't enabled on this site right now.",
+        },
+      };
+      const copy = errorCopy[error] || {
+        title: "Sign-in problem",
+        description: "Something went wrong with sign-in. Please try again.",
+      };
+      toast({ ...copy, variant: "destructive" });
+      trackEvent("auth_error_displayed", { error_code: error });
+    }
+
+    // Strip the params so this useEffect doesn't fire again on re-render.
+    const url = new URL(window.location.href);
+    url.searchParams.delete("welcome");
+    url.searchParams.delete("error");
+    window.history.replaceState({}, "", url.pathname + url.search + url.hash);
+  }, [toast]);
+
   // Handle followup requests from StructuredReportRenderer
   useEffect(() => {
     const handleFollowupRequest = (e: Event) => {

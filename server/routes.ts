@@ -3,7 +3,7 @@ import { createServer, type Server } from "http";
 import OpenAI from "openai";
 import { storage } from "./storage";
 import { requireAuth, requireAdmin } from "./auth";
-import { randomUUID } from "crypto";
+import { randomUUID, randomBytes } from "crypto";
 import { eq, desc, sql, and, gte, count, max, asc } from "drizzle-orm";
 import { conversations, messages, savedPlans, shareLog, usageLogs, users } from "@shared/schema";
 import { db } from "./db";
@@ -68,6 +68,26 @@ const ENABLE_AUTHENTICATION = process.env.ENABLE_AUTHENTICATION === 'true';
 // create signup pressure right as guests finish their first full report cycle.
 // Override per-environment with GUEST_PROMPT_LIMIT in Render env settings.
 const GUEST_PROMPT_LIMIT = Math.max(0, parseInt(process.env.GUEST_PROMPT_LIMIT || '5', 10) || 5);
+
+// Magic-link auth: tokens live 15 minutes, and we soft-rate-limit to one
+// outstanding token per email per minute to keep accidental double-clicks
+// (or simple abuse) from spamming the same inbox.
+const MAGIC_LINK_TOKEN_TTL_MS = 15 * 60 * 1000;
+const MAGIC_LINK_RATE_WINDOW_MS = 60 * 1000;
+
+/**
+ * Build a fully-qualified base URL for redirects + emailed links.
+ * Prefers REPLIT_DOMAINS (the existing convention used by OAuth callbacks),
+ * falls back to the request's own protocol+host (works in dev + when no
+ * env var is configured).
+ */
+function getBaseUrl(req: any): string {
+  if (process.env.REPLIT_DOMAINS) {
+    return `https://${process.env.REPLIT_DOMAINS}`;
+  }
+  const host = req.get?.('host') || 'localhost:5000';
+  return `${req.protocol || 'http'}://${host}`;
+}
 
 export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/generate", async (req: any, res) => {
@@ -349,6 +369,150 @@ Always ask clarifying questions about employment structure when medical professi
     } catch (err) {
       console.error("Email capture failed:", err);
       res.status(500).json({ error: "Couldn't capture your email. Please try again." });
+    }
+  });
+
+  // Magic-link auth: request a one-time sign-in link by email. Always responds
+  // success (regardless of whether the email matches an existing user) to
+  // prevent account enumeration.
+  app.post("/api/auth/magic/request", async (req: any, res) => {
+    if (!ENABLE_AUTHENTICATION) {
+      return res.status(503).json({ error: "Authentication is not enabled" });
+    }
+    if (!process.env.RESEND_API_KEY) {
+      return res.status(503).json({
+        error: "Email sign-in isn't available yet. Try Google or Facebook instead.",
+      });
+    }
+
+    const { email: rawEmail } = req.body ?? {};
+    const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!rawEmail || typeof rawEmail !== "string" || !EMAIL_REGEX.test(rawEmail)) {
+      return res.status(400).json({ error: "Please enter a valid email address." });
+    }
+    const email = rawEmail.toLowerCase().trim();
+
+    // Soft rate limit: if there's already an active (unexpired, unconsumed)
+    // token for this email created within the rate window, return success
+    // without creating a new one (silent — no second email).
+    try {
+      const active = await storage.countRecentActiveTokens(email, MAGIC_LINK_RATE_WINDOW_MS);
+      if (active > 0) {
+        return res.json({ success: true });
+      }
+    } catch (rateErr) {
+      console.error("Magic-link rate check failed (allowing anyway):", rateErr);
+    }
+
+    const token = randomBytes(32).toString("hex");
+    const expiresAt = new Date(Date.now() + MAGIC_LINK_TOKEN_TTL_MS);
+    const requestIp = (req.ip || req.socket?.remoteAddress || 'unknown').toString().slice(0, 45);
+    const requestUserAgent = (req.get?.('user-agent') || 'unknown').toString().slice(0, 1000);
+
+    try {
+      await storage.createMagicLinkToken({
+        token,
+        email,
+        expiresAt,
+        requestIp,
+        requestUserAgent,
+      });
+    } catch (createErr) {
+      console.error("Failed to create magic-link token:", createErr);
+      return res.status(500).json({ error: "Couldn't create sign-in link. Please try again." });
+    }
+
+    const magicLink = `${getBaseUrl(req)}/auth/magic?token=${encodeURIComponent(token)}`;
+
+    // Dispatch the email in the background so this request returns instantly.
+    setImmediate(async () => {
+      try {
+        const html = generateMagicLinkEmailHtml(magicLink);
+        const transporter = nodemailer.createTransport({
+          host: "smtp.resend.com",
+          port: 465,
+          secure: true,
+          auth: { user: "resend", pass: process.env.RESEND_API_KEY },
+        });
+        await transporter.sendMail({
+          from: "AITaxMD <noreply@aitaxmd.com>",
+          to: email,
+          subject: "Your AITaxMD sign-in link",
+          html,
+          text: htmlToText(html),
+        });
+      } catch (sendErr) {
+        console.error("Magic-link email send failed:", sendErr);
+      }
+    });
+
+    res.json({ success: true });
+  });
+
+  // Magic-link callback: GET /auth/magic?token=... — validates the token,
+  // finds-or-creates the user, establishes the session, and redirects home.
+  app.get("/auth/magic", async (req: any, res) => {
+    const baseUrl = getBaseUrl(req);
+
+    if (!ENABLE_AUTHENTICATION) {
+      return res.redirect(`${baseUrl}/?error=auth_disabled`);
+    }
+
+    const { token } = req.query;
+    if (!token || typeof token !== "string") {
+      return res.redirect(`${baseUrl}/?error=magic_invalid`);
+    }
+
+    try {
+      const tokenRow = await storage.getMagicLinkToken(token);
+      if (!tokenRow) {
+        return res.redirect(`${baseUrl}/?error=magic_invalid`);
+      }
+      if (tokenRow.consumedAt) {
+        return res.redirect(`${baseUrl}/?error=magic_consumed`);
+      }
+      if (tokenRow.expiresAt.getTime() < Date.now()) {
+        return res.redirect(`${baseUrl}/?error=magic_expired`);
+      }
+
+      // Consume the token BEFORE the login completes — if anything below fails,
+      // the link still can't be reused.
+      await storage.consumeMagicLinkToken(token);
+
+      // Find or create user keyed by email.
+      let user = await storage.getUserByEmail(tokenRow.email);
+      if (!user) {
+        const prefix = tokenRow.email.split("@")[0];
+        const niceName = prefix.charAt(0).toUpperCase() + prefix.slice(1);
+        user = await storage.createUser({
+          email: tokenRow.email,
+          name: niceName || tokenRow.email,
+          role: "user",
+        });
+      } else {
+        user = await storage.updateUser(user.id, { lastLoginAt: new Date() });
+      }
+
+      // Capture pre-login sessionID for guest-conversion analytics.
+      const preLoginSessionId = req.sessionID as string | undefined;
+
+      await new Promise<void>((resolve, reject) => {
+        req.logIn(user, (loginErr: any) => {
+          if (loginErr) reject(loginErr);
+          else resolve();
+        });
+      });
+
+      if (preLoginSessionId) {
+        storage.markGuestConverted(preLoginSessionId, user!.id).catch((convErr) => {
+          console.error("Failed to mark guest conversion (magic link):", convErr);
+        });
+      }
+
+      return res.redirect(`${baseUrl}/?welcome=1`);
+    } catch (err) {
+      console.error("Magic-link verification failed:", err);
+      return res.redirect(`${baseUrl}/?error=magic_error`);
     }
   });
 
@@ -1169,6 +1333,56 @@ function generatePDFTemplate(message: any, user: any): string {
       <div class="footer">
         <p>This report was generated by AITaxMD - AI-Powered Tax Planning Assistant</p>
         <p><strong>Disclaimer:</strong> This analysis is for educational purposes only. Please consult with a qualified tax professional before implementing any tax strategies.</p>
+      </div>
+    </body>
+    </html>
+  `;
+}
+
+/**
+ * HTML email body for the magic-link sign-in flow. Includes a big CTA
+ * button + the raw URL as fallback (some inboxes strip styled buttons).
+ * Mentions the 15-minute expiry and the "didn't request this?" disclaimer.
+ */
+function generateMagicLinkEmailHtml(magicLink: string): string {
+  // Magic link is generated by us with randomBytes; no user-controlled
+  // content lands in this template, so no escaping is needed. We still
+  // attribute-encode the href just for safety.
+  const safeHref = magicLink.replace(/"/g, "&quot;");
+  return `
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <meta charset="utf-8">
+      <style>
+        body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px; }
+        .header { background: #2563eb; color: white; padding: 24px; text-align: center; border-radius: 8px 8px 0 0; }
+        .header h1 { margin: 0; font-size: 24px; }
+        .content { background: #f8fafc; padding: 28px; border-radius: 0 0 8px 8px; }
+        .cta-wrap { text-align: center; margin: 32px 0 24px; }
+        .cta { background: #2563eb; color: white !important; padding: 14px 32px; text-decoration: none; display: inline-block; border-radius: 6px; font-weight: 600; font-size: 16px; }
+        .raw-link { word-break: break-all; font-size: 12px; color: #666; background: white; padding: 12px; border-radius: 4px; border: 1px solid #e5e7eb; font-family: monospace; }
+        .footer { margin-top: 28px; text-align: center; font-size: 12px; color: #666; }
+        .footer p { margin: 6px 0; }
+      </style>
+    </head>
+    <body>
+      <div class="header">
+        <h1>Sign in to AITaxMD</h1>
+      </div>
+      <div class="content">
+        <p>Click the button below to sign in to your AITaxMD account. This link expires in <strong>15 minutes</strong> and can only be used once.</p>
+        <div class="cta-wrap">
+          <a href="${safeHref}" class="cta">Sign in to AITaxMD</a>
+        </div>
+        <p style="font-size: 14px; color: #666;">Or copy and paste this link into your browser:</p>
+        <div class="raw-link">${magicLink}</div>
+        <p style="margin-top: 28px; font-size: 14px; color: #666;">
+          <strong>Didn't request this?</strong> You can safely ignore this email — someone may have entered your address by mistake. No account was created.
+        </p>
+      </div>
+      <div class="footer">
+        <p>This is a one-time sign-in link from AITaxMD.</p>
       </div>
     </body>
     </html>

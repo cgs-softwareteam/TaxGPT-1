@@ -97,6 +97,25 @@ export const shareLog = pgTable("share_log", {
   index("share_log_shared_at_idx").on(table.sharedAt),
 ]);
 
+// Magic-link auth tokens. One row per outstanding sign-in request.
+// Token value is the primary key; it's cryptographically random (64 hex
+// chars from crypto.randomBytes(32)) so collisions are not a concern.
+// Tokens are single-use (consumedAt set when used) and expire after a
+// short window (typically 15 minutes; enforced in the route handler).
+export const magicLinkTokens = pgTable("magic_link_tokens", {
+  token: varchar("token", { length: 128 }).primaryKey(),
+  email: varchar("email", { length: 255 }).notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  expiresAt: timestamp("expires_at").notNull(),
+  consumedAt: timestamp("consumed_at"),
+  // Audit fields — useful for spotting abuse / debugging
+  requestIp: varchar("request_ip", { length: 45 }),
+  requestUserAgent: text("request_user_agent"),
+}, (table) => [
+  index("magic_link_tokens_email_idx").on(table.email),
+  index("magic_link_tokens_expires_at_idx").on(table.expiresAt),
+]);
+
 // Email captures — leads from the "Email me my plan" flow. Lighter-weight
 // than a full user account: just an email address tied to a session, with
 // the latest report dispatched once via nodemailer. May later convert to
@@ -220,6 +239,8 @@ export type GuestSession = typeof guestSessions.$inferSelect;
 export type InsertGuestSession = z.infer<typeof insertGuestSessionSchema>;
 export type EmailCapture = typeof emailCaptures.$inferSelect;
 export type InsertEmailCapture = typeof emailCaptures.$inferInsert;
+export type MagicLinkToken = typeof magicLinkTokens.$inferSelect;
+export type InsertMagicLinkToken = typeof magicLinkTokens.$inferInsert;
 
 // Admin statistics type
 export type UsageStatistics = {

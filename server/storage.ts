@@ -17,7 +17,9 @@ import {
   type GuestStatistics,
   type ConvertedGuest,
   type EmailCapture,
-  type InsertEmailCapture
+  type InsertEmailCapture,
+  type MagicLinkToken,
+  type InsertMagicLinkToken
 } from "@shared/schema";
 import { randomUUID } from "crypto";
 
@@ -73,6 +75,12 @@ export interface IStorage {
   createEmailCapture(data: InsertEmailCapture): Promise<EmailCapture>;
   markEmailCaptureReportSent(id: number): Promise<void>;
 
+  // MAGIC LINK OPERATIONS
+  createMagicLinkToken(data: InsertMagicLinkToken): Promise<MagicLinkToken>;
+  getMagicLinkToken(token: string): Promise<MagicLinkToken | undefined>;
+  consumeMagicLinkToken(token: string): Promise<void>;
+  countRecentActiveTokens(email: string, sinceMs: number): Promise<number>;
+
   // ADMIN ANALYTICS
   getTopPrompts(limit?: number): Promise<Array<{
     prompt: string;
@@ -97,6 +105,7 @@ export class MemStorage implements IStorage {
   private guestSessions: Map<string, GuestSession>;
   private emailCaptures: Map<number, EmailCapture>;
   private emailCaptureIdCounter: number;
+  private magicLinkTokens: Map<string, MagicLinkToken>;
   private userIdCounter: number;
   private logIdCounter: number;
   private conversationIdCounter: number;
@@ -114,6 +123,7 @@ export class MemStorage implements IStorage {
     this.guestSessions = new Map();
     this.emailCaptures = new Map();
     this.emailCaptureIdCounter = 1;
+    this.magicLinkTokens = new Map();
     this.userIdCounter = 1;
     this.logIdCounter = 1;
     this.conversationIdCounter = 1;
@@ -584,6 +594,43 @@ export class MemStorage implements IStorage {
     this.emailCaptures.set(id, { ...existing, reportSent: true });
   }
 
+  // MAGIC LINK OPERATIONS
+  async createMagicLinkToken(data: InsertMagicLinkToken): Promise<MagicLinkToken> {
+    const tok: MagicLinkToken = {
+      token: data.token,
+      email: data.email,
+      createdAt: new Date(),
+      expiresAt: data.expiresAt,
+      consumedAt: null,
+      requestIp: data.requestIp ?? null,
+      requestUserAgent: data.requestUserAgent ?? null,
+    };
+    this.magicLinkTokens.set(data.token, tok);
+    return tok;
+  }
+
+  async getMagicLinkToken(token: string): Promise<MagicLinkToken | undefined> {
+    return this.magicLinkTokens.get(token);
+  }
+
+  async consumeMagicLinkToken(token: string): Promise<void> {
+    const existing = this.magicLinkTokens.get(token);
+    if (!existing) return;
+    this.magicLinkTokens.set(token, { ...existing, consumedAt: new Date() });
+  }
+
+  async countRecentActiveTokens(email: string, sinceMs: number): Promise<number> {
+    const cutoff = Date.now() - sinceMs;
+    const now = Date.now();
+    return Array.from(this.magicLinkTokens.values()).filter(
+      (t) =>
+        t.email === email &&
+        t.consumedAt === null &&
+        t.createdAt.getTime() > cutoff &&
+        t.expiresAt.getTime() > now,
+    ).length;
+  }
+
   // ADMIN ANALYTICS
   async getTopPrompts(limit = 20): Promise<Array<{prompt: string; count: number; avgTokens: number; avgResponseTime: number}>> {
     const promptStats = new Map<string, {count: number; totalTokens: number; totalResponseTime: number}>();
@@ -620,8 +667,8 @@ export class MemStorage implements IStorage {
 }
 
 import { getDatabase } from "./db";
-import { users, usageLogs, conversations, messages, savedPlans, shareLog, guestSessions, emailCaptures } from "@shared/schema";
-import { eq, desc, count, sum, gte, and, sql, asc } from "drizzle-orm";
+import { users, usageLogs, conversations, messages, savedPlans, shareLog, guestSessions, emailCaptures, magicLinkTokens } from "@shared/schema";
+import { eq, desc, count, sum, gte, and, sql, asc, isNull } from "drizzle-orm";
 
 // Drizzle-based database storage
 export class DrizzleStorage implements IStorage {
@@ -1132,6 +1179,46 @@ export class DrizzleStorage implements IStorage {
       .update(emailCaptures)
       .set({ reportSent: true })
       .where(eq(emailCaptures.id, id));
+  }
+
+  // MAGIC LINK OPERATIONS
+  async createMagicLinkToken(data: InsertMagicLinkToken): Promise<MagicLinkToken> {
+    const [tok] = await this.db!
+      .insert(magicLinkTokens)
+      .values(data)
+      .returning();
+    return tok;
+  }
+
+  async getMagicLinkToken(token: string): Promise<MagicLinkToken | undefined> {
+    const [tok] = await this.db!
+      .select()
+      .from(magicLinkTokens)
+      .where(eq(magicLinkTokens.token, token))
+      .limit(1);
+    return tok || undefined;
+  }
+
+  async consumeMagicLinkToken(token: string): Promise<void> {
+    await this.db!
+      .update(magicLinkTokens)
+      .set({ consumedAt: new Date() })
+      .where(eq(magicLinkTokens.token, token));
+  }
+
+  async countRecentActiveTokens(email: string, sinceMs: number): Promise<number> {
+    const cutoff = new Date(Date.now() - sinceMs);
+    const now = new Date();
+    const [row] = await this.db!
+      .select({ n: count() })
+      .from(magicLinkTokens)
+      .where(and(
+        eq(magicLinkTokens.email, email),
+        isNull(magicLinkTokens.consumedAt),
+        gte(magicLinkTokens.createdAt, cutoff),
+        gte(magicLinkTokens.expiresAt, now),
+      ));
+    return Number(row?.n) || 0;
   }
 
   // ADMIN ANALYTICS
