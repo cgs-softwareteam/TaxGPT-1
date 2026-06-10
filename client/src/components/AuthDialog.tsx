@@ -7,7 +7,7 @@ import {
   DialogTitle,
 } from "./ui/dialog";
 import { Link } from "wouter";
-import { Infinity as InfinityIcon, Save, Mail, BarChart3, ShieldCheck, EyeOff, Zap, Star } from "lucide-react";
+import { MessageSquarePlus, Save, Mail, BarChart3, ShieldCheck, EyeOff, Zap, Star } from "lucide-react";
 import { trackEvent } from "@/lib/analytics";
 
 export type AuthDialogMode = "sign-in" | "sign-up" | "limit-reached";
@@ -31,8 +31,11 @@ interface AuthDialogProps {
 }
 
 // "What you get" value props shown in the dialog body. Tax-app specific.
+// Phrased to describe current state ("more sessions") rather than make a
+// perpetual "unlimited" promise that would have to be unsaid if pricing
+// tiers ever cap free usage.
 const BENEFITS: Array<{ icon: React.ComponentType<{ className?: string }>; label: string }> = [
-  { icon: InfinityIcon, label: "Unlimited tax planning sessions" },
+  { icon: MessageSquarePlus, label: "More tax planning sessions" },
   { icon: Save, label: "Save & revisit your plans anytime" },
   { icon: Mail, label: "Email your reports to your accountant" },
   { icon: BarChart3, label: "Track tax-saving opportunities over time" },
@@ -66,7 +69,7 @@ function buildCopy(opts: {
     return {
       title: "Create your free AITaxMD account",
       description:
-        "Save your plans and unlock unlimited tax planning sessions. No credit card required.",
+        "Save your plans and unlock more tax planning sessions. No credit card required.",
     };
   }
 
@@ -81,7 +84,7 @@ function buildCopy(opts: {
         : "";
     return {
       title: "Don't lose your tax plan",
-      description: `You've discovered ${dollarsFmt} in potential tax savings${audienceLabel ? " " + audienceLabel : ""}. Create a free account to save this plan, unlock unlimited sessions, and revisit it anytime.`,
+      description: `You've discovered ${dollarsFmt} in potential tax savings${audienceLabel ? " " + audienceLabel : ""}. Create a free account to save this plan, unlock more sessions, and revisit it anytime.`,
     };
   }
 

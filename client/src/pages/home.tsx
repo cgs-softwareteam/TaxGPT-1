@@ -619,7 +619,7 @@ export default function Home() {
                         className="text-blue-600 hover:underline"
                         data-testid="guest-counter-signup-link"
                       >
-                        Sign up for unlimited
+                        Sign up to continue
                       </button>
                     </>
                   )}
