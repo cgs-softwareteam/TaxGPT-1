@@ -1,4 +1,6 @@
+import { useState } from "react";
 import { Button } from "./ui/button";
+import { Input } from "./ui/input";
 import {
   Dialog,
   DialogContent,
@@ -7,7 +9,7 @@ import {
   DialogTitle,
 } from "./ui/dialog";
 import { Link } from "wouter";
-import { MessageSquarePlus, Save, Mail, BarChart3, ShieldCheck, EyeOff, Zap, Star } from "lucide-react";
+import { MessageSquarePlus, Save, Mail, BarChart3, ShieldCheck, EyeOff, Zap, Star, CheckCircle2 } from "lucide-react";
 import { trackEvent } from "@/lib/analytics";
 
 export type AuthDialogMode = "sign-in" | "sign-up" | "limit-reached";
@@ -28,6 +30,13 @@ interface AuthDialogProps {
   stateHint?: string;
   /** Tailor copy for a specific audience (e.g. physicians get medical-prof framing). */
   audience?: AuthDialogAudience;
+  /**
+   * Most recent structured tax report from the conversation. When provided,
+   * an "Email me my plan" lead-capture form is shown below the OAuth buttons.
+   * Lower friction than OAuth — captures the email + sends the report via
+   * Resend (RESEND_API_KEY), no account created.
+   */
+  latestReport?: string;
 }
 
 // "What you get" value props shown in the dialog body. Tax-app specific.
@@ -104,7 +113,48 @@ export function AuthDialog({
   professionHint,
   stateHint,
   audience = "general",
+  latestReport,
 }: AuthDialogProps) {
+  // Local state for the "Email me my plan" lead-capture form.
+  const [emailValue, setEmailValue] = useState("");
+  const [emailSubmitting, setEmailSubmitting] = useState(false);
+  const [emailError, setEmailError] = useState<string | null>(null);
+  const [emailSent, setEmailSent] = useState(false);
+
+  const submitEmailCapture = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (emailSubmitting || emailSent) return;
+    const email = emailValue.trim();
+    if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      setEmailError("Please enter a valid email address.");
+      return;
+    }
+    if (!latestReport) {
+      setEmailError("There's no tax plan to send yet — chat first.");
+      return;
+    }
+    setEmailError(null);
+    setEmailSubmitting(true);
+    trackEvent("email_capture_submitted", { mode });
+    try {
+      const res = await fetch("/api/email-my-plan", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({ email, reportContent: latestReport }),
+      });
+      if (!res.ok) {
+        const body = await res.json().catch(() => ({} as { error?: string }));
+        throw new Error(body?.error || `HTTP ${res.status}`);
+      }
+      setEmailSent(true);
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : "Something went wrong.";
+      setEmailError(msg);
+    } finally {
+      setEmailSubmitting(false);
+    }
+  };
   const locked = mode === "limit-reached";
   const { title, description } = buildCopy({
     mode,
@@ -182,6 +232,65 @@ export function AuthDialog({
             Continue with Facebook
           </Button>
         </div>
+
+        {/* Email-capture alternative — only shown when there's an actual
+            report to send. Lower-friction path for users who don't want to
+            OAuth: drop their email, get the plan by mail, no account. */}
+        {latestReport && (
+          <div className="pt-3" data-testid="auth-dialog-email-capture">
+            <div className="flex items-center gap-3 pb-3">
+              <div className="flex-1 h-px bg-gray-200 dark:bg-gray-700" />
+              <span className="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wide">
+                or email me my plan
+              </span>
+              <div className="flex-1 h-px bg-gray-200 dark:bg-gray-700" />
+            </div>
+
+            {emailSent ? (
+              <div
+                className="flex items-center gap-2 text-sm text-green-700 dark:text-green-400 bg-green-50 dark:bg-green-950/30 p-3 rounded-md"
+                data-testid="auth-dialog-email-sent"
+              >
+                <CheckCircle2 className="h-4 w-4 shrink-0" />
+                <span>Check your inbox — we've sent your tax plan.</span>
+              </div>
+            ) : (
+              <form onSubmit={submitEmailCapture} className="space-y-2">
+                <div className="flex gap-2">
+                  <Input
+                    type="email"
+                    placeholder="your@email.com"
+                    value={emailValue}
+                    onChange={(e) => {
+                      setEmailValue(e.target.value);
+                      if (emailError) setEmailError(null);
+                    }}
+                    disabled={emailSubmitting}
+                    aria-label="Your email address"
+                    data-testid="auth-dialog-email-input"
+                    className="flex-1"
+                  />
+                  <Button
+                    type="submit"
+                    variant="outline"
+                    disabled={emailSubmitting}
+                    data-testid="auth-dialog-email-submit"
+                  >
+                    {emailSubmitting ? "Sending…" : "Send"}
+                  </Button>
+                </div>
+                {emailError && (
+                  <p
+                    className="text-xs text-red-600 dark:text-red-400"
+                    data-testid="auth-dialog-email-error"
+                  >
+                    {emailError}
+                  </p>
+                )}
+              </form>
+            )}
+          </div>
+        )}
 
         {/* Trust badges — reduce signup hesitation by addressing the
             most common objections at the exact decision moment. */}

@@ -311,17 +311,21 @@ Always ask clarifying questions about employment structure when medical professi
       });
 
       // Dispatch in the background so the request returns immediately.
+      // Uses Resend via SMTP (smtp.resend.com) — cleaner setup than the
+      // previous SendGrid integration, free tier of 3K emails/month.
       setImmediate(async () => {
         try {
-          if (!process.env.SENDGRID_API_KEY) {
-            console.warn("SENDGRID_API_KEY not set — email capture queued but not sent");
+          if (!process.env.RESEND_API_KEY) {
+            console.warn("RESEND_API_KEY not set — email capture queued but not sent");
             return;
           }
 
           const html = generateLeadCaptureEmailHtml(reportContent);
           const transporter = nodemailer.createTransport({
-            service: "SendGrid",
-            auth: { user: "apikey", pass: process.env.SENDGRID_API_KEY },
+            host: "smtp.resend.com",
+            port: 465,
+            secure: true,
+            auth: { user: "resend", pass: process.env.RESEND_API_KEY },
           });
 
           await transporter.sendMail({
