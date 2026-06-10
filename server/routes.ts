@@ -443,6 +443,11 @@ Always ask clarifying questions about employment structure when medical professi
         storage.markGuestConverted(preLoginSessionId, user!.id).catch((convErr) => {
           console.error("Failed to mark guest conversion (One Tap):", convErr);
         });
+        // Re-parent pre-signup guest usage_logs into a real Conversation
+        // so the new user sees their pre-signup chat in their sidebar.
+        storage.claimGuestHistory(preLoginSessionId, user!.id).catch((claimErr) => {
+          console.error("Failed to claim guest history (One Tap):", claimErr);
+        });
       }
 
       return res.json({

@@ -240,6 +240,11 @@ export function setupAuthRoutes(app: Express) {
             storage.markGuestConverted(preLoginSessionId, user.id).catch((convErr) => {
               console.error('Failed to mark guest conversion (Google):', convErr);
             });
+            // Re-parent pre-signup guest usage_logs into a real Conversation
+            // so the new user sees their pre-signup chat in their sidebar.
+            storage.claimGuestHistory(preLoginSessionId, user.id).catch((claimErr) => {
+              console.error('Failed to claim guest history (Google):', claimErr);
+            });
           }
 
           return res.redirect(baseUrl);
@@ -287,6 +292,11 @@ export function setupAuthRoutes(app: Express) {
           if (preLoginSessionId) {
             storage.markGuestConverted(preLoginSessionId, user.id).catch((convErr) => {
               console.error('Failed to mark guest conversion (Facebook):', convErr);
+            });
+            // Re-parent pre-signup guest usage_logs into a real Conversation
+            // so the new user sees their pre-signup chat in their sidebar.
+            storage.claimGuestHistory(preLoginSessionId, user.id).catch((claimErr) => {
+              console.error('Failed to claim guest history (Facebook):', claimErr);
             });
           }
 

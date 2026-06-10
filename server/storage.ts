@@ -70,6 +70,13 @@ export interface IStorage {
   markGuestConverted(sessionId: string, userId: number): Promise<GuestSession | undefined>;
   getGuestStatistics(promptLimit: number): Promise<GuestStatistics>;
   getRecentConversions(limit?: number): Promise<ConvertedGuest[]>;
+  /**
+   * Re-parent a guest's pre-signup usage_logs to their new user account
+   * and bundle them into a single Conversation + Messages so the user
+   * sees their pre-signup chat in their conversation history. Idempotent:
+   * if there are no pending guest logs for sessionId, returns null.
+   */
+  claimGuestHistory(sessionId: string, userId: number): Promise<{ conversationId: number; claimedCount: number } | null>;
 
   // EMAIL CAPTURE OPERATIONS
   createEmailCapture(data: InsertEmailCapture): Promise<EmailCapture>;
@@ -570,6 +577,57 @@ export class MemStorage implements IStorage {
       });
   }
 
+  async claimGuestHistory(sessionId: string, userId: number): Promise<{ conversationId: number; claimedCount: number } | null> {
+    const allLogs = Array.from(this.usageLogs.values());
+    const pending = allLogs
+      .filter(l => l.sessionId === sessionId && l.userId === null)
+      .sort((a, b) => a.timestamp.getTime() - b.timestamp.getTime());
+    if (pending.length === 0) return null;
+
+    // Re-parent the usage_logs to the new user
+    for (const log of pending) {
+      this.usageLogs.set(log.id, { ...log, userId });
+    }
+
+    // Create a conversation owned by the new user, timestamped to span the guest activity
+    const convId = this.conversationIdCounter++;
+    const conv: Conversation = {
+      id: convId,
+      userId,
+      title: "Saved from your guest session",
+      createdAt: pending[0].timestamp,
+      updatedAt: pending[pending.length - 1].timestamp,
+      isActive: true,
+    };
+    this.conversations.set(convId, conv);
+
+    // Create user + assistant messages from each usage_log pair
+    for (const log of pending) {
+      const userMsgId = this.messageIdCounter++;
+      this.messages.set(userMsgId, {
+        id: userMsgId,
+        conversationId: convId,
+        role: "user",
+        content: log.userMessage,
+        timestamp: log.timestamp,
+        tokensUsed: null,
+        responseTimeMs: null,
+      });
+      const aiMsgId = this.messageIdCounter++;
+      this.messages.set(aiMsgId, {
+        id: aiMsgId,
+        conversationId: convId,
+        role: "assistant",
+        content: log.aiResponse,
+        timestamp: log.timestamp,
+        tokensUsed: log.totalTokens,
+        responseTimeMs: log.responseTimeMs,
+      });
+    }
+
+    return { conversationId: convId, claimedCount: pending.length };
+  }
+
   // EMAIL CAPTURE OPERATIONS
   async createEmailCapture(data: InsertEmailCapture): Promise<EmailCapture> {
     const id = this.emailCaptureIdCounter++;
@@ -668,7 +726,7 @@ export class MemStorage implements IStorage {
 
 import { getDatabase } from "./db";
 import { users, usageLogs, conversations, messages, savedPlans, shareLog, guestSessions, emailCaptures, magicLinkTokens } from "@shared/schema";
-import { eq, desc, count, sum, gte, and, sql, asc, isNull } from "drizzle-orm";
+import { eq, desc, count, sum, gte, and, sql, asc, isNull, isNotNull } from "drizzle-orm";
 
 // Drizzle-based database storage
 export class DrizzleStorage implements IStorage {
@@ -1163,6 +1221,69 @@ export class DrizzleStorage implements IStorage {
       userName: r.userName,
       userEmail: r.userEmail,
     }));
+  }
+
+  async claimGuestHistory(sessionId: string, userId: number): Promise<{ conversationId: number; claimedCount: number } | null> {
+    // Pull pending guest logs in chronological order BEFORE the transaction,
+    // since we use the first/last timestamp for the conversation bookends.
+    const pending = await this.db!
+      .select()
+      .from(usageLogs)
+      .where(and(
+        eq(usageLogs.sessionId, sessionId),
+        isNull(usageLogs.userId),
+      ))
+      .orderBy(asc(usageLogs.timestamp));
+
+    if (pending.length === 0) return null;
+
+    // Re-parent + create conversation + create messages atomically.
+    return await this.db!.transaction(async (tx) => {
+      // 1. Re-parent the usage_logs to the new user.
+      await tx
+        .update(usageLogs)
+        .set({ userId })
+        .where(and(
+          eq(usageLogs.sessionId, sessionId),
+          isNull(usageLogs.userId),
+        ));
+
+      // 2. Create a single conversation owned by the new user.
+      const [conv] = await tx
+        .insert(conversations)
+        .values({
+          userId,
+          title: "Saved from your guest session",
+          createdAt: pending[0].timestamp,
+          updatedAt: pending[pending.length - 1].timestamp,
+        })
+        .returning();
+
+      // 3. Fan out user+assistant message rows for each usage_log pair.
+      const messageRows = pending.flatMap((log) => [
+        {
+          conversationId: conv.id,
+          role: "user",
+          content: log.userMessage,
+          timestamp: log.timestamp,
+          tokensUsed: null,
+          responseTimeMs: null,
+        },
+        {
+          conversationId: conv.id,
+          role: "assistant",
+          content: log.aiResponse,
+          timestamp: log.timestamp,
+          tokensUsed: log.totalTokens,
+          responseTimeMs: log.responseTimeMs,
+        },
+      ]);
+      if (messageRows.length > 0) {
+        await tx.insert(messages).values(messageRows);
+      }
+
+      return { conversationId: conv.id, claimedCount: pending.length };
+    });
   }
 
   // EMAIL CAPTURE OPERATIONS
