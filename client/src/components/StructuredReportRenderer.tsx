@@ -272,65 +272,6 @@ export default function StructuredReportRenderer({ content, timestamp, messageId
           </p>
         </div>
 
-        {/* ===== GUEST LOCK ZONE ====================================
-            Everything below the scenario teaser is wrapped so we can blur
-            it for guests and overlay an "unlock" CTA on top. Authenticated
-            users see the original layout unchanged.
-            Print preview keeps the blur (print:blur-sm) so Ctrl+P doesn't
-            silently leak the report. ============================== */}
-        <div className={isGuest ? "relative" : ""}>
-          {isGuest && (
-            <div
-              className="absolute inset-0 z-20 flex items-center justify-center px-4 print:hidden"
-              data-testid="report-unlock-overlay"
-            >
-              <div className="bg-white rounded-xl shadow-2xl border border-gray-200 max-w-sm w-full p-6 text-center">
-                <div className="flex justify-center mb-3">
-                  <div className="bg-amber-100 p-3 rounded-full">
-                    <Lock className="w-6 h-6 text-amber-600" />
-                  </div>
-                </div>
-                <h3 className="font-semibold text-lg text-gray-900 mb-2">
-                  Unlock your full tax plan
-                </h3>
-                {report.potentialSavings ? (
-                  <p className="text-sm text-gray-600 mb-4">
-                    You've discovered{" "}
-                    <span className="font-semibold text-green-700">
-                      {report.potentialSavings}
-                    </span>{" "}
-                    in potential tax savings. Sign in free to see all strategies,
-                    action steps, and save your plan.
-                  </p>
-                ) : (
-                  <p className="text-sm text-gray-600 mb-4">
-                    Sign in free to see all strategies, action steps, and save
-                    your plan.
-                  </p>
-                )}
-                <Button
-                  onClick={requestUnlock}
-                  className="w-full"
-                  data-testid="button-unlock-report"
-                >
-                  Sign in to unlock
-                </Button>
-                <p className="text-xs text-gray-400 mt-2">
-                  Free · Takes 5 seconds · No credit card
-                </p>
-              </div>
-            </div>
-          )}
-
-          <div
-            className={
-              isGuest
-                ? "blur-md select-none pointer-events-none opacity-50 space-y-6 print:blur-sm print:opacity-40"
-                : "space-y-6"
-            }
-            aria-hidden={isGuest ? "true" : undefined}
-          >
-
         {/* Financial Highlights */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="bg-gradient-to-br from-green-50 to-emerald-50 border border-green-200 rounded-xl p-4">
@@ -363,15 +304,17 @@ export default function StructuredReportRenderer({ content, timestamp, messageId
           <div className="space-y-4">
             {report.strategies.map((strategy: any, index: number) => {
               const { icon, impactLevel, timeline, impactColor, timelineIcon } = getStrategyMetadata(strategy.name, index);
-              const isExpanded = expandedStrategy === index;
+              // Force collapsed for guests so the details (locked) never render.
+              const isExpanded = !isGuest && expandedStrategy === index;
               const detailedContent = getDetailedStrategyContent(strategy.name);
-              
+
               return (
                 <div key={index} className="bg-white border border-gray-200 rounded-xl shadow-sm hover:shadow-lg transition-all duration-200">
-                  {/* Clickable Strategy Header */}
-                  <div 
-                    className="p-5 cursor-pointer hover:bg-gray-50 transition-colors"
-                    onClick={() => setExpandedStrategy(isExpanded ? null : index)}
+                  {/* Clickable Strategy Header — guests get a Lock icon and a
+                      non-interactive card; authenticated users can expand. */}
+                  <div
+                    className={`p-5 transition-colors ${isGuest ? "" : "cursor-pointer hover:bg-gray-50"}`}
+                    onClick={isGuest ? undefined : () => setExpandedStrategy(isExpanded ? null : index)}
                     data-testid={`strategy-card-${index}`}
                   >
                     <div className="flex items-center justify-between">
@@ -394,7 +337,9 @@ export default function StructuredReportRenderer({ content, timestamp, messageId
                             <span>{timeline}</span>
                           </div>
                         </div>
-                        {isExpanded ? (
+                        {isGuest ? (
+                          <Lock className="w-4 h-4 text-amber-500" />
+                        ) : isExpanded ? (
                           <ChevronDown className="w-4 h-4 text-gray-400" />
                         ) : (
                           <ChevronRight className="w-4 h-4 text-gray-400" />
@@ -492,6 +437,71 @@ export default function StructuredReportRenderer({ content, timestamp, messageId
             })}
           </div>
         </div>
+
+        {/* ===== GUEST LOCK ZONE ====================================
+            Partial blur: scenario teaser, savings, and strategy names are
+            visible above. Action steps + implementation details + follow-up
+            actions are locked behind a sign-in CTA below. ============== */}
+        <div className={isGuest ? "relative" : ""}>
+          {isGuest && (
+            <div
+              className="absolute inset-0 z-20 flex items-center justify-center px-4 print:hidden"
+              data-testid="report-unlock-overlay"
+            >
+              <div className="bg-white rounded-xl shadow-2xl border border-gray-200 max-w-sm w-full p-6 text-center">
+                <div className="flex justify-center mb-3">
+                  <div className="bg-amber-100 p-3 rounded-full">
+                    <Lock className="w-6 h-6 text-amber-600" />
+                  </div>
+                </div>
+                <h3 className="font-semibold text-lg text-gray-900 mb-2">
+                  Unlock your action steps
+                </h3>
+                {report.potentialSavings ? (
+                  <p className="text-sm text-gray-600 mb-4">
+                    You've found{" "}
+                    <span className="font-semibold text-green-700">
+                      {report.potentialSavings}
+                    </span>
+                    {report.strategies.length > 0 && (
+                      <>
+                        {" "}across{" "}
+                        <span className="font-semibold">
+                          {report.strategies.length} strategies
+                        </span>
+                      </>
+                    )}
+                    . Sign in free to see the implementation steps and save
+                    your plan.
+                  </p>
+                ) : (
+                  <p className="text-sm text-gray-600 mb-4">
+                    Sign in free to see the implementation steps and save
+                    your plan.
+                  </p>
+                )}
+                <Button
+                  onClick={requestUnlock}
+                  className="w-full"
+                  data-testid="button-unlock-report"
+                >
+                  Sign in to unlock
+                </Button>
+                <p className="text-xs text-gray-400 mt-2">
+                  Free · Takes 5 seconds · No credit card
+                </p>
+              </div>
+            </div>
+          )}
+
+          <div
+            className={
+              isGuest
+                ? "blur-md select-none pointer-events-none opacity-50 space-y-6 print:blur-sm print:opacity-40"
+                : "space-y-6"
+            }
+            aria-hidden={isGuest ? "true" : undefined}
+          >
 
         {/* Action Steps */}
         <div className="bg-gray-50 rounded-xl p-4 border border-gray-200">
