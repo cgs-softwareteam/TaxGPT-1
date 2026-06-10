@@ -5,7 +5,18 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Users, MessageSquare, DollarSign, TrendingUp, ArrowLeft, UserPlus, Activity, Percent, AlertCircle, Hash } from "lucide-react";
+import { Users, MessageSquare, DollarSign, TrendingUp, ArrowLeft, UserPlus, Activity, Percent, AlertCircle, Hash, Trash2 } from "lucide-react";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import { Link } from "wouter";
 import { useAuth } from "@/hooks/useAuth";
 import { apiRequest } from "@/lib/queryClient";
@@ -121,6 +132,40 @@ export default function AdminDashboard() {
     const newRole = currentRole === 'admin' ? 'user' : 'admin';
     updateUserRoleMutation.mutate({ userId, role: newRole });
   };
+
+  // Mutation for the Danger Zone "Clear today's test data" button.
+  // Deletes today's UTC rows from guest_sessions / usage_logs / email_captures
+  // so admins can wipe their own testing data before sharing daily stats.
+  const clearTestDataMutation = useMutation({
+    mutationFn: async () => {
+      const response = await apiRequest("POST", "/api/admin/clear-test-data");
+      return response.json() as Promise<{
+        success: boolean;
+        deleted: {
+          guestSessionsDeleted: number;
+          usageLogsDeleted: number;
+          emailCapturesDeleted: number;
+        };
+      }>;
+    },
+    onSuccess: (data) => {
+      const d = data.deleted;
+      toast({
+        title: "Today's test data cleared",
+        description: `Deleted ${d.guestSessionsDeleted} guest sessions, ${d.usageLogsDeleted} usage logs, and ${d.emailCapturesDeleted} email captures.`,
+      });
+      // Refresh both stat blocks so the numbers reflect the wipe.
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/stats"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/guest-stats"] });
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Failed to clear test data",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
 
   if (!isAuthenticated || user?.role !== 'admin') {
     return (
@@ -442,6 +487,63 @@ export default function AdminDashboard() {
                   </CardContent>
                 </Card>
               </div>
+
+              {/* Danger Zone: wipe today's testing data from guest tables.
+                  Useful right before sharing daily stats with stakeholders. */}
+              <Card className="border-red-200 dark:border-red-900" data-testid="card-danger-zone">
+                <CardHeader>
+                  <CardTitle className="text-red-700 dark:text-red-400">
+                    Danger Zone
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
+                    <div className="space-y-1 flex-1">
+                      <p className="font-medium">Clear today's test data</p>
+                      <p className="text-sm text-muted-foreground">
+                        Deletes today's <code className="text-xs">guest_sessions</code>,{" "}
+                        <code className="text-xs">usage_logs</code>, and{" "}
+                        <code className="text-xs">email_captures</code> rows (UTC).
+                        Run this after a testing session before sharing daily stats.
+                        Conversations and user accounts are NOT touched. Cannot be undone.
+                      </p>
+                    </div>
+                    <AlertDialog>
+                      <AlertDialogTrigger asChild>
+                        <Button
+                          variant="destructive"
+                          disabled={clearTestDataMutation.isPending}
+                          data-testid="button-clear-test-data"
+                        >
+                          <Trash2 className="h-4 w-4 mr-2" />
+                          Clear today's data
+                        </Button>
+                      </AlertDialogTrigger>
+                      <AlertDialogContent>
+                        <AlertDialogHeader>
+                          <AlertDialogTitle>Clear today's test data?</AlertDialogTitle>
+                          <AlertDialogDescription>
+                            This will permanently delete every <code>guest_sessions</code>,{" "}
+                            <code>usage_logs</code>, and <code>email_captures</code> row
+                            created since UTC midnight. Real visitor activity from today
+                            (if any) will also be deleted. This cannot be undone.
+                          </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                          <AlertDialogCancel data-testid="button-clear-cancel">Cancel</AlertDialogCancel>
+                          <AlertDialogAction
+                            onClick={() => clearTestDataMutation.mutate()}
+                            className="bg-red-600 hover:bg-red-700 text-white"
+                            data-testid="button-clear-confirm"
+                          >
+                            {clearTestDataMutation.isPending ? "Deleting…" : "Yes, delete today's data"}
+                          </AlertDialogAction>
+                        </AlertDialogFooter>
+                      </AlertDialogContent>
+                    </AlertDialog>
+                  </div>
+                </CardContent>
+              </Card>
 
               <Card data-testid="card-recent-conversions">
                 <CardHeader>

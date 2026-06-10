@@ -88,6 +88,19 @@ export interface IStorage {
   consumeMagicLinkToken(token: string): Promise<void>;
   countRecentActiveTokens(email: string, sinceMs: number): Promise<number>;
 
+  // ADMIN OPERATIONS
+  /**
+   * Wipe today's testing/dev rows from the guest-side tables so daily
+   * stats aren't polluted. Deletes from guest_sessions, usage_logs, and
+   * email_captures only — conversations + messages (which belong to
+   * authenticated user accounts) are preserved. "Today" is UTC.
+   */
+  clearTestDataToday(): Promise<{
+    guestSessionsDeleted: number;
+    usageLogsDeleted: number;
+    emailCapturesDeleted: number;
+  }>;
+
   // ADMIN ANALYTICS
   getTopPrompts(limit?: number): Promise<Array<{
     prompt: string;
@@ -687,6 +700,35 @@ export class MemStorage implements IStorage {
         t.createdAt.getTime() > cutoff &&
         t.expiresAt.getTime() > now,
     ).length;
+  }
+
+  async clearTestDataToday(): Promise<{ guestSessionsDeleted: number; usageLogsDeleted: number; emailCapturesDeleted: number }> {
+    const todayStart = new Date();
+    todayStart.setUTCHours(0, 0, 0, 0);
+
+    let usageLogsDeleted = 0;
+    for (const [id, log] of Array.from(this.usageLogs.entries())) {
+      if (log.timestamp >= todayStart) {
+        this.usageLogs.delete(id);
+        usageLogsDeleted++;
+      }
+    }
+    let guestSessionsDeleted = 0;
+    for (const [id, gs] of Array.from(this.guestSessions.entries())) {
+      if (gs.createdAt >= todayStart) {
+        this.guestSessions.delete(id);
+        guestSessionsDeleted++;
+      }
+    }
+    let emailCapturesDeleted = 0;
+    for (const [id, ec] of Array.from(this.emailCaptures.entries())) {
+      if (ec.capturedAt >= todayStart) {
+        this.emailCaptures.delete(id);
+        emailCapturesDeleted++;
+      }
+    }
+
+    return { guestSessionsDeleted, usageLogsDeleted, emailCapturesDeleted };
   }
 
   // ADMIN ANALYTICS
@@ -1340,6 +1382,31 @@ export class DrizzleStorage implements IStorage {
         gte(magicLinkTokens.expiresAt, now),
       ));
     return Number(row?.n) || 0;
+  }
+
+  async clearTestDataToday(): Promise<{ guestSessionsDeleted: number; usageLogsDeleted: number; emailCapturesDeleted: number }> {
+    const todayStart = new Date();
+    todayStart.setUTCHours(0, 0, 0, 0);
+
+    // Wrap in a transaction so partial deletion can't leave the DB in a
+    // half-cleaned state if any single statement fails.
+    return await this.db!.transaction(async (tx) => {
+      const usageRes = await tx
+        .delete(usageLogs)
+        .where(gte(usageLogs.timestamp, todayStart));
+      const guestRes = await tx
+        .delete(guestSessions)
+        .where(gte(guestSessions.createdAt, todayStart));
+      const emailRes = await tx
+        .delete(emailCaptures)
+        .where(gte(emailCaptures.capturedAt, todayStart));
+
+      return {
+        usageLogsDeleted: usageRes.rowCount ?? 0,
+        guestSessionsDeleted: guestRes.rowCount ?? 0,
+        emailCapturesDeleted: emailRes.rowCount ?? 0,
+      };
+    });
   }
 
   // ADMIN ANALYTICS

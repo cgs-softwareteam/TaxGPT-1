@@ -916,6 +916,20 @@ Always ask clarifying questions about employment structure when medical professi
       }
     });
 
+    // Admin: wipe today's testing data from the guest-side tables so
+    // daily stats aren't polluted by your own test sessions. Deletes
+    // from guest_sessions / usage_logs / email_captures only — does NOT
+    // touch users / conversations / messages.
+    app.post("/api/admin/clear-test-data", requireAdmin, async (req, res) => {
+      try {
+        const result = await storage.clearTestDataToday();
+        res.json({ success: true, deleted: result });
+      } catch (error) {
+        console.error("Failed to clear test data:", error);
+        res.status(500).json({ error: "Failed to clear test data" });
+      }
+    });
+
     // Guest activity + recent conversions for the admin dashboard.
     // Returns aggregate guest metrics and the most recent guest-to-signup conversions
     // joined to the resulting user's name and email.
