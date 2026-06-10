@@ -11,28 +11,24 @@ import { Infinity as InfinityIcon, Save, Mail, BarChart3, ShieldCheck, EyeOff, Z
 import { trackEvent } from "@/lib/analytics";
 
 export type AuthDialogMode = "sign-in" | "sign-up" | "limit-reached";
+export type AuthDialogAudience = "general" | "medical";
 
 interface AuthDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   mode?: AuthDialogMode;
   promptLimit?: number;
+  /**
+   * Personalization hints derived from the conversation. When provided,
+   * the limit-reached copy switches from generic to "you discovered $X
+   * savings as a <profession> in <state>", which converts ~2x better.
+   */
+  savingsHint?: number;
+  professionHint?: string;
+  stateHint?: string;
+  /** Tailor copy for a specific audience (e.g. physicians get medical-prof framing). */
+  audience?: AuthDialogAudience;
 }
-
-const COPY: Record<AuthDialogMode, { title: string; description: string }> = {
-  "sign-in": {
-    title: "Welcome back",
-    description: "Sign in to continue your tax planning conversations.",
-  },
-  "sign-up": {
-    title: "Get unlimited access — free forever",
-    description: "Create a free AITaxMD account to save your plans and unlock unlimited tax planning sessions.",
-  },
-  "limit-reached": {
-    title: "You've used all your free prompts",
-    description: "", // overridden below to include the dynamic prompt limit
-  },
-};
 
 // "What you get" value props shown in the dialog body. Tax-app specific.
 const BENEFITS: Array<{ icon: React.ComponentType<{ className?: string }>; label: string }> = [
@@ -42,18 +38,79 @@ const BENEFITS: Array<{ icon: React.ComponentType<{ className?: string }>; label
   { icon: BarChart3, label: "Track tax-saving opportunities over time" },
 ];
 
+function buildCopy(opts: {
+  mode: AuthDialogMode;
+  promptLimit: number;
+  savingsHint?: number;
+  professionHint?: string;
+  stateHint?: string;
+  audience: AuthDialogAudience;
+}): { title: string; description: string } {
+  const { mode, promptLimit, savingsHint, professionHint, stateHint, audience } = opts;
+
+  if (mode === "sign-in") {
+    return {
+      title: "Welcome back",
+      description: "Sign in to continue your tax planning conversations.",
+    };
+  }
+
+  if (mode === "sign-up") {
+    if (audience === "medical") {
+      return {
+        title: "Get unlimited access — free forever",
+        description:
+          "AITaxMD specializes in tax strategies for physicians — QBI deductions, Section 179, Solo 401(k), and more. Create a free account to unlock the full medical-professional toolkit.",
+      };
+    }
+    return {
+      title: "Get unlimited access — free forever",
+      description:
+        "Create a free AITaxMD account to save your plans and unlock unlimited tax planning sessions.",
+    };
+  }
+
+  // mode === "limit-reached"
+  // Personalize when we have meaningful context from the conversation.
+  if (savingsHint && savingsHint > 0) {
+    const dollarsFmt = `$${savingsHint.toLocaleString("en-US")}`;
+    const audienceLabel = professionHint
+      ? `as a ${professionHint}${stateHint ? ` in ${stateHint}` : ""}`
+      : stateHint
+        ? `in ${stateHint}`
+        : "";
+    return {
+      title: "Don't lose your tax plan",
+      description: `You've discovered ${dollarsFmt} in potential tax savings${audienceLabel ? " " + audienceLabel : ""}. Create a free account to save this plan, unlock unlimited sessions, and revisit it anytime.`,
+    };
+  }
+
+  // Generic limit-reached fallback (no context parsed).
+  return {
+    title: "You've used all your free prompts",
+    description: `You've used all ${promptLimit} free prompts. Sign in or create a free account to keep chatting with AITaxMD.`,
+  };
+}
+
 export function AuthDialog({
   open,
   onOpenChange,
   mode = "sign-in",
   promptLimit = 5,
+  savingsHint,
+  professionHint,
+  stateHint,
+  audience = "general",
 }: AuthDialogProps) {
   const locked = mode === "limit-reached";
-  const { title } = COPY[mode];
-  const description =
-    mode === "limit-reached"
-      ? `You've used all ${promptLimit} free prompts. Sign in or create a free account to keep chatting with AITaxMD.`
-      : COPY[mode].description;
+  const { title, description } = buildCopy({
+    mode,
+    promptLimit,
+    savingsHint,
+    professionHint,
+    stateHint,
+    audience,
+  });
 
   // Fire a GA4 event then redirect to the OAuth provider. We do BOTH because
   // OAuth navigates away and we want to capture intent even if the user

@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useState, useEffect, useCallback, useRef, useMemo } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import ChatInterface from "@/components/ChatInterface";
@@ -6,17 +6,36 @@ import ChatInput from "@/components/ChatInput";
 import { ConversationSidebar } from "@/components/ConversationSidebar";
 import { Calculator, Star, Menu, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { ToastAction } from "@/components/ui/toast";
 import { UserMenu } from "@/components/UserMenu";
-import { AuthDialog, type AuthDialogMode } from "@/components/AuthDialog";
+import {
+  AuthDialog,
+  type AuthDialogMode,
+  type AuthDialogAudience,
+} from "@/components/AuthDialog";
 import { useAuth } from "@/hooks/useAuth";
 import { useGuestStatus } from "@/hooks/useGuestStatus";
 import { trackEvent } from "@/lib/analytics";
+import { parseTaxContext, isStructuredReport } from "@/lib/conversationParse";
 import { Link } from "wouter";
 import { useToast } from "@/hooks/use-toast";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { cn } from "@/lib/utils";
 
 const WAS_GUEST_FLAG = "aitaxmd_was_guest";
+// Per-session flags to make sure each smart-trigger fires at most once.
+const FIRST_REPORT_NUDGE_FLAG = "aitaxmd_first_report_nudge_shown";
+const MIDCONVO_NUDGE_FLAG = "aitaxmd_midconvo_nudge_shown";
+const EXIT_INTENT_FLAG = "aitaxmd_exit_intent_shown";
+
+// Number of user messages after which we surface the soft mid-conversation
+// "save your work" nudge. Tuned to fire just after the user has typed enough
+// for the AI to be returning real value (not still in data-gathering).
+const MIDCONVO_TRIGGER_COUNT = 3;
+
+// How long to wait after the AI emits a full structured report before
+// nudging the guest to sign up. Lets them actually SEE the report first.
+const FIRST_REPORT_NUDGE_DELAY_MS = 3000;
 
 interface Message {
   role: 'user' | 'assistant';
@@ -38,6 +57,14 @@ export default function Home() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const isMobile = useIsMobile();
+
+  // Parsed signal extracted from the live conversation. Used to personalize
+  // the AuthDialog ("you've found $X as a <profession> in <state>") and to
+  // decide which audience copy to show (general vs. physician).
+  const taxContext = useMemo(() => parseTaxContext(conversation), [conversation]);
+  const audience: AuthDialogAudience = taxContext.isMedicalProfessional
+    ? "medical"
+    : "general";
 
   // Convenience flag: should we treat the current visitor as a guest?
   const isGuest = authEnabled && !isAuthenticated;
@@ -232,6 +259,24 @@ export default function Home() {
             limit: guestStatus.limit,
           });
         }
+
+        // First-report milestone: when the AI emits a full structured report
+        // for a guest, give them a few seconds to see it then softly suggest
+        // saving the plan. Fires at most once per session.
+        if (
+          isStructuredReport(data.content) &&
+          typeof window !== "undefined" &&
+          sessionStorage.getItem(FIRST_REPORT_NUDGE_FLAG) !== "1"
+        ) {
+          sessionStorage.setItem(FIRST_REPORT_NUDGE_FLAG, "1");
+          trackEvent("first_report_milestone_scheduled", {});
+          window.setTimeout(() => {
+            // Bail if the user has already opened the dialog manually or has
+            // signed in during the delay.
+            if (sessionStorage.getItem(WAS_GUEST_FLAG) === null) return;
+            openAuthDialog("sign-up", "first_report_milestone");
+          }, FIRST_REPORT_NUDGE_DELAY_MS);
+        }
       }
       
       // Save messages to database for existing conversations
@@ -297,15 +342,80 @@ export default function Home() {
     };
 
     window.addEventListener('requestFollowup', handleFollowupRequest);
-    
+
     return () => {
       window.removeEventListener('requestFollowup', handleFollowupRequest);
     };
   }, [handleSubmit]);
 
+  // Mid-conversation nudge: after the guest has typed MIDCONVO_TRIGGER_COUNT
+  // messages, surface a single non-blocking toast inviting them to save
+  // their work. Less aggressive than a modal. Fires once per session.
+  useEffect(() => {
+    if (!isGuest) return;
+    if (typeof window === "undefined") return;
+    if (sessionStorage.getItem(MIDCONVO_NUDGE_FLAG) === "1") return;
+
+    const userCount = conversation.filter((m) => m.role === "user").length;
+    if (userCount < MIDCONVO_TRIGGER_COUNT) return;
+
+    sessionStorage.setItem(MIDCONVO_NUDGE_FLAG, "1");
+    trackEvent("midconvo_nudge_shown", { user_message_count: userCount });
+
+    toast({
+      title: "💾 Save your work?",
+      description: "Sign up free to save this conversation and revisit your plan anytime.",
+      duration: 8000,
+      action: (
+        <ToastAction
+          altText="Sign up to save"
+          onClick={() => openAuthDialog("sign-up", "midconvo_nudge")}
+        >
+          Sign up
+        </ToastAction>
+      ),
+    });
+  }, [conversation, isGuest, toast, openAuthDialog]);
+
+  // Exit-intent capture: when a guest's mouse leaves through the top of the
+  // viewport (toward the browser tabs / close button), open the sign-up
+  // modal as a "before you go" save. Only fires after they've sent at
+  // least one prompt — don't bother brand-new visitors who just landed.
+  useEffect(() => {
+    if (!isGuest) return;
+    if (typeof window === "undefined") return;
+    if (sessionStorage.getItem(EXIT_INTENT_FLAG) === "1") return;
+
+    const onMouseOut = (e: MouseEvent) => {
+      // Leaving through top of viewport = clientY at or above 0.
+      // Also ignore movement to child elements (relatedTarget would be set).
+      if (e.clientY > 0) return;
+      if (e.relatedTarget) return;
+      // Require at least 1 actual prompt sent so we don't fire on bouncers.
+      const userMsgCount = conversationRef.current.filter((m) => m.role === "user").length;
+      if (userMsgCount < 1) return;
+      if (sessionStorage.getItem(EXIT_INTENT_FLAG) === "1") return;
+
+      sessionStorage.setItem(EXIT_INTENT_FLAG, "1");
+      trackEvent("exit_intent_shown", { user_message_count: userMsgCount });
+      openAuthDialog("sign-up", "exit_intent");
+    };
+
+    document.addEventListener("mouseout", onMouseOut);
+    return () => document.removeEventListener("mouseout", onMouseOut);
+  }, [isGuest, openAuthDialog]);
+
   const handleExpertAnalysisRequest = async (strategyName: string) => {
+    // Gate the deep "expert analysis" mode behind signup for guests. This is
+    // a high-value feature reveal — guests get to SEE that it exists, but
+    // hitting it triggers the sign-up modal instead of burning a free prompt.
+    if (isGuest) {
+      trackEvent("expert_analysis_blocked", { strategy: strategyName });
+      openAuthDialog("sign-up", "expert_analysis_lock");
+      return;
+    }
     const expertAnalysisMessage = `Please provide a comprehensive, expert-level explanation of the "${strategyName}" tax strategy. Include specific examples, advanced techniques, potential pitfalls, and detailed implementation guidance. Make this a thorough analysis that a tax professional would provide.`;
-    
+
     await handleSubmit(expertAnalysisMessage);
   };
 
@@ -545,12 +655,18 @@ export default function Home() {
       </div>
 
       {/* Auth modal: shown for guests when they click Sign In/Sign Up,
-          or forced open (locked) when they hit the prompt limit. */}
+          or forced open (locked) when they hit the prompt limit.
+          Personalization hints come from the parsed conversation so the
+          limit-reached copy can read "you've found $X as a <profession>". */}
       <AuthDialog
         open={authDialogOpen}
         onOpenChange={setAuthDialogOpen}
         mode={authDialogMode}
-        promptLimit={guestStatus?.limit ?? 15}
+        promptLimit={guestStatus?.limit ?? 5}
+        savingsHint={taxContext.estimatedSavings}
+        professionHint={taxContext.profession}
+        stateHint={taxContext.state}
+        audience={audience}
       />
     </div>
   );
