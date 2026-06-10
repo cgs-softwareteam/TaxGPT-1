@@ -15,7 +15,9 @@ import {
   type GuestSession,
   type InsertGuestSession,
   type GuestStatistics,
-  type ConvertedGuest
+  type ConvertedGuest,
+  type EmailCapture,
+  type InsertEmailCapture
 } from "@shared/schema";
 import { randomUUID } from "crypto";
 
@@ -67,6 +69,10 @@ export interface IStorage {
   getGuestStatistics(promptLimit: number): Promise<GuestStatistics>;
   getRecentConversions(limit?: number): Promise<ConvertedGuest[]>;
 
+  // EMAIL CAPTURE OPERATIONS
+  createEmailCapture(data: InsertEmailCapture): Promise<EmailCapture>;
+  markEmailCaptureReportSent(id: number): Promise<void>;
+
   // ADMIN ANALYTICS
   getTopPrompts(limit?: number): Promise<Array<{
     prompt: string;
@@ -89,6 +95,8 @@ export class MemStorage implements IStorage {
   private savedPlans: Map<number, SavedPlan>;
   private shareLogs: Map<number, ShareLog>;
   private guestSessions: Map<string, GuestSession>;
+  private emailCaptures: Map<number, EmailCapture>;
+  private emailCaptureIdCounter: number;
   private userIdCounter: number;
   private logIdCounter: number;
   private conversationIdCounter: number;
@@ -104,6 +112,8 @@ export class MemStorage implements IStorage {
     this.savedPlans = new Map();
     this.shareLogs = new Map();
     this.guestSessions = new Map();
+    this.emailCaptures = new Map();
+    this.emailCaptureIdCounter = 1;
     this.userIdCounter = 1;
     this.logIdCounter = 1;
     this.conversationIdCounter = 1;
@@ -550,6 +560,30 @@ export class MemStorage implements IStorage {
       });
   }
 
+  // EMAIL CAPTURE OPERATIONS
+  async createEmailCapture(data: InsertEmailCapture): Promise<EmailCapture> {
+    const id = this.emailCaptureIdCounter++;
+    const capture: EmailCapture = {
+      id,
+      email: data.email,
+      sessionId: data.sessionId || null,
+      ipAddress: data.ipAddress,
+      source: data.source || "auth_dialog",
+      reportSent: data.reportSent ?? false,
+      capturedAt: new Date(),
+      convertedToUserId: data.convertedToUserId || null,
+      convertedAt: data.convertedAt || null,
+    };
+    this.emailCaptures.set(id, capture);
+    return capture;
+  }
+
+  async markEmailCaptureReportSent(id: number): Promise<void> {
+    const existing = this.emailCaptures.get(id);
+    if (!existing) return;
+    this.emailCaptures.set(id, { ...existing, reportSent: true });
+  }
+
   // ADMIN ANALYTICS
   async getTopPrompts(limit = 20): Promise<Array<{prompt: string; count: number; avgTokens: number; avgResponseTime: number}>> {
     const promptStats = new Map<string, {count: number; totalTokens: number; totalResponseTime: number}>();
@@ -586,7 +620,7 @@ export class MemStorage implements IStorage {
 }
 
 import { getDatabase } from "./db";
-import { users, usageLogs, conversations, messages, savedPlans, shareLog, guestSessions } from "@shared/schema";
+import { users, usageLogs, conversations, messages, savedPlans, shareLog, guestSessions, emailCaptures } from "@shared/schema";
 import { eq, desc, count, sum, gte, and, sql, asc } from "drizzle-orm";
 
 // Drizzle-based database storage
@@ -1082,6 +1116,22 @@ export class DrizzleStorage implements IStorage {
       userName: r.userName,
       userEmail: r.userEmail,
     }));
+  }
+
+  // EMAIL CAPTURE OPERATIONS
+  async createEmailCapture(data: InsertEmailCapture): Promise<EmailCapture> {
+    const [capture] = await this.db!
+      .insert(emailCaptures)
+      .values(data)
+      .returning();
+    return capture;
+  }
+
+  async markEmailCaptureReportSent(id: number): Promise<void> {
+    await this.db!
+      .update(emailCaptures)
+      .set({ reportSent: true })
+      .where(eq(emailCaptures.id, id));
   }
 
   // ADMIN ANALYTICS

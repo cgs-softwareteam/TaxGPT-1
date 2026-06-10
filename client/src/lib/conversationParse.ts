@@ -38,6 +38,23 @@ export function isStructuredReport(content: string): boolean {
   return REPORT_MARKER.test(content);
 }
 
+/**
+ * Walk the conversation backwards and return the most recent assistant
+ * message that contains a full structured tax report. Used to decide
+ * whether to show the "Email me my plan" section in AuthDialog.
+ */
+export function findLatestReportContent(
+  messages: readonly Message[],
+): string | undefined {
+  for (let i = messages.length - 1; i >= 0; i--) {
+    const m = messages[i];
+    if (m.role === "assistant" && isStructuredReport(m.content)) {
+      return m.content;
+    }
+  }
+  return undefined;
+}
+
 // Comprehensive US state name list (no abbreviations to keep false-positive
 // risk low — "OR" / "IN" / "ME" as abbreviations would match too much).
 const US_STATES = [
