@@ -349,7 +349,9 @@ Always ask clarifying questions about employment structure when medical professi
           });
 
           await transporter.sendMail({
-            from: "AITaxMD <noreply@aitaxmd.com>",
+            // TEMPORARY: see note in /api/auth/magic/request — same caveat.
+            // TODO(domain-verified): swap back to "AITaxMD <noreply@aitaxmd.com>".
+            from: "AITaxMD <onboarding@resend.dev>",
             to: email,
             subject: "Your AITaxMD Tax Plan",
             html,
@@ -435,7 +437,12 @@ Always ask clarifying questions about employment structure when medical professi
           auth: { user: "resend", pass: process.env.RESEND_API_KEY },
         });
         await transporter.sendMail({
-          from: "AITaxMD <noreply@aitaxmd.com>",
+          // TEMPORARY: using Resend's testing sender because aitaxmd.com
+          // is not verified in Resend yet. Limitation: only delivers to
+          // the email registered with the Resend account.
+          // TODO(domain-verified): swap back to "AITaxMD <noreply@aitaxmd.com>"
+          // once the domain is verified at resend.com/domains.
+          from: "AITaxMD <onboarding@resend.dev>",
           to: email,
           subject: "Your AITaxMD sign-in link",
           html,
