@@ -424,6 +424,22 @@ export default function Home() {
     };
   }, [handleSubmit]);
 
+  // Handle "gated action clicked by guest" events. GuestLockButton (used in
+  // ExportButtons for PDF + in ChatInterface for Save Plan) fires this event
+  // when a guest clicks a locked action. We open the AuthDialog in sign-up
+  // mode with the appropriate trigger so GA4 can chart which value-locks
+  // actually convert.
+  useEffect(() => {
+    const handleAuthGate = (e: Event) => {
+      const ev = e as CustomEvent<{ mode?: AuthDialogMode; trigger?: string }>;
+      const mode = ev.detail?.mode ?? "sign-up";
+      const trigger = ev.detail?.trigger ?? "guest_gate";
+      openAuthDialog(mode, trigger);
+    };
+    window.addEventListener("requestAuthGate", handleAuthGate);
+    return () => window.removeEventListener("requestAuthGate", handleAuthGate);
+  }, [openAuthDialog]);
+
   // Mid-conversation nudge: after the guest has typed MIDCONVO_TRIGGER_COUNT
   // messages, surface a single non-blocking toast inviting them to save
   // their work. Less aggressive than a modal. Fires once per session.

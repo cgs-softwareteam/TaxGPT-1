@@ -2,9 +2,11 @@ import { useEffect, useRef } from "react";
 import ReactMarkdown from "react-markdown";
 import { Bot } from "lucide-react";
 import StructuredReportRenderer from "./StructuredReportRenderer";
-// import { SaveButton } from "./SaveButton"; // DISABLED: Out-of-scope feature
+import { SaveButton } from "./SaveButton";
+import { GuestLockButton } from "./GuestLockButton";
 import { ExportButtons } from "./ExportButtons";
 import { useAuth } from "@/hooks/useAuth";
+import { isTaxReport } from "@/hooks/usePdfExport";
 
 interface Message {
   role: 'user' | 'assistant';
@@ -113,20 +115,28 @@ export default function ChatInterface({ conversation, isLoading, onRequestExpert
                 <div className="text-xs text-gray-500">{formatTime(message.timestamp)}</div>
                 <div className="flex items-center space-x-2">
                   {/* Show ExportButtons for all AI messages - the component handles authentication and tax report detection internally */}
-                  <ExportButtons 
+                  <ExportButtons
                     messageId={message.id}
                     content={message.content}
                   />
-                  {authEnabled && isAuthenticated && (
-                    <>
-                      {/* DISABLED: Out-of-scope Save feature
-                      <SaveButton 
+                  {/* Save Plan button — only meaningful on structured tax reports.
+                      Authenticated user with a real DB messageId: render the real
+                      SaveButton (writes to /api/saved-plans).
+                      Guest: render a locked variant that opens the sign-up modal.
+                      Authenticated without an ID (transient): render nothing. */}
+                  {isTaxReport(message.content) && (
+                    authEnabled && isAuthenticated && message.id !== undefined ? (
+                      <SaveButton
                         messageId={message.id}
-                        messageContent={message.content}
-                        size="sm"
+                        content={message.content}
                       />
-                      */}
-                    </>
+                    ) : authEnabled && !isAuthenticated ? (
+                      <GuestLockButton
+                        label="Sign in to save"
+                        trigger="save_plan_lock"
+                        testId={`save-locked-${message.id ?? 'no-id'}`}
+                      />
+                    ) : null
                   )}
                   <div className="flex items-center space-x-1 text-xs text-gray-400">
                     <div className="w-1.5 h-1.5 bg-green-500 rounded-full"></div>

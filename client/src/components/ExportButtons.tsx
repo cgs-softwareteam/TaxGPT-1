@@ -12,7 +12,9 @@ import {
   Loader2
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/hooks/useAuth";
 import { usePdfExport, isTaxReport } from "@/hooks/usePdfExport";
+import { GuestLockButton } from "@/components/GuestLockButton";
 import {
   Dialog,
   DialogContent,
@@ -37,6 +39,8 @@ export function ExportButtons({ messageId, content, className }: ExportButtonsPr
   const [isEmailDialogOpen, setIsEmailDialogOpen] = useState(false);
   const [copied, setCopied] = useState(false);
   const { toast } = useToast();
+  const { isAuthenticated, authEnabled } = useAuth();
+  const isGuest = authEnabled && !isAuthenticated;
 
   // Use shared PDF export hook
   const { exportPdf, isExporting } = usePdfExport({ 
@@ -127,27 +131,37 @@ export function ExportButtons({ messageId, content, className }: ExportButtonsPr
         )}
       </Button>
 
-      {/* Show PDF button for tax reports regardless of messageId */}
+      {/* PDF button (only shown for tax reports — chat replies have no value to export).
+          For guests we show a locked variant that opens the sign-up modal — the PDF
+          download is one of the high-value features they unlock by signing up. */}
       {isTaxReport(content) && (
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => exportPdf()}
-          disabled={isExporting}
-          data-testid={`pdf-button-${messageId || 'simple'}`}
-        >
-          {isExporting ? (
-            <>
-              <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-              {messageId ? 'Exporting...' : 'Opening...'}
-            </>
-          ) : (
-            <>
-              <Download className="w-4 h-4 mr-2" />
-              {messageId ? 'PDF' : 'Print PDF'}
-            </>
-          )}
-        </Button>
+        isGuest ? (
+          <GuestLockButton
+            label="Sign in for PDF"
+            trigger="pdf_export_lock"
+            testId={`pdf-locked-${messageId || 'simple'}`}
+          />
+        ) : (
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => exportPdf()}
+            disabled={isExporting}
+            data-testid={`pdf-button-${messageId || 'simple'}`}
+          >
+            {isExporting ? (
+              <>
+                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                {messageId ? 'Exporting...' : 'Opening...'}
+              </>
+            ) : (
+              <>
+                <Download className="w-4 h-4 mr-2" />
+                {messageId ? 'PDF' : 'Print PDF'}
+              </>
+            )}
+          </Button>
+        )
       )}
 
       {/* DISABLED: Out-of-scope Email Share feature
