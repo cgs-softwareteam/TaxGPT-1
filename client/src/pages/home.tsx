@@ -397,48 +397,96 @@ export default function Home() {
                marginLeft: isMobile ? '0' : (authEnabled && isAuthenticated && !sidebarCollapsed ? '20rem' : '0')
              }}
              data-testid="chat-input-container">
-          {/* Guest free-prompt counter (shown above the input only for guests) */}
-          {isGuest && guestStatus && (
-            <div
-              className="px-4 pt-2 pb-1 text-xs text-center text-gray-600"
-              data-testid="guest-prompt-counter"
-            >
-              {guestStatus.remaining > 0 ? (
-                <>
-                  <span className="font-medium text-gray-900">
-                    {guestStatus.remaining}
-                  </span>{" "}
-                  of {guestStatus.limit} free prompts remaining ·{" "}
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setAuthDialogMode("sign-up");
-                      setAuthDialogOpen(true);
-                    }}
-                    className="text-blue-600 hover:underline"
-                    data-testid="guest-counter-signup-link"
-                  >
-                    Sign up for unlimited
-                  </button>
-                </>
-              ) : (
-                <>
-                  You've used all your free prompts ·{" "}
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setAuthDialogMode("limit-reached");
-                      setAuthDialogOpen(true);
-                    }}
-                    className="text-blue-600 hover:underline font-medium"
-                    data-testid="guest-counter-signin-link"
-                  >
-                    Sign in to continue
-                  </button>
-                </>
-              )}
-            </div>
-          )}
+          {/* Guest free-prompt counter (shown above the input only for guests).
+              Includes a thin progress bar that empties as prompts are used and
+              shifts color (green -> amber -> red) for visual urgency. */}
+          {isGuest && guestStatus && (() => {
+            const pct = guestStatus.limit > 0
+              ? Math.max(0, (guestStatus.remaining / guestStatus.limit) * 100)
+              : 0;
+            // Color tier based on % remaining. Tuned to feel safe -> warn -> alarm.
+            const barColor =
+              pct >= 50 ? "bg-green-500" :
+              pct >= 25 ? "bg-amber-500" :
+              "bg-red-500";
+            const textColor =
+              guestStatus.remaining === 0 ? "text-red-600" :
+              guestStatus.remaining === 1 ? "text-red-600 font-semibold" :
+              pct < 50 ? "text-amber-700" :
+              "text-gray-600";
+
+            return (
+              <div className="px-4 pt-2 pb-1" data-testid="guest-prompt-counter">
+                {/* Depleting progress bar */}
+                <div
+                  className="h-1 w-full max-w-md mx-auto bg-gray-200 rounded-full overflow-hidden mb-1.5"
+                  data-testid="guest-prompt-progress"
+                  role="progressbar"
+                  aria-valuemin={0}
+                  aria-valuemax={guestStatus.limit}
+                  aria-valuenow={guestStatus.remaining}
+                  aria-label={`${guestStatus.remaining} of ${guestStatus.limit} free prompts remaining`}
+                >
+                  <div
+                    className={cn("h-full transition-[width,background-color] duration-300", barColor)}
+                    style={{ width: `${pct}%` }}
+                  />
+                </div>
+
+                <div className={cn("text-xs text-center", textColor)}>
+                  {guestStatus.remaining === 0 ? (
+                    <>
+                      You've used all your free prompts ·{" "}
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setAuthDialogMode("limit-reached");
+                          setAuthDialogOpen(true);
+                        }}
+                        className="text-blue-600 hover:underline font-medium"
+                        data-testid="guest-counter-signin-link"
+                      >
+                        Sign in to continue
+                      </button>
+                    </>
+                  ) : guestStatus.remaining === 1 ? (
+                    <>
+                      ⚠️ Last free prompt — {" "}
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setAuthDialogMode("sign-up");
+                          setAuthDialogOpen(true);
+                        }}
+                        className="text-blue-600 hover:underline font-semibold"
+                        data-testid="guest-counter-signup-link"
+                      >
+                        sign up to keep going
+                      </button>
+                    </>
+                  ) : (
+                    <>
+                      <span className={cn("font-medium", pct < 50 ? "text-amber-800" : "text-gray-900")}>
+                        {guestStatus.remaining}
+                      </span>{" "}
+                      of {guestStatus.limit} free prompts remaining ·{" "}
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setAuthDialogMode("sign-up");
+                          setAuthDialogOpen(true);
+                        }}
+                        className="text-blue-600 hover:underline"
+                        data-testid="guest-counter-signup-link"
+                      >
+                        Sign up for unlimited
+                      </button>
+                    </>
+                  )}
+                </div>
+              </div>
+            );
+          })()}
 
           <ChatInput
             onSubmit={handleSubmit}

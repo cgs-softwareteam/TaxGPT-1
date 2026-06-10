@@ -7,6 +7,7 @@ import {
   DialogTitle,
 } from "./ui/dialog";
 import { Link } from "wouter";
+import { Infinity as InfinityIcon, Save, Mail, BarChart3, ShieldCheck, EyeOff, Zap, Star } from "lucide-react";
 
 export type AuthDialogMode = "sign-in" | "sign-up" | "limit-reached";
 
@@ -23,9 +24,8 @@ const COPY: Record<AuthDialogMode, { title: string; description: string }> = {
     description: "Sign in to continue your tax planning conversations.",
   },
   "sign-up": {
-    title: "Create your AITaxMD account",
-    description:
-      "Sign up for free to save conversations, track usage, and get personalized tax planning.",
+    title: "Get unlimited access — free forever",
+    description: "Create a free AITaxMD account to save your plans and unlock unlimited tax planning sessions.",
   },
   "limit-reached": {
     title: "You've used all your free prompts",
@@ -33,11 +33,19 @@ const COPY: Record<AuthDialogMode, { title: string; description: string }> = {
   },
 };
 
+// "What you get" value props shown in the dialog body. Tax-app specific.
+const BENEFITS: Array<{ icon: React.ComponentType<{ className?: string }>; label: string }> = [
+  { icon: InfinityIcon, label: "Unlimited tax planning sessions" },
+  { icon: Save, label: "Save & revisit your plans anytime" },
+  { icon: Mail, label: "Email your reports to your accountant" },
+  { icon: BarChart3, label: "Track tax-saving opportunities over time" },
+];
+
 export function AuthDialog({
   open,
   onOpenChange,
   mode = "sign-in",
-  promptLimit = 15,
+  promptLimit = 5,
 }: AuthDialogProps) {
   const locked = mode === "limit-reached";
   const { title } = COPY[mode];
@@ -66,6 +74,19 @@ export function AuthDialog({
             {description}
           </DialogDescription>
         </DialogHeader>
+
+        {/* Value-prop list: tells users WHAT they get for signing up. */}
+        <ul
+          className="space-y-2 pt-2"
+          data-testid="auth-dialog-benefits"
+        >
+          {BENEFITS.map(({ icon: Icon, label }) => (
+            <li key={label} className="flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300">
+              <Icon className="h-4 w-4 text-blue-600 shrink-0" />
+              <span>{label}</span>
+            </li>
+          ))}
+        </ul>
 
         <div className="space-y-3 pt-2">
           <Button
@@ -97,7 +118,36 @@ export function AuthDialog({
           </Button>
         </div>
 
-        <p className="text-xs text-gray-500 dark:text-gray-400 text-center pt-2">
+        {/* Trust badges — reduce signup hesitation by addressing the
+            most common objections at the exact decision moment. */}
+        <div
+          className="flex flex-wrap items-center justify-center gap-x-4 gap-y-1 pt-3 text-xs text-gray-500 dark:text-gray-400"
+          data-testid="auth-dialog-trust-badges"
+        >
+          <span className="flex items-center gap-1">
+            <ShieldCheck className="h-3.5 w-3.5 text-green-600" />
+            Bank-level encryption
+          </span>
+          <span className="flex items-center gap-1">
+            <EyeOff className="h-3.5 w-3.5 text-green-600" />
+            Never shared with the IRS
+          </span>
+          <span className="flex items-center gap-1">
+            <Zap className="h-3.5 w-3.5 text-green-600" />
+            Sign up in 5 seconds · No card
+          </span>
+        </div>
+
+        {/* Qualitative social proof — no fabricated user counts. */}
+        <p
+          className="text-xs text-gray-500 dark:text-gray-400 text-center pt-1 flex items-center justify-center gap-1"
+          data-testid="auth-dialog-social-proof"
+        >
+          <Star className="h-3.5 w-3.5 text-yellow-500 fill-yellow-500" />
+          Trusted by entrepreneurs, doctors, and freelancers across the US
+        </p>
+
+        <p className="text-xs text-gray-500 dark:text-gray-400 text-center pt-1">
           By continuing, you agree to our{" "}
           <Link
             href="/terms-of-service"

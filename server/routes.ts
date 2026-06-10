@@ -56,8 +56,10 @@ CRITICAL: When you have all required information (Income, State, Age, Tax Paid),
 
 const ENABLE_AUTHENTICATION = process.env.ENABLE_AUTHENTICATION === 'true';
 
-// Guest prompt limit (configurable via env, default 15 to match the spec).
-const GUEST_PROMPT_LIMIT = Math.max(0, parseInt(process.env.GUEST_PROMPT_LIMIT || '15', 10) || 15);
+// Guest prompt limit (configurable via env). Default 5 — tighter than 15 to
+// create signup pressure right as guests finish their first full report cycle.
+// Override per-environment with GUEST_PROMPT_LIMIT in Render env settings.
+const GUEST_PROMPT_LIMIT = Math.max(0, parseInt(process.env.GUEST_PROMPT_LIMIT || '5', 10) || 5);
 
 export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/generate", async (req: any, res) => {
