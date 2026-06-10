@@ -10,10 +10,13 @@ import { UserMenu } from "@/components/UserMenu";
 import { AuthDialog, type AuthDialogMode } from "@/components/AuthDialog";
 import { useAuth } from "@/hooks/useAuth";
 import { useGuestStatus } from "@/hooks/useGuestStatus";
+import { trackEvent } from "@/lib/analytics";
 import { Link } from "wouter";
 import { useToast } from "@/hooks/use-toast";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { cn } from "@/lib/utils";
+
+const WAS_GUEST_FLAG = "aitaxmd_was_guest";
 
 interface Message {
   role: 'user' | 'assistant';
@@ -38,14 +41,45 @@ export default function Home() {
 
   // Convenience flag: should we treat the current visitor as a guest?
   const isGuest = authEnabled && !isAuthenticated;
-  
+
   // Use ref to track latest conversation to avoid stale closures
   const conversationRef = useRef<Message[]>([]);
-  
+
   // Keep conversationRef updated with latest conversation state
   useEffect(() => {
     conversationRef.current = conversation;
   }, [conversation]);
+
+  // Helper: open the auth dialog and fire a GA4 event so we can track which
+  // surfaces (header / counter / limit modal / etc.) actually convert.
+  const openAuthDialog = useCallback((mode: AuthDialogMode, trigger: string) => {
+    setAuthDialogMode(mode);
+    setAuthDialogOpen(true);
+    trackEvent("auth_modal_opened", { mode, trigger });
+  }, []);
+
+  // Detect guest -> authenticated transition so we can fire signup_completed
+  // exactly once per conversion. We stash the pre-signup prompt count in
+  // sessionStorage while the user is a guest; when they later become
+  // authenticated, we read it back, fire the event, and clear the flag.
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    if (isGuest && guestStatus) {
+      sessionStorage.setItem(WAS_GUEST_FLAG, String(guestStatus.used));
+      return;
+    }
+    if (isAuthenticated) {
+      const raw = sessionStorage.getItem(WAS_GUEST_FLAG);
+      if (raw !== null) {
+        const promptsUsed = Number(raw) || 0;
+        trackEvent("signup_completed", {
+          from: "guest",
+          prompts_used_before_signup: promptsUsed,
+        });
+        sessionStorage.removeItem(WAS_GUEST_FLAG);
+      }
+    }
+  }, [isGuest, isAuthenticated, guestStatus]);
 
   const createConversationMutation = useMutation({
     mutationFn: async (data: { title?: string; initialMessage?: string }) => {
@@ -78,8 +112,7 @@ export default function Home() {
     // Proactive guest limit check: if we already know this guest has used all
     // of their free prompts, open the auth modal without spending a network call.
     if (isGuest && guestStatus && guestStatus.remaining <= 0) {
-      setAuthDialogMode("limit-reached");
-      setAuthDialogOpen(true);
+      openAuthDialog("limit-reached", "limit_reached_proactive");
       return;
     }
 
@@ -166,8 +199,11 @@ export default function Home() {
           const errBody = await response.json();
           if (errBody?.error === "GUEST_LIMIT_REACHED") {
             setConversation((prev) => prev.slice(0, -1));
-            setAuthDialogMode("limit-reached");
-            setAuthDialogOpen(true);
+            trackEvent("guest_limit_reached", {
+              limit: errBody.limit,
+              used: errBody.used,
+            });
+            openAuthDialog("limit-reached", "limit_reached_server");
             queryClient.invalidateQueries({ queryKey: ["/api/guest/status"] });
             return;
           }
@@ -185,8 +221,17 @@ export default function Home() {
 
       // Refresh the guest counter after a successful generation so the
       // "X of N free prompts remaining" indicator stays accurate.
+      // Also fire a GA4 event so we can chart prompt activity by guest.
       if (isGuest) {
         queryClient.invalidateQueries({ queryKey: ["/api/guest/status"] });
+        if (guestStatus) {
+          const newUsed = guestStatus.used + 1;
+          trackEvent("guest_prompt_sent", {
+            prompt_number: newUsed,
+            remaining_after: Math.max(0, guestStatus.limit - newUsed),
+            limit: guestStatus.limit,
+          });
+        }
       }
       
       // Save messages to database for existing conversations
@@ -354,10 +399,7 @@ export default function Home() {
                     <Button
                       variant="ghost"
                       size="sm"
-                      onClick={() => {
-                        setAuthDialogMode("sign-in");
-                        setAuthDialogOpen(true);
-                      }}
+                      onClick={() => openAuthDialog("sign-in", "header_signin")}
                       data-testid="header-sign-in"
                     >
                       Sign In
@@ -365,10 +407,7 @@ export default function Home() {
                     <Button
                       variant="default"
                       size="sm"
-                      onClick={() => {
-                        setAuthDialogMode("sign-up");
-                        setAuthDialogOpen(true);
-                      }}
+                      onClick={() => openAuthDialog("sign-up", "header_signup")}
                       data-testid="header-sign-up"
                     >
                       Sign Up
@@ -439,10 +478,7 @@ export default function Home() {
                       You've used all your free prompts ·{" "}
                       <button
                         type="button"
-                        onClick={() => {
-                          setAuthDialogMode("limit-reached");
-                          setAuthDialogOpen(true);
-                        }}
+                        onClick={() => openAuthDialog("limit-reached", "counter_signin_zero")}
                         className="text-blue-600 hover:underline font-medium"
                         data-testid="guest-counter-signin-link"
                       >
@@ -454,10 +490,7 @@ export default function Home() {
                       ⚠️ Last free prompt — {" "}
                       <button
                         type="button"
-                        onClick={() => {
-                          setAuthDialogMode("sign-up");
-                          setAuthDialogOpen(true);
-                        }}
+                        onClick={() => openAuthDialog("sign-up", "counter_signup_last")}
                         className="text-blue-600 hover:underline font-semibold"
                         data-testid="guest-counter-signup-link"
                       >
@@ -472,10 +505,7 @@ export default function Home() {
                       of {guestStatus.limit} free prompts remaining ·{" "}
                       <button
                         type="button"
-                        onClick={() => {
-                          setAuthDialogMode("sign-up");
-                          setAuthDialogOpen(true);
-                        }}
+                        onClick={() => openAuthDialog("sign-up", "counter_signup")}
                         className="text-blue-600 hover:underline"
                         data-testid="guest-counter-signup-link"
                       >

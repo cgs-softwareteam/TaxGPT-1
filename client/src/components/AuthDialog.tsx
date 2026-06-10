@@ -8,6 +8,7 @@ import {
 } from "./ui/dialog";
 import { Link } from "wouter";
 import { Infinity as InfinityIcon, Save, Mail, BarChart3, ShieldCheck, EyeOff, Zap, Star } from "lucide-react";
+import { trackEvent } from "@/lib/analytics";
 
 export type AuthDialogMode = "sign-in" | "sign-up" | "limit-reached";
 
@@ -54,6 +55,14 @@ export function AuthDialog({
       ? `You've used all ${promptLimit} free prompts. Sign in or create a free account to keep chatting with AITaxMD.`
       : COPY[mode].description;
 
+  // Fire a GA4 event then redirect to the OAuth provider. We do BOTH because
+  // OAuth navigates away and we want to capture intent even if the user
+  // bounces from the provider's consent screen.
+  const goToOAuth = (provider: "google" | "facebook") => {
+    trackEvent("oauth_redirect_clicked", { provider, mode });
+    window.location.href = `/auth/${provider}`;
+  };
+
   return (
     <Dialog
       open={open}
@@ -90,9 +99,7 @@ export function AuthDialog({
 
         <div className="space-y-3 pt-2">
           <Button
-            onClick={() => {
-              window.location.href = "/auth/google";
-            }}
+            onClick={() => goToOAuth("google")}
             className="w-full bg-red-500 hover:bg-red-600 text-white"
             data-testid="auth-dialog-button-google"
           >
@@ -105,9 +112,7 @@ export function AuthDialog({
             Continue with Google
           </Button>
           <Button
-            onClick={() => {
-              window.location.href = "/auth/facebook";
-            }}
+            onClick={() => goToOAuth("facebook")}
             className="w-full bg-blue-600 hover:bg-blue-700 text-white"
             data-testid="auth-dialog-button-facebook"
           >
