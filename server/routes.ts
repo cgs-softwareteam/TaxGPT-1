@@ -89,6 +89,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
           const ipAddress = (req.ip || req.socket?.remoteAddress || 'unknown').toString().slice(0, 45);
           const userAgent = (req.get?.('user-agent') || 'unknown').toString();
           const guest = await storage.getOrCreateGuestSession(sessionId, ipAddress, userAgent);
+
+          // Pin this sessionID across requests. express-session has
+          // saveUninitialized:false, so unless we write to req.session it
+          // won't persist and the next request will mint a brand-new
+          // sessionID. That would mean every request creates a fresh
+          // guest_sessions row and the counter never appears to tick up.
+          if (req.session) {
+            (req.session as any).guestActive = true;
+          }
+
           if (guest.conversationCount >= GUEST_PROMPT_LIMIT) {
             return res.status(429).json({
               error: 'GUEST_LIMIT_REACHED',
@@ -244,6 +254,16 @@ Always ask clarifying questions about employment structure when medical professi
       const ipAddress = (req.ip || req.socket?.remoteAddress || 'unknown').toString().slice(0, 45);
       const userAgent = (req.get?.('user-agent') || 'unknown').toString();
       const guest = await storage.getOrCreateGuestSession(sessionId, ipAddress, userAgent);
+
+      // CRITICAL: pin this sessionID across requests. express-session has
+      // saveUninitialized:false, so unless we write to req.session it won't
+      // persist and the cookie won't be set — meaning every subsequent
+      // request mints a fresh sessionID + a fresh guest_sessions row, and
+      // the prompt counter never appears to increment in the UI.
+      if (req.session) {
+        (req.session as any).guestActive = true;
+      }
+
       const used = guest.conversationCount;
       const remaining = Math.max(0, GUEST_PROMPT_LIMIT - used);
       return res.json({
