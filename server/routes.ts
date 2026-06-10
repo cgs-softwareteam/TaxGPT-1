@@ -13,6 +13,14 @@ import * as csvWriter from "fast-csv";
 import nodemailer from "nodemailer";
 import { htmlToText } from "html-to-text";
 import fs from "fs/promises";
+import { OAuth2Client } from "google-auth-library";
+
+// Singleton Google ID token verifier. We instantiate once at module load
+// because it caches Google's signing certs internally and reuses them
+// across requests. Null when GOOGLE_CLIENT_ID isn't configured.
+const googleAuthClient = process.env.GOOGLE_CLIENT_ID
+  ? new OAuth2Client(process.env.GOOGLE_CLIENT_ID)
+  : null;
 
 // the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
 const openai = process.env.OPENAI_API_KEY ? new OpenAI({ 
@@ -253,6 +261,93 @@ Always ask clarifying questions about employment structure when medical professi
         limit: GUEST_PROMPT_LIMIT,
         remaining: GUEST_PROMPT_LIMIT,
       });
+    }
+  });
+
+  // Google One Tap: receives a Google-issued JWT credential from the client,
+  // verifies it server-side, then either logs in the matching existing user
+  // or creates a new one and logs them in. Mirrors the find-or-create logic
+  // from the passport-google-oauth20 callback in auth.ts.
+  app.post("/api/auth/google/one-tap", async (req: any, res) => {
+    if (!ENABLE_AUTHENTICATION) {
+      return res.status(503).json({ error: "Authentication is not enabled" });
+    }
+    if (!googleAuthClient || !process.env.GOOGLE_CLIENT_ID) {
+      return res.status(503).json({ error: "Google authentication is not configured" });
+    }
+
+    const { credential } = req.body ?? {};
+    if (!credential || typeof credential !== "string") {
+      return res.status(400).json({ error: "Missing credential" });
+    }
+
+    try {
+      // verifyIdToken checks signature, audience, expiration, and issuer.
+      // This is the security boundary — never trust the JWT contents before
+      // this call returns successfully.
+      const ticket = await googleAuthClient.verifyIdToken({
+        idToken: credential,
+        audience: process.env.GOOGLE_CLIENT_ID,
+      });
+      const payload = ticket.getPayload();
+      if (!payload || !payload.sub) {
+        return res.status(401).json({ error: "Invalid Google credential" });
+      }
+
+      const googleId = payload.sub;
+      const email = payload.email;
+      const name = payload.name || payload.given_name || (email ? email.split("@")[0] : "User");
+      const profilePicture = payload.picture || null;
+
+      if (!email) {
+        return res.status(400).json({ error: "Google account has no email address" });
+      }
+
+      // Find-or-create logic intentionally mirrors the passport callback.
+      let user = await storage.getUserByGoogleId(googleId);
+      if (!user) {
+        const existingByEmail = await storage.getUserByEmail(email);
+        if (existingByEmail) {
+          // Same email, different (or no) Google ID — link them.
+          user = await storage.updateUser(existingByEmail.id, { googleId });
+        } else {
+          user = await storage.createUser({
+            googleId,
+            email,
+            name,
+            profilePicture,
+            role: "user",
+          });
+        }
+      } else {
+        user = await storage.updateUser(user.id, { lastLoginAt: new Date() });
+      }
+
+      // Capture the pre-login sessionID so we can record the guest→user
+      // conversion (matches what the redirect-based OAuth callbacks do).
+      const preLoginSessionId = req.sessionID as string | undefined;
+
+      // Establish the passport session. Promisified since req.logIn is callback-based.
+      await new Promise<void>((resolve, reject) => {
+        req.logIn(user, (loginErr: any) => {
+          if (loginErr) reject(loginErr);
+          else resolve();
+        });
+      });
+
+      if (preLoginSessionId) {
+        storage.markGuestConverted(preLoginSessionId, user!.id).catch((convErr) => {
+          console.error("Failed to mark guest conversion (One Tap):", convErr);
+        });
+      }
+
+      return res.json({
+        success: true,
+        user: { id: user!.id, email: user!.email, name: user!.name },
+      });
+    } catch (err) {
+      console.error("Google One Tap verification failed:", err);
+      return res.status(401).json({ error: "Invalid Google credential" });
     }
   });
 

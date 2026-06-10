@@ -2,6 +2,7 @@ import { useEffect } from "react";
 import { Switch, Route, useLocation } from "wouter";
 import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";
+import { GoogleOAuthProvider } from "@react-oauth/google";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import NotFound from "@/pages/not-found";
@@ -13,6 +14,14 @@ import DataDeletion from "@/pages/data-deletion";
 import AdminDashboard from "@/pages/admin-dashboard";
 import UserUsage from "@/pages/user-usage";
 import SavedPlans from "@/pages/SavedPlans";
+import { OneTapAutoPrompt } from "@/components/OneTapAutoPrompt";
+
+// Set in Render env: VITE_GOOGLE_CLIENT_ID (same value as GOOGLE_CLIENT_ID).
+// When missing, the One Tap feature is silently disabled so deploys don't
+// break — users can still use the regular Sign In / Sign Up buttons.
+const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID as
+  | string
+  | undefined;
 
 // Track SPA route changes in Google Analytics 4 (G-DZG17VYGRB).
 // The initial pageview is sent automatically by the gtag snippet in index.html;
@@ -66,14 +75,28 @@ function Router() {
 }
 
 function App() {
-  return (
+  const content = (
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
         <Toaster />
         <RouteTracker />
+        {GOOGLE_CLIENT_ID && <OneTapAutoPrompt />}
         <Router />
       </TooltipProvider>
     </QueryClientProvider>
+  );
+
+  // Only wrap with GoogleOAuthProvider when a client ID is configured.
+  // OneTapAutoPrompt calls useGoogleOneTapLogin which requires the provider
+  // context — without the env var, we skip both so the app still renders.
+  if (!GOOGLE_CLIENT_ID) {
+    return content;
+  }
+
+  return (
+    <GoogleOAuthProvider clientId={GOOGLE_CLIENT_ID}>
+      {content}
+    </GoogleOAuthProvider>
   );
 }
 
