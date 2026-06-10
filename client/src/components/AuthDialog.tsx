@@ -58,15 +58,15 @@ function buildCopy(opts: {
   if (mode === "sign-up") {
     if (audience === "medical") {
       return {
-        title: "Get unlimited access — free forever",
+        title: "Create your free AITaxMD account",
         description:
           "AITaxMD specializes in tax strategies for physicians — QBI deductions, Section 179, Solo 401(k), and more. Create a free account to unlock the full medical-professional toolkit.",
       };
     }
     return {
-      title: "Get unlimited access — free forever",
+      title: "Create your free AITaxMD account",
       description:
-        "Create a free AITaxMD account to save your plans and unlock unlimited tax planning sessions.",
+        "Save your plans and unlock unlimited tax planning sessions. No credit card required.",
     };
   }
 
