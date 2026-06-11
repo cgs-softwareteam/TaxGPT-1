@@ -116,26 +116,6 @@ export const magicLinkTokens = pgTable("magic_link_tokens", {
   index("magic_link_tokens_expires_at_idx").on(table.expiresAt),
 ]);
 
-// Email captures — leads from the "Email me my plan" flow. Lighter-weight
-// than a full user account: just an email address tied to a session, with
-// the latest report dispatched once via nodemailer. May later convert to
-// a full user (convertedToUserId).
-export const emailCaptures = pgTable("email_captures", {
-  id: serial("id").primaryKey(),
-  email: varchar("email", { length: 255 }).notNull(),
-  sessionId: varchar("session_id", { length: 255 }),
-  ipAddress: varchar("ip_address", { length: 45 }).notNull(),
-  source: varchar("source", { length: 50 }).default("auth_dialog").notNull(),
-  reportSent: boolean("report_sent").default(false).notNull(),
-  capturedAt: timestamp("captured_at").defaultNow().notNull(),
-  convertedToUserId: integer("converted_to_user_id").references(() => users.id),
-  convertedAt: timestamp("converted_at"),
-}, (table) => [
-  index("email_captures_email_idx").on(table.email),
-  index("email_captures_captured_at_idx").on(table.capturedAt),
-  index("email_captures_session_id_idx").on(table.sessionId),
-]);
-
 // Guest sessions table for tracking non-authenticated users and their prompt usage.
 // The primary key `id` is the Express session ID, so guests are tracked across
 // page reloads as long as they have the session cookie. When a guest signs up,
@@ -237,8 +217,6 @@ export type ShareLog = typeof shareLog.$inferSelect;
 export type InsertShareLog = typeof shareLog.$inferInsert;
 export type GuestSession = typeof guestSessions.$inferSelect;
 export type InsertGuestSession = z.infer<typeof insertGuestSessionSchema>;
-export type EmailCapture = typeof emailCaptures.$inferSelect;
-export type InsertEmailCapture = typeof emailCaptures.$inferInsert;
 export type MagicLinkToken = typeof magicLinkTokens.$inferSelect;
 export type InsertMagicLinkToken = typeof magicLinkTokens.$inferInsert;
 

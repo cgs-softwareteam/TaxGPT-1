@@ -16,7 +16,7 @@ import {
 import { useAuth } from "@/hooks/useAuth";
 import { useGuestStatus } from "@/hooks/useGuestStatus";
 import { trackEvent } from "@/lib/analytics";
-import { parseTaxContext, isStructuredReport, findLatestReportContent } from "@/lib/conversationParse";
+import { parseTaxContext, isStructuredReport } from "@/lib/conversationParse";
 import { Link } from "wouter";
 import { useToast } from "@/hooks/use-toast";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -65,14 +65,6 @@ export default function Home() {
   const audience: AuthDialogAudience = taxContext.isMedicalProfessional
     ? "medical"
     : "general";
-  // Latest assistant-emitted structured report. When present, AuthDialog
-  // shows an "Email me my plan" lead-capture form as a low-friction
-  // alternative to OAuth.
-  const latestReport = useMemo(
-    () => findLatestReportContent(conversation),
-    [conversation],
-  );
-
   // Convenience flag: should we treat the current visitor as a guest?
   const isGuest = authEnabled && !isAuthenticated;
 
@@ -759,7 +751,6 @@ export default function Home() {
         professionHint={taxContext.profession}
         stateHint={taxContext.state}
         audience={audience}
-        latestReport={latestReport}
       />
     </div>
   );

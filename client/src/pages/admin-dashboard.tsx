@@ -134,8 +134,8 @@ export default function AdminDashboard() {
   };
 
   // Mutation for the Danger Zone "Clear today's test data" button.
-  // Deletes today's UTC rows from guest_sessions / usage_logs / email_captures
-  // so admins can wipe their own testing data before sharing daily stats.
+  // Deletes today's UTC rows from guest_sessions / usage_logs so admins
+  // can wipe their own testing data before sharing daily stats.
   const clearTestDataMutation = useMutation({
     mutationFn: async () => {
       const response = await apiRequest("POST", "/api/admin/clear-test-data");
@@ -144,7 +144,6 @@ export default function AdminDashboard() {
         deleted: {
           guestSessionsDeleted: number;
           usageLogsDeleted: number;
-          emailCapturesDeleted: number;
         };
       }>;
     },
@@ -152,7 +151,7 @@ export default function AdminDashboard() {
       const d = data.deleted;
       toast({
         title: "Today's test data cleared",
-        description: `Deleted ${d.guestSessionsDeleted} guest sessions, ${d.usageLogsDeleted} usage logs, and ${d.emailCapturesDeleted} email captures.`,
+        description: `Deleted ${d.guestSessionsDeleted} guest sessions and ${d.usageLogsDeleted} usage logs.`,
       });
       // Refresh both stat blocks so the numbers reflect the wipe.
       queryClient.invalidateQueries({ queryKey: ["/api/admin/stats"] });
@@ -501,9 +500,8 @@ export default function AdminDashboard() {
                     <div className="space-y-1 flex-1">
                       <p className="font-medium">Clear today's test data</p>
                       <p className="text-sm text-muted-foreground">
-                        Deletes today's <code className="text-xs">guest_sessions</code>,{" "}
-                        <code className="text-xs">usage_logs</code>, and{" "}
-                        <code className="text-xs">email_captures</code> rows (UTC).
+                        Deletes today's <code className="text-xs">guest_sessions</code>{" "}
+                        and <code className="text-xs">usage_logs</code> rows (UTC).
                         Run this after a testing session before sharing daily stats.
                         Conversations and user accounts are NOT touched. Cannot be undone.
                       </p>
@@ -523,10 +521,10 @@ export default function AdminDashboard() {
                         <AlertDialogHeader>
                           <AlertDialogTitle>Clear today's test data?</AlertDialogTitle>
                           <AlertDialogDescription>
-                            This will permanently delete every <code>guest_sessions</code>,{" "}
-                            <code>usage_logs</code>, and <code>email_captures</code> row
-                            created since UTC midnight. Real visitor activity from today
-                            (if any) will also be deleted. This cannot be undone.
+                            This will permanently delete every <code>guest_sessions</code>{" "}
+                            and <code>usage_logs</code> row created since UTC midnight.
+                            Real visitor activity from today (if any) will also be
+                            deleted. This cannot be undone.
                           </AlertDialogDescription>
                         </AlertDialogHeader>
                         <AlertDialogFooter>

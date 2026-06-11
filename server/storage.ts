@@ -16,8 +16,6 @@ import {
   type InsertGuestSession,
   type GuestStatistics,
   type ConvertedGuest,
-  type EmailCapture,
-  type InsertEmailCapture,
   type MagicLinkToken,
   type InsertMagicLinkToken
 } from "@shared/schema";
@@ -78,10 +76,6 @@ export interface IStorage {
    */
   claimGuestHistory(sessionId: string, userId: number): Promise<{ conversationId: number; claimedCount: number } | null>;
 
-  // EMAIL CAPTURE OPERATIONS
-  createEmailCapture(data: InsertEmailCapture): Promise<EmailCapture>;
-  markEmailCaptureReportSent(id: number): Promise<void>;
-
   // MAGIC LINK OPERATIONS
   createMagicLinkToken(data: InsertMagicLinkToken): Promise<MagicLinkToken>;
   getMagicLinkToken(token: string): Promise<MagicLinkToken | undefined>;
@@ -91,14 +85,13 @@ export interface IStorage {
   // ADMIN OPERATIONS
   /**
    * Wipe today's testing/dev rows from the guest-side tables so daily
-   * stats aren't polluted. Deletes from guest_sessions, usage_logs, and
-   * email_captures only — conversations + messages (which belong to
-   * authenticated user accounts) are preserved. "Today" is UTC.
+   * stats aren't polluted. Deletes from guest_sessions and usage_logs
+   * only — conversations + messages (which belong to authenticated
+   * user accounts) are preserved. "Today" is UTC.
    */
   clearTestDataToday(): Promise<{
     guestSessionsDeleted: number;
     usageLogsDeleted: number;
-    emailCapturesDeleted: number;
   }>;
 
   // ADMIN ANALYTICS
@@ -123,8 +116,6 @@ export class MemStorage implements IStorage {
   private savedPlans: Map<number, SavedPlan>;
   private shareLogs: Map<number, ShareLog>;
   private guestSessions: Map<string, GuestSession>;
-  private emailCaptures: Map<number, EmailCapture>;
-  private emailCaptureIdCounter: number;
   private magicLinkTokens: Map<string, MagicLinkToken>;
   private userIdCounter: number;
   private logIdCounter: number;
@@ -141,8 +132,6 @@ export class MemStorage implements IStorage {
     this.savedPlans = new Map();
     this.shareLogs = new Map();
     this.guestSessions = new Map();
-    this.emailCaptures = new Map();
-    this.emailCaptureIdCounter = 1;
     this.magicLinkTokens = new Map();
     this.userIdCounter = 1;
     this.logIdCounter = 1;
@@ -641,30 +630,6 @@ export class MemStorage implements IStorage {
     return { conversationId: convId, claimedCount: pending.length };
   }
 
-  // EMAIL CAPTURE OPERATIONS
-  async createEmailCapture(data: InsertEmailCapture): Promise<EmailCapture> {
-    const id = this.emailCaptureIdCounter++;
-    const capture: EmailCapture = {
-      id,
-      email: data.email,
-      sessionId: data.sessionId || null,
-      ipAddress: data.ipAddress,
-      source: data.source || "auth_dialog",
-      reportSent: data.reportSent ?? false,
-      capturedAt: new Date(),
-      convertedToUserId: data.convertedToUserId || null,
-      convertedAt: data.convertedAt || null,
-    };
-    this.emailCaptures.set(id, capture);
-    return capture;
-  }
-
-  async markEmailCaptureReportSent(id: number): Promise<void> {
-    const existing = this.emailCaptures.get(id);
-    if (!existing) return;
-    this.emailCaptures.set(id, { ...existing, reportSent: true });
-  }
-
   // MAGIC LINK OPERATIONS
   async createMagicLinkToken(data: InsertMagicLinkToken): Promise<MagicLinkToken> {
     const tok: MagicLinkToken = {
@@ -702,7 +667,7 @@ export class MemStorage implements IStorage {
     ).length;
   }
 
-  async clearTestDataToday(): Promise<{ guestSessionsDeleted: number; usageLogsDeleted: number; emailCapturesDeleted: number }> {
+  async clearTestDataToday(): Promise<{ guestSessionsDeleted: number; usageLogsDeleted: number }> {
     const todayStart = new Date();
     todayStart.setUTCHours(0, 0, 0, 0);
 
@@ -720,15 +685,8 @@ export class MemStorage implements IStorage {
         guestSessionsDeleted++;
       }
     }
-    let emailCapturesDeleted = 0;
-    for (const [id, ec] of Array.from(this.emailCaptures.entries())) {
-      if (ec.capturedAt >= todayStart) {
-        this.emailCaptures.delete(id);
-        emailCapturesDeleted++;
-      }
-    }
 
-    return { guestSessionsDeleted, usageLogsDeleted, emailCapturesDeleted };
+    return { guestSessionsDeleted, usageLogsDeleted };
   }
 
   // ADMIN ANALYTICS
@@ -767,7 +725,7 @@ export class MemStorage implements IStorage {
 }
 
 import { getDatabase } from "./db";
-import { users, usageLogs, conversations, messages, savedPlans, shareLog, guestSessions, emailCaptures, magicLinkTokens } from "@shared/schema";
+import { users, usageLogs, conversations, messages, savedPlans, shareLog, guestSessions, magicLinkTokens } from "@shared/schema";
 import { eq, desc, count, sum, gte, and, sql, asc, isNull, isNotNull } from "drizzle-orm";
 
 // Drizzle-based database storage
@@ -1329,20 +1287,6 @@ export class DrizzleStorage implements IStorage {
   }
 
   // EMAIL CAPTURE OPERATIONS
-  async createEmailCapture(data: InsertEmailCapture): Promise<EmailCapture> {
-    const [capture] = await this.db!
-      .insert(emailCaptures)
-      .values(data)
-      .returning();
-    return capture;
-  }
-
-  async markEmailCaptureReportSent(id: number): Promise<void> {
-    await this.db!
-      .update(emailCaptures)
-      .set({ reportSent: true })
-      .where(eq(emailCaptures.id, id));
-  }
 
   // MAGIC LINK OPERATIONS
   async createMagicLinkToken(data: InsertMagicLinkToken): Promise<MagicLinkToken> {
@@ -1384,7 +1328,7 @@ export class DrizzleStorage implements IStorage {
     return Number(row?.n) || 0;
   }
 
-  async clearTestDataToday(): Promise<{ guestSessionsDeleted: number; usageLogsDeleted: number; emailCapturesDeleted: number }> {
+  async clearTestDataToday(): Promise<{ guestSessionsDeleted: number; usageLogsDeleted: number }> {
     const todayStart = new Date();
     todayStart.setUTCHours(0, 0, 0, 0);
 
@@ -1397,14 +1341,10 @@ export class DrizzleStorage implements IStorage {
       const guestRes = await tx
         .delete(guestSessions)
         .where(gte(guestSessions.createdAt, todayStart));
-      const emailRes = await tx
-        .delete(emailCaptures)
-        .where(gte(emailCaptures.capturedAt, todayStart));
 
       return {
         usageLogsDeleted: usageRes.rowCount ?? 0,
         guestSessionsDeleted: guestRes.rowCount ?? 0,
-        emailCapturesDeleted: emailRes.rowCount ?? 0,
       };
     });
   }
