@@ -2,6 +2,7 @@ import React from 'react';
 import { Link } from 'wouter';
 import { ArrowLeft } from 'lucide-react';
 import { Seo } from '@/components/Seo';
+import { makeWebPage, makeBreadcrumb } from '@/lib/schema';
 
 export default function PrivacyPolicy() {
   return (
@@ -10,6 +11,18 @@ export default function PrivacyPolicy() {
         title="Privacy Policy | AITaxMD"
         description="How AITaxMD handles your personal data — what we collect, how we use it, and your rights under US privacy law."
         keywords="AITaxMD privacy policy, tax app privacy, data handling, personal data protection"
+        schema={[
+          makeWebPage({
+            name: "Privacy Policy",
+            description:
+              "How AITaxMD collects, uses, and protects your personal data.",
+            url: "/privacy-policy",
+          }),
+          makeBreadcrumb([
+            { name: "Home", url: "/" },
+            { name: "Privacy Policy", url: "/privacy-policy" },
+          ]),
+        ]}
       />
       <div className="max-w-4xl mx-auto px-4 py-8">
         {/* Header */}

@@ -2,6 +2,7 @@ import React from 'react';
 import { Link } from 'wouter';
 import { ArrowLeft } from 'lucide-react';
 import { Seo } from '@/components/Seo';
+import { makeWebPage, makeBreadcrumb } from '@/lib/schema';
 
 export default function TermsOfService() {
   return (
@@ -10,6 +11,18 @@ export default function TermsOfService() {
         title="Terms of Service | AITaxMD"
         description="The terms governing your use of AITaxMD's AI-powered tax planning platform. Read our terms before using the service."
         keywords="AITaxMD terms of service, tax app terms, user agreement, usage terms"
+        schema={[
+          makeWebPage({
+            name: "Terms of Service",
+            description:
+              "The terms governing your use of the AITaxMD platform.",
+            url: "/terms-of-service",
+          }),
+          makeBreadcrumb([
+            { name: "Home", url: "/" },
+            { name: "Terms of Service", url: "/terms-of-service" },
+          ]),
+        ]}
       />
       <div className="max-w-4xl mx-auto px-4 py-8">
         {/* Header */}

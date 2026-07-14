@@ -11,6 +11,7 @@ import Home from "@/pages/home";
 import TermsOfService from "@/pages/terms-of-service";
 import PrivacyPolicy from "@/pages/privacy-policy";
 import DataDeletion from "@/pages/data-deletion";
+import FAQPageRoute from "@/pages/faq";
 
 import AdminDashboard from "@/pages/admin-dashboard";
 import UserUsage from "@/pages/user-usage";
@@ -65,6 +66,7 @@ function Router() {
       <Route path="/terms-of-service" component={TermsOfService} />
       <Route path="/privacy-policy" component={PrivacyPolicy} />
       <Route path="/data-deletion" component={DataDeletion} />
+      <Route path="/faq" component={FAQPageRoute} />
 
       <Route path="/admin" component={AdminDashboard} />
       <Route path="/admin-dashboard" component={AdminDashboard} />

@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Link } from 'wouter';
 import { ArrowLeft, Trash2, AlertTriangle, CheckCircle } from 'lucide-react';
 import { Seo } from '@/components/Seo';
+import { makeWebPage, makeBreadcrumb } from '@/lib/schema';
 
 export default function DataDeletion() {
   const [email, setEmail] = useState('');
@@ -54,6 +55,18 @@ export default function DataDeletion() {
           title="Data Deletion Request | AITaxMD"
           description="Request permanent deletion of your AITaxMD account and personal data. GDPR/CCPA compliant."
           keywords="AITaxMD data deletion, delete my data, GDPR request, CCPA request, account deletion"
+          schema={[
+            makeWebPage({
+              name: "Data Deletion Request",
+              description:
+                "Request permanent deletion of your AITaxMD account and personal data.",
+              url: "/data-deletion",
+            }),
+            makeBreadcrumb([
+              { name: "Home", url: "/" },
+              { name: "Data Deletion", url: "/data-deletion" },
+            ]),
+          ]}
         />
         <div className="max-w-2xl mx-auto px-4 py-8">
           <Link href="/" className="inline-flex items-center text-blue-600 hover:text-blue-800 mb-8">
@@ -82,6 +95,18 @@ export default function DataDeletion() {
         title="Data Deletion Request | AITaxMD"
         description="Request permanent deletion of your AITaxMD account and personal data. GDPR/CCPA compliant."
         keywords="AITaxMD data deletion, delete my data, GDPR request, CCPA request, account deletion"
+        schema={[
+          makeWebPage({
+            name: "Data Deletion Request",
+            description:
+              "Request permanent deletion of your AITaxMD account and personal data.",
+            url: "/data-deletion",
+          }),
+          makeBreadcrumb([
+            { name: "Home", url: "/" },
+            { name: "Data Deletion", url: "/data-deletion" },
+          ]),
+        ]}
       />
       <div className="max-w-2xl mx-auto px-4 py-8">
         {/* Header */}

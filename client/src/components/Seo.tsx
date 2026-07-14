@@ -21,6 +21,24 @@ interface SeoProps {
   canonical?: string;
   /** Absolute URL of the Open Graph image. Defaults to the site-wide preview. */
   ogImage?: string;
+  /**
+   * Per-page JSON-LD schema.org objects (or an array of them). Injected
+   * as <script type="application/ld+json"> tags in <head>. Use the
+   * helpers in @/lib/schema (makeWebPage, makeBreadcrumb, makeFaqPage).
+   * Site-wide schemas (SoftwareApplication, Organization, WebSite) are
+   * already in client/index.html — this prop is for page-specific ones.
+   */
+  schema?: object | object[];
+}
+
+/**
+ * Safely encode a schema object into a string that can live inside a
+ * <script type="application/ld+json"> tag. The `<` → `<` escape
+ * prevents any `</script>` sequence inside a value from breaking out
+ * of the script tag (a classic JSON-in-HTML injection surface).
+ */
+function encodeSchema(obj: object): string {
+  return JSON.stringify(obj).replace(/</g, "\\u003c");
 }
 
 // Base URL of the production site. Used to build absolute canonicals /
@@ -43,12 +61,20 @@ export function Seo({
   noindex,
   canonical,
   ogImage,
+  schema,
 }: SeoProps) {
   // Compute canonical from current path when not explicitly provided.
   const path =
     typeof window !== "undefined" ? window.location.pathname : "/";
   const resolvedCanonical = canonical ?? `${BASE_URL}${path}`;
   const resolvedOgImage = ogImage ?? DEFAULT_OG_IMAGE;
+
+  // Normalize schema to an array so the render is a single map.
+  const schemaList = schema
+    ? Array.isArray(schema)
+      ? schema
+      : [schema]
+    : [];
 
   return (
     <Helmet>
@@ -80,6 +106,14 @@ export function Seo({
       )}
       <meta property="twitter:url" content={resolvedCanonical} />
       <meta property="twitter:image" content={resolvedOgImage} />
+
+      {/* Per-page JSON-LD structured data. Content is HTML-safe encoded
+          so any user-provided string can't break out of the <script> tag. */}
+      {schemaList.map((s, i) => (
+        <script key={i} type="application/ld+json">
+          {encodeSchema(s)}
+        </script>
+      ))}
     </Helmet>
   );
 }

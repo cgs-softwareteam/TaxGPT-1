@@ -18,6 +18,7 @@ import { useGuestStatus } from "@/hooks/useGuestStatus";
 import { trackEvent } from "@/lib/analytics";
 import { parseTaxContext, isStructuredReport } from "@/lib/conversationParse";
 import { Seo } from "@/components/Seo";
+import { makeWebPage } from "@/lib/schema";
 import { Link } from "wouter";
 import { useToast } from "@/hooks/use-toast";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -538,6 +539,12 @@ export default function Home() {
         title="AITaxMD | AI Tax Assistant USA for Personalized Tax Savings"
         description="AITaxMD is an AI-based tax assistant helping entrepreneurs, doctors, freelancers, and employees in the USA save taxes legally. Get personalized deductions and tax planning today."
         keywords="AI Tax Assistant USA, Tax Saving AI Tool, Online Tax Planner USA, Personalized Tax Advice USA, Reduce Taxes Legally, Tax Help for Freelancers"
+        schema={makeWebPage({
+          name: "AITaxMD | AI Tax Assistant USA for Personalized Tax Savings",
+          description:
+            "AI-powered tax planning assistant for US entrepreneurs, doctors, freelancers, and employees. Generate a personalized tax-savings plan in minutes.",
+          url: "/",
+        })}
       />
       {/* Conversation Sidebar - Only show if authenticated */}
       {authEnabled && isAuthenticated && (
@@ -726,6 +733,10 @@ export default function Home() {
           {/* Footer with Legal Links */}
           <div className="px-4 py-2 bg-gray-50 border-t border-gray-100">
             <div className="flex flex-wrap justify-center items-center space-x-4 text-xs text-gray-500">
+              <Link href="/faq" className="hover:text-gray-700 underline">
+                FAQ
+              </Link>
+              <span className="text-gray-300">•</span>
               <Link href="/terms-of-service" className="hover:text-gray-700 underline">
                 Terms of Service
               </Link>
