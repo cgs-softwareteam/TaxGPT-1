@@ -17,6 +17,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useGuestStatus } from "@/hooks/useGuestStatus";
 import { trackEvent } from "@/lib/analytics";
 import { parseTaxContext, isStructuredReport } from "@/lib/conversationParse";
+import { Seo } from "@/components/Seo";
 import { Link } from "wouter";
 import { useToast } from "@/hooks/use-toast";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -533,6 +534,11 @@ export default function Home() {
 
   return (
     <div className="min-h-screen flex" data-testid="main-page">
+      <Seo
+        title="AITaxMD | AI Tax Assistant USA for Personalized Tax Savings"
+        description="AITaxMD is an AI-based tax assistant helping entrepreneurs, doctors, freelancers, and employees in the USA save taxes legally. Get personalized deductions and tax planning today."
+        keywords="AI Tax Assistant USA, Tax Saving AI Tool, Online Tax Planner USA, Personalized Tax Advice USA, Reduce Taxes Legally, Tax Help for Freelancers"
+      />
       {/* Conversation Sidebar - Only show if authenticated */}
       {authEnabled && isAuthenticated && (
         <ConversationSidebar

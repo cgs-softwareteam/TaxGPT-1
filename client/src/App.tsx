@@ -2,6 +2,7 @@ import { useEffect } from "react";
 import { Switch, Route, useLocation } from "wouter";
 import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";
+import { HelmetProvider } from "react-helmet-async";
 import { GoogleOAuthProvider } from "@react-oauth/google";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -76,14 +77,16 @@ function Router() {
 
 function App() {
   const content = (
-    <QueryClientProvider client={queryClient}>
-      <TooltipProvider>
-        <Toaster />
-        <RouteTracker />
-        {GOOGLE_CLIENT_ID && <OneTapAutoPrompt />}
-        <Router />
-      </TooltipProvider>
-    </QueryClientProvider>
+    <HelmetProvider>
+      <QueryClientProvider client={queryClient}>
+        <TooltipProvider>
+          <Toaster />
+          <RouteTracker />
+          {GOOGLE_CLIENT_ID && <OneTapAutoPrompt />}
+          <Router />
+        </TooltipProvider>
+      </QueryClientProvider>
+    </HelmetProvider>
   );
 
   // Only wrap with GoogleOAuthProvider when a client ID is configured.

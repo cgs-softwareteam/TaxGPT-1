@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
+import { Seo } from "@/components/Seo";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -82,6 +83,7 @@ export default function SavedPlans() {
 
   return (
     <div className="container mx-auto p-6">
+      <Seo title="Saved Plans | AITaxMD" noindex />
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-gray-900 mb-2">Saved Tax Plans</h1>
         <p className="text-gray-600">Your collection of saved tax planning strategies</p>

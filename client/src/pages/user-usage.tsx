@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
 import { Link } from "wouter";
 import { useAuth } from "@/hooks/useAuth";
+import { Seo } from "@/components/Seo";
 
 interface UsageLog {
   id: number;
@@ -29,6 +30,7 @@ export default function UserUsage() {
   if (!isAuthenticated) {
     return (
       <div className="flex items-center justify-center min-h-screen">
+        <Seo title="My Usage | AITaxMD" noindex />
         <Card className="w-full max-w-md mx-auto" data-testid="card-unauthorized">
           <CardHeader>
             <CardTitle className="text-center">Sign In Required</CardTitle>
@@ -54,6 +56,7 @@ export default function UserUsage() {
 
   return (
     <div className="container mx-auto py-8 px-4">
+      <Seo title="My Usage | AITaxMD" noindex />
       <div className="flex items-center gap-4 mb-8">
         <Link href="/">
           <Button variant="outline" size="sm" data-testid="button-back">

@@ -1,10 +1,16 @@
 import React from 'react';
 import { Link } from 'wouter';
 import { ArrowLeft } from 'lucide-react';
+import { Seo } from '@/components/Seo';
 
 export default function PrivacyPolicy() {
   return (
     <div className="min-h-screen bg-gray-50">
+      <Seo
+        title="Privacy Policy | AITaxMD"
+        description="How AITaxMD handles your personal data — what we collect, how we use it, and your rights under US privacy law."
+        keywords="AITaxMD privacy policy, tax app privacy, data handling, personal data protection"
+      />
       <div className="max-w-4xl mx-auto px-4 py-8">
         {/* Header */}
         <div className="mb-8">

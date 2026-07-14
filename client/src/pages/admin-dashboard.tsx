@@ -21,6 +21,7 @@ import { Link } from "wouter";
 import { useAuth } from "@/hooks/useAuth";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
+import { Seo } from "@/components/Seo";
 
 interface UsageStatistics {
   totalUsers: number;
@@ -169,6 +170,7 @@ export default function AdminDashboard() {
   if (!isAuthenticated || user?.role !== 'admin') {
     return (
       <div className="flex items-center justify-center min-h-screen">
+        <Seo title="Admin Dashboard | AITaxMD" noindex />
         <Card className="w-full max-w-md mx-auto" data-testid="card-unauthorized">
           <CardHeader>
             <CardTitle className="text-center">Access Denied</CardTitle>
@@ -188,6 +190,7 @@ export default function AdminDashboard() {
 
   return (
     <div className="container mx-auto py-8 px-4">
+      <Seo title="Admin Dashboard | AITaxMD" noindex />
       <div className="flex items-center gap-4 mb-8">
         <Link href="/">
           <Button variant="outline" size="sm" data-testid="button-back">

@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Link } from 'wouter';
 import { ArrowLeft, Trash2, AlertTriangle, CheckCircle } from 'lucide-react';
+import { Seo } from '@/components/Seo';
 
 export default function DataDeletion() {
   const [email, setEmail] = useState('');
@@ -49,6 +50,11 @@ export default function DataDeletion() {
   if (isSubmitted) {
     return (
       <div className="min-h-screen bg-gray-50">
+        <Seo
+          title="Data Deletion Request | AITaxMD"
+          description="Request permanent deletion of your AITaxMD account and personal data. GDPR/CCPA compliant."
+          keywords="AITaxMD data deletion, delete my data, GDPR request, CCPA request, account deletion"
+        />
         <div className="max-w-2xl mx-auto px-4 py-8">
           <Link href="/" className="inline-flex items-center text-blue-600 hover:text-blue-800 mb-8">
             <ArrowLeft className="w-4 h-4 mr-2" />
@@ -72,6 +78,11 @@ export default function DataDeletion() {
 
   return (
     <div className="min-h-screen bg-gray-50">
+      <Seo
+        title="Data Deletion Request | AITaxMD"
+        description="Request permanent deletion of your AITaxMD account and personal data. GDPR/CCPA compliant."
+        keywords="AITaxMD data deletion, delete my data, GDPR request, CCPA request, account deletion"
+      />
       <div className="max-w-2xl mx-auto px-4 py-8">
         {/* Header */}
         <div className="mb-8">

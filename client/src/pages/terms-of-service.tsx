@@ -1,10 +1,16 @@
 import React from 'react';
 import { Link } from 'wouter';
 import { ArrowLeft } from 'lucide-react';
+import { Seo } from '@/components/Seo';
 
 export default function TermsOfService() {
   return (
     <div className="min-h-screen bg-gray-50">
+      <Seo
+        title="Terms of Service | AITaxMD"
+        description="The terms governing your use of AITaxMD's AI-powered tax planning platform. Read our terms before using the service."
+        keywords="AITaxMD terms of service, tax app terms, user agreement, usage terms"
+      />
       <div className="max-w-4xl mx-auto px-4 py-8">
         {/* Header */}
         <div className="mb-8">

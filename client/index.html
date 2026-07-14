@@ -62,10 +62,24 @@
     <meta name="revisit-after" content="7 days" />
     <link rel="canonical" href="https://aitaxmd.com/" />
 
+    <!-- Locale targeting — US English is the audience. -->
+    <link rel="alternate" hreflang="en-US" href="https://aitaxmd.com/" />
+    <link rel="alternate" hreflang="x-default" href="https://aitaxmd.com/" />
+
+    <!-- Prevent iOS from auto-linking numbers as phone links and email
+         strings as mailto links inside chat content. -->
+    <meta name="format-detection" content="telephone=no, email=no, address=no" />
+
     <!-- Favicon & PWA Manifest -->
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="apple-touch-icon" href="/favicon.svg" />
     <link rel="manifest" href="/site.webmanifest" />
     <meta name="theme-color" content="#2563eb" />
+
+    <!-- iOS Safari PWA hints — controls the standalone-mode chrome. -->
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <meta name="apple-mobile-web-app-title" content="AITaxMD" />
 
     <!--
       JSON-LD Structured Data (SoftwareApplication)
@@ -111,6 +125,37 @@
         "@type": "AggregateRating",
         "ratingValue": "4.9",
         "reviewCount": "250"
+      }
+    }
+    </script>
+
+    <!-- JSON-LD Organization: gives Google Knowledge Graph info about the
+         entity behind the site (name, logo, sameAs profiles). -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "Organization",
+      "name": "AITaxMD",
+      "url": "https://aitaxmd.com/",
+      "logo": "https://aitaxmd.com/logo.png",
+      "description": "AI-powered tax planning platform for US entrepreneurs, doctors, freelancers, and business owners."
+    }
+    </script>
+
+    <!-- JSON-LD WebSite: names the site and (optionally) enables the
+         Google search-box sitelink. Add a SearchAction later if we
+         build an internal /search endpoint. -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebSite",
+      "name": "AITaxMD",
+      "url": "https://aitaxmd.com/",
+      "inLanguage": "en-US",
+      "publisher": {
+        "@type": "Organization",
+        "name": "AITaxMD",
+        "url": "https://aitaxmd.com/"
       }
     }
     </script>
